@@ -20,10 +20,11 @@ from apiv1 import views
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
-router.register(r'groups', views.GroupViewSet)
+router.register(r'listeners', views.ListenerViewSet)
+router.register(r'queuegroups', views.QueueGroupViewSet)
 
 urlpatterns = [
     #url(r'^admin/', include(admin.site.urls)),
-    url(r'^', include(router.urls)),
+    url(r'^apiv1/', include(router.urls, namespace='apiv1')),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]
