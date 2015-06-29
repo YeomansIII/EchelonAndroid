@@ -19,7 +19,8 @@ class GroupSerializer(serializers.ModelSerializer):
 class ListenerSerializer(serializers.ModelSerializer):
     user = UserSerializer(required=False)
     active_queuegroup = serializers.SlugRelatedField(slug_field='group_id', queryset=QueueGroup.objects, required=False)
-    leader_of = serializers.SlugRelatedField(slug_field='group_id', queryset=QueueGroup.objects, required=False)
+    leader_of = serializers.SlugRelatedField(slug_field='group_id', queryset=QueueGroup.objects, required=False, allow_null=True)
+    gcm_id = serializers.CharField(required=False)
 
     def create(self, validated_data):
         # Create the book instance
@@ -32,17 +33,17 @@ class ListenerSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         # Update the book instance
-        #if(validated_data['user']):
-        #    instance.user.username = validated_data['user']['username']
-        #    if(validated_data['user']['email']):
-        #        instance.user.email = validated_data['user']['email']
-        #    instance.user.save()
+        if 'user' in validated_data:
+            instance.user.username = validated_data['user']['username']
+            if 'email' in validated_data['user']:
+                instance.user.email = validated_data['user']['email']
+            instance.user.save()
 
-        if(validated_data['gcm_id']):
+        if 'gcm_id' in validated_data:
             instance.gcm_id = validated_data['gcm_id']
-        if(validated_data['active_queuegroup']):
+        if 'active_queuegroup' in validated_data:
             instance.active_queuegroup = QueueGroup.objects.get(group_id=validated_data['active_queuegroup'])
-        if(validated_data['leader_of']):
+        if 'leader_of' in validated_data:
             instance.leader_of = QueueGroup.objects.get(group_id=validated_data['leader_of'])
         instance.save()
 
