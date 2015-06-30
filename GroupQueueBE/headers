@@ -1,0 +1,9 @@
+HTTP/1.0 401 UNAUTHORIZED
+Date: Tue, 30 Jun 2015 00:56:54 GMT
+Server: WSGIServer/0.1 Python/2.7.6
+Vary: Accept, Cookie
+X-Frame-Options: SAMEORIGIN
+Content-Type: application/json
+WWW-Authenticate: Basic realm="api"
+Allow: GET, HEAD, OPTIONS
+

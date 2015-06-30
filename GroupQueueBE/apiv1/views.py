@@ -1,14 +1,24 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
 from apiv1.serializers import ListenerSerializer, QueueGroupSerializer, UserSerializer
 from apiv1.models import Listener, QueueGroup
 from django.contrib.auth.models import User, Group
-from rest_framework.decorators import list_route
+from rest_framework.decorators import list_route, api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 
 import uuid
 
 # Create your views here.
+@api_view(('GET',))
+def api_root(request, format=None):
+    return Response({
+        'users': reverse('apiv1:user-list', request=request, format=format),
+        'listeners': reverse('apiv1:listener-list', request=request, format=format),
+        'queuegroups': reverse('apiv1:queuegroup-list', request=request, format=format),
+    })
+
+
 class UserViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
@@ -23,6 +33,20 @@ class ListenerViewSet(viewsets.ModelViewSet):
     """
     queryset = Listener.objects.all()
     serializer_class = ListenerSerializer
+    #lookup_field = 'user__username'
+
+class GetListenerView(generics.RetrieveAPIView):
+    """
+    Retreive a single Listener
+    """
+    model = Listener
+    serializer_class = ListenerSerializer
+    lookup_field="user__username"
+    view_name="apiv1:listener-detail"
+
+    def get_queryset(self):
+        username = self.kwargs['user__username']
+        return Listener.objects.filter(user__username = username)
 
 class QueueGroupViewSet(viewsets.ModelViewSet):
     """

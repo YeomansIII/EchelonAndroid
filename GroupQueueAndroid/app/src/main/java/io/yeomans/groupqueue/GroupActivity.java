@@ -48,6 +48,7 @@ public class GroupActivity extends Activity implements PlayerNotificationCallbac
     private static final int REQUEST_CODE = 9001;
 
     private Player mPlayer;
+    private boolean playerReady;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +64,7 @@ public class GroupActivity extends Activity implements PlayerNotificationCallbac
         }
         Log.wtf("Intent Extras", playId);
         if (leader) {
-            ((TextView) findViewById(R.id.syncRoom)).setText("Sync Room:" + playId);
+            //((TextView) findViewById(R.id.syncRoom)).setText("Sync Room:" + playId);
 
 
             AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
@@ -100,111 +101,111 @@ public class GroupActivity extends Activity implements PlayerNotificationCallbac
         }
     }
 
-    public void showListenerId() {
+//    public void showListenerId() {
+//
+//        new AsyncTask<String, Void, String>() {
+//            @Override
+//            protected String doInBackground(String... params) {
+//                String a = "";
+//                HttpURLConnection urlConnection;
+//                try {
+//                    URL urlget = new URL(params[0]);
+//                    urlConnection = (HttpURLConnection) urlget.openConnection();
+//                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+//                    java.util.Scanner s = new java.util.Scanner(in).useDelimiter("\\A");
+//
+//                    //return "works";
+//                    String returner = s.hasNext() ? s.next() : "";
+//                    urlConnection.disconnect();
+//                    return returner;
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//                return "{\"success\":false, \"error\":\"could not connect to server\"}";
+//            }
+//
+//            @Override
+//            protected void onPostExecute(String msg) {
+//                try {
+//                    JSONObject json = new JSONObject(msg);
+//                    if (json.getBoolean("success")) {
+//                        idText.setTextSize(40f);
+//                        myListenerId = json.getString("id");
+//                        idText.setText("Your ID: " + myListenerId);
+//                    } else {
+//                        idText.setText(json.getString("error"));
+//                    }
+//                } catch (JSONException je) {
+//                    je.printStackTrace();
+//                }
+//            }
+//        }.execute(MYIDBASEURL + getRegistrationId(context), null, null);
+//
+//    }
 
-        new AsyncTask<String, Void, String>() {
-            @Override
-            protected String doInBackground(String... params) {
-                String a = "";
-                HttpURLConnection urlConnection;
-                try {
-                    URL urlget = new URL(params[0]);
-                    urlConnection = (HttpURLConnection) urlget.openConnection();
-                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                    java.util.Scanner s = new java.util.Scanner(in).useDelimiter("\\A");
-
-                    //return "works";
-                    String returner = s.hasNext() ? s.next() : "";
-                    urlConnection.disconnect();
-                    return returner;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return "{\"success\":false, \"error\":\"could not connect to server\"}";
-            }
-
-            @Override
-            protected void onPostExecute(String msg) {
-                try {
-                    JSONObject json = new JSONObject(msg);
-                    if (json.getBoolean("success")) {
-                        idText.setTextSize(40f);
-                        myListenerId = json.getString("id");
-                        idText.setText("Your ID: " + myListenerId);
-                    } else {
-                        idText.setText(json.getString("error"));
-                    }
-                } catch (JSONException je) {
-                    je.printStackTrace();
-                }
-            }
-        }.execute(MYIDBASEURL + getRegistrationId(context), null, null);
-
-    }
-
-    public String searchSongs(String searchTerms) {
-
-        try {
-            AsyncTask<String, Void, String> get = new AsyncTask<String, Void, String>() {
-                @Override
-                protected String doInBackground(String... params) {
-                    String a = "";
-                    HttpURLConnection urlConnection;
-                    try {
-                        Log.d("GET", "URL: " + params[0]);
-                        URL urlget = new URL(params[0]);
-                        urlConnection = (HttpURLConnection) urlget.openConnection();
-                        InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                        java.util.Scanner s = new java.util.Scanner(in).useDelimiter("\\A");
-
-                        //return "works";
-                        String returner = s.hasNext() ? s.next() : "";
-                        urlConnection.disconnect();
-                        return returner;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return "{\"success\":false, \"error\":\"could not connect to server\"}";
-                }
-
-                @Override
-                protected void onPostExecute(String msg) {
-                    try {
-                        Log.d("GET", "PostExecute Song Search");
-                        JSONObject json = new JSONObject(msg);
-                        JSONArray items = json.getJSONObject("tracks").getJSONArray("items");
-                        LinearLayout songList = (LinearLayout) findViewById(R.id.songList);
-                        songListArr = new ArrayList<TextView>();
-                        for (int i = 0; i < items.length(); i++) {
-                            JSONObject curObj = items.getJSONObject(i);
-                            TextView tv = new TextView(getApplicationContext());
-                            tv.setText(curObj.getString("name") + " by " + curObj.getJSONArray("artists").getJSONObject(0).getString("name"));
-                            tv.setTextSize(30f);
-                            tv.setTextColor(Color.WHITE);
-                            tv.setTag(curObj.getString("uri"));
-                            tv.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    trackUri = (String) v.getTag();
-                                    for (TextView view : songListArr) {
-                                        view.setBackgroundColor(Color.TRANSPARENT);
-                                    }
-                                    v.setBackgroundColor(Color.GRAY);
-                                }
-                            });
-                            songListArr.add(tv);
-                            songList.addView(tv);
-                        }
-                    } catch (JSONException je) {
-                        je.printStackTrace();
-                    }
-                }
-            }.execute("https://api.spotify.com/v1/search?q=" + URLEncoder.encode(searchTerms, "UTF-8") + "&type=track", null, null);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
+//    public String searchSongs(String searchTerms) {
+//
+//        try {
+//            AsyncTask<String, Void, String> get = new AsyncTask<String, Void, String>() {
+//                @Override
+//                protected String doInBackground(String... params) {
+//                    String a = "";
+//                    HttpURLConnection urlConnection;
+//                    try {
+//                        Log.d("GET", "URL: " + params[0]);
+//                        URL urlget = new URL(params[0]);
+//                        urlConnection = (HttpURLConnection) urlget.openConnection();
+//                        InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+//                        java.util.Scanner s = new java.util.Scanner(in).useDelimiter("\\A");
+//
+//                        //return "works";
+//                        String returner = s.hasNext() ? s.next() : "";
+//                        urlConnection.disconnect();
+//                        return returner;
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                    return "{\"success\":false, \"error\":\"could not connect to server\"}";
+//                }
+//
+//                @Override
+//                protected void onPostExecute(String msg) {
+//                    try {
+//                        Log.d("GET", "PostExecute Song Search");
+//                        JSONObject json = new JSONObject(msg);
+//                        JSONArray items = json.getJSONObject("tracks").getJSONArray("items");
+//                        LinearLayout songList = (LinearLayout) findViewById(R.id.songList);
+//                        songListArr = new ArrayList<TextView>();
+//                        for (int i = 0; i < items.length(); i++) {
+//                            JSONObject curObj = items.getJSONObject(i);
+//                            TextView tv = new TextView(getApplicationContext());
+//                            tv.setText(curObj.getString("name") + " by " + curObj.getJSONArray("artists").getJSONObject(0).getString("name"));
+//                            tv.setTextSize(30f);
+//                            tv.setTextColor(Color.WHITE);
+//                            tv.setTag(curObj.getString("uri"));
+//                            tv.setOnClickListener(new View.OnClickListener() {
+//                                @Override
+//                                public void onClick(View v) {
+//                                    trackUri = (String) v.getTag();
+//                                    for (TextView view : songListArr) {
+//                                        view.setBackgroundColor(Color.TRANSPARENT);
+//                                    }
+//                                    v.setBackgroundColor(Color.GRAY);
+//                                }
+//                            });
+//                            songListArr.add(tv);
+//                            songList.addView(tv);
+//                        }
+//                    } catch (JSONException je) {
+//                        je.printStackTrace();
+//                    }
+//                }
+//            }.execute("https://api.spotify.com/v1/search?q=" + URLEncoder.encode(searchTerms, "UTF-8") + "&type=track", null, null);
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
+//        return "";
+//    }
 
     @Override
     public void onLoggedIn() {

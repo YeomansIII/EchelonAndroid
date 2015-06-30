@@ -16,6 +16,10 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from rest_framework import routers
+from rest_framework.generics import CreateAPIView
+from rest_framework import permissions
+from apiv1.models import Listener
+from apiv1.serializers import ListenerSerializer
 from apiv1 import views
 
 router = routers.DefaultRouter()
@@ -25,6 +29,14 @@ router.register(r'queuegroups', views.QueueGroupViewSet)
 
 urlpatterns = [
     #url(r'^admin/', include(admin.site.urls)),
+    url(r'^apiv1/create-listener/', CreateAPIView.as_view(permission_classes = [permissions.AllowAny], serializer_class=ListenerSerializer),name='create-user'),
+    url(r'^apiv1/listener/(?P<user__username>.+)/$', views.GetListenerView.as_view()),
+    url(r'^apiv1/$', views.api_root),
     url(r'^apiv1/', include(router.urls, namespace='apiv1')),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+]
+from rest_framework.authtoken import views
+
+urlpatterns += [
+    url(r'^api-token-auth/', views.obtain_auth_token),
 ]

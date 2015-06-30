@@ -5,7 +5,8 @@ from rest_framework import serializers
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ('url', 'pk', 'username', 'email')
+        fields = ('url', 'pk', 'username', 'password','email')
+        extra_kwargs = {'password': {'write_only': True}}
         view_name = "apiv1:user-detail"
 
 
@@ -16,7 +17,7 @@ class GroupSerializer(serializers.ModelSerializer):
         view_name = "apiv1:group-detail"
 
 
-class ListenerSerializer(serializers.ModelSerializer):
+class ListenerSerializer(serializers.HyperlinkedModelSerializer):
     user = UserSerializer(required=False)
     active_queuegroup = serializers.SlugRelatedField(slug_field='group_id', queryset=QueueGroup.objects, required=False)
     leader_of = serializers.SlugRelatedField(slug_field='group_id', queryset=QueueGroup.objects, required=False, allow_null=True)
@@ -25,9 +26,15 @@ class ListenerSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Create the book instance
         newuser = User.objects.create(username=validated_data['user']['username'], email=validated_data['user']['email'])
+        newuser.set_password(validated_data['user']['password'])
         newuser.save()
 
-        listener = Listener.objects.create(user=newuser, gcm_id=validated_data['gcm_id'])
+        listener = Listener.objects.create(user=newuser)
+
+        if 'gcm_id' in validated_data:
+            setattr(listener, 'gcm_id', validated_data['gcm_id'])
+
+        listener.save()
 
         return listener
 
@@ -55,7 +62,7 @@ class ListenerSerializer(serializers.ModelSerializer):
         view_name = "apiv1:listener-detail"
 
 
-class QueueGroupSerializer(serializers.ModelSerializer):
+class QueueGroupSerializer(serializers.HyperlinkedModelSerializer):
     leader = ListenerSerializer(required=False)
     participants = ListenerSerializer(many=True, required=False)
 

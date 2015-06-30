@@ -1,11 +1,16 @@
 package io.yeomans.groupqueue;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.Spotify;
@@ -19,13 +24,23 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private static final String REDIRECT_URI = "groupqueue://callback";
 
     private static final int REQUEST_CODE = 9001;
+    private static final int CONTENT_VIEW_ID = 10101010;
 
     private Player mPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        FrameLayout frame = new FrameLayout(this);
+        frame.setId(CONTENT_VIEW_ID);
+        setContentView(frame, new ViewGroup.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        if (savedInstanceState == null) {
+            Fragment newFragment = new LoginFragment();
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.add(CONTENT_VIEW_ID, newFragment).commit();
+        }
     }
 
     @Override
