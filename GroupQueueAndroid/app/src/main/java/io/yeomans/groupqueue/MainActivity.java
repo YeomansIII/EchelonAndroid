@@ -2,45 +2,63 @@ package io.yeomans.groupqueue;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.Spotify;
 
 //Groupify
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends Activity {
 
     // TODO: Replace with your client ID
     private static final String CLIENT_ID = "8b81e3deddce42c4b0f2972e181b8a3a";
     // TODO: Replace with your redirect URI
     private static final String REDIRECT_URI = "groupqueue://callback";
 
+    public static final String PREFS_NAME = "basic_pref";
+
     private static final int REQUEST_CODE = 9001;
-    private static final int CONTENT_VIEW_ID = 10101010;
+    public static final int CONTENT_VIEW_ID = 10101010;
 
     private Player mPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FrameLayout frame = new FrameLayout(this);
-        frame.setId(CONTENT_VIEW_ID);
-        setContentView(frame, new ViewGroup.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        setContentView(R.layout.activity_main);
+        SharedPreferences pref = getSharedPreferences(PREFS_NAME, 0);
+        String token = pref.getString("token", null);
 
-        if (savedInstanceState == null) {
-            Fragment newFragment = new LoginFragment();
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.add(CONTENT_VIEW_ID, newFragment).commit();
+        if (token == null) {
+            setContentViewLogin();
+        } else {
+            setContentViewMain();
         }
+    }
+
+    private void setContentViewMain() {
+
+        Fragment newFragment = new HomeFragment();
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.add(R.id.fragment_container, newFragment).commit();
+    }
+
+    private void setContentViewLogin() {
+
+        Fragment newFragment = new LoginFragment();
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.add(R.id.fragment_container, newFragment).commit();
     }
 
     @Override
@@ -66,23 +84,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
 //    }
 
     @Override
-    public void onClick(final View view) {
-
-        if (view == findViewById(R.id.createGroupButton)) {
-            boolean leader = true;
-            Log.d("Button", "Create Button");
-            Intent groupIntent = new Intent(getApplicationContext(), GroupActivity.class);
-            Log.wtf("PuttingIntExtra", ""+leader);
-            groupIntent.putExtra("extra_stuff", new String[]{""+leader, ""+leader});
-            startActivity(groupIntent);
-        } else if(view == findViewById(R.id.joinGroupButton)) {
-            Log.d("Button", "Join Button");
-        }
-    }
-
-    @Override
     protected void onDestroy() {
         Spotify.destroyPlayer(this);
         super.onDestroy();
     }
+
 }
