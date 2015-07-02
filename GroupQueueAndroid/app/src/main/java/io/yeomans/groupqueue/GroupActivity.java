@@ -40,12 +40,14 @@ public class GroupActivity extends Activity implements PlayerNotificationCallbac
     // TODO: Replace with your client ID
     private static final String CLIENT_ID = "8b81e3deddce42c4b0f2972e181b8a3a";
     // TODO: Replace with your redirect URI
-    private static final String REDIRECT_URI = "playsync://callback";
+    private static final String REDIRECT_URI = "groupqueue://callback";
 
+    private String groupId;
     private String playId;
     private boolean leader;
 
     private static final int REQUEST_CODE = 9001;
+    public static final String PREFS_NAME = "group_prefs";
 
     private Player mPlayer;
     private boolean playerReady;
@@ -65,7 +67,8 @@ public class GroupActivity extends Activity implements PlayerNotificationCallbac
         Log.wtf("Intent Extras", playId);
         if (leader) {
             //((TextView) findViewById(R.id.syncRoom)).setText("Sync Room:" + playId);
-
+            BackendRequest be = new BackendRequest("get","apiv1/queuegroups/create-group/",this);
+            BackendRequest.createGroup(be);
 
             AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
                     AuthenticationResponse.Type.TOKEN, REDIRECT_URI);

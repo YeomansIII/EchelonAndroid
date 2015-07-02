@@ -49,7 +49,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             groupIntent.putExtra("extra_stuff", new String[]{"" + leader, "" + leader});
             startActivity(groupIntent);
         } else if (v == view.findViewById(R.id.joinGroupButton)) {
-            Log.d("Button", "Join Button");
+            Log.d("Button", "Join Group Button");
+            parentActivity.findViewById(R.id.homeButtonsLayout).setVisibility(View.INVISIBLE);
+            parentActivity.findViewById(R.id.joinGroupIdLayout).setVisibility(View.VISIBLE);
         } else if (v == view.findViewById(R.id.logoutButton)) {
             Log.d("Button", "Logout Button");
             SharedPreferences pref = parentActivity.getSharedPreferences(MainActivity.PREFS_NAME, 0);
@@ -60,8 +62,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
+        } else if (v == view.findViewById(R.id.joinGroupIdButton)) {
+            Log.d("Button", "Join Button");
+
         }
     }
 }
-
-

@@ -35,6 +35,11 @@ class ListenerViewSet(viewsets.ModelViewSet):
     serializer_class = ListenerSerializer
     #lookup_field = 'user__username'
 
+    @list_route(methods=['get'], permission_classes=[IsAuthenticated], url_path='my-user-info')
+    def my_user_info(self, request):
+        listener = Listener.objects.get(user=request.user)
+        return Response(self.get_serializer(listener).data)
+
 class GetListenerView(generics.RetrieveAPIView):
     """
     Retreive a single Listener
@@ -58,4 +63,10 @@ class QueueGroupViewSet(viewsets.ModelViewSet):
     @list_route(methods=['get'], permission_classes=[IsAuthenticated], url_path='create-group')
     def create_group(self, request):
         new_group = QueueGroup.objects.create(group_id=(str(uuid.uuid4().get_hex().upper()[0:6])))
+        listener = Listener.objects.get(user=request.user);
+
+        new_group.leader = listener
+        new_group.participants.add(listener)
+        new_group.save()
+
         return Response(self.get_serializer(new_group).data)
