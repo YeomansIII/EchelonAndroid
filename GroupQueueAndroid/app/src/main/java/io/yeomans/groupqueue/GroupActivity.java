@@ -67,8 +67,8 @@ public class GroupActivity extends Activity implements PlayerNotificationCallbac
         Log.wtf("Intent Extras", playId);
         if (leader) {
             //((TextView) findViewById(R.id.syncRoom)).setText("Sync Room:" + playId);
-            BackendRequest be = new BackendRequest("get","apiv1/queuegroups/create-group/",this);
-            BackendRequest.createGroup(be);
+            BackendRequest be = new BackendRequest("PUT","apiv1/queuegroups/activate-my-group/",this);
+            BackendRequest.activateJoinGroup(be);
 
             AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
                     AuthenticationResponse.Type.TOKEN, REDIRECT_URI);

@@ -18,6 +18,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
@@ -33,13 +35,21 @@ import java.util.ArrayList;
  */
 public class BackendRequest {
 
-    public static final String BASE_URL = "http://192.168.1.14:8000/";
+    public static final String BASE_URL = "http://192.168.1.2:8000/";
 
     private String url;
     private String method;
     private Header[] headers;
     private ArrayList<NameValuePair> paramaters;
+    private String jsonEntity;
     private Activity mainActivity;
+
+    public BackendRequest(String method, String url, String jsonEntity, Activity mainActivity) {
+        this.method = method;
+        this.url = url;
+        this.jsonEntity = jsonEntity;
+        this.mainActivity = mainActivity;
+    }
 
     public BackendRequest(String method, String url, Activity mainActivity) {
         this.method = method;
@@ -100,6 +110,14 @@ public class BackendRequest {
         this.paramaters = paramaters;
     }
 
+    public String getJsonEntity() {
+        return jsonEntity;
+    }
+
+    public void setJsonEntity(String jsonEntity) {
+        this.jsonEntity = jsonEntity;
+    }
+
     public Activity getMainActivity() {
         return mainActivity;
     }
@@ -133,7 +151,7 @@ public class BackendRequest {
                                 SharedPreferences.Editor editor = settings.edit();
                                 editor.putString("token", token);
 
-                                HttpGet get = new HttpGet(BASE_URL + "my-user-info/");
+                                HttpGet get = new HttpGet(BASE_URL + "apiv1/listeners/my-user-info/");
                                 get.addHeader("Authorization", "Token " + token);
                                 HttpResponse responseGet = client.execute(get);
                                 HttpEntity resEntityGet = responseGet.getEntity();
@@ -141,10 +159,11 @@ public class BackendRequest {
 
                                 JSONObject json = new JSONObject(response2);
                                 editor.putInt("listener_pk", json.getInt("pk"));
+                                editor.putString("listener_owner_of", json.getString("owner_of"));
                                 JSONObject jsonUser = json.getJSONObject("user");
                                 editor.putInt("user_pk", jsonUser.getInt("pk"));
                                 editor.putString("listener_username", jsonUser.getString("username"));
-                                editor.putString("listener_email", jsonUser.getString("email"));
+                                //editor.putString("listener_email", jsonUser.getString("email"));
                                 editor.commit();
 
                                 return response;
@@ -171,21 +190,24 @@ public class BackendRequest {
         }
     }
 
-    public static void createGroup(BackendRequest be) {
-        if (be.getMethod().equalsIgnoreCase("GET")) {
+    public static void activateJoinGroup(BackendRequest be) {
+        if (be.getMethod().equalsIgnoreCase("PUT")) {
             final Activity activity = be.getMainActivity();
-            AsyncTask<BackendRequest, Void, String> get = new AsyncTask<BackendRequest, Void, String>() {
+            new AsyncTask<BackendRequest, Void, String>() {
                 @Override
                 protected String doInBackground(BackendRequest... params) {
                     try {
                         BackendRequest be = params[0];
                         HttpClient client = new DefaultHttpClient();
-                        HttpGet get = new HttpGet(BASE_URL + be.getUrl());
+                        HttpPut put = new HttpPut(BASE_URL + be.getUrl());
                         SharedPreferences settings = activity.getSharedPreferences(MainActivity.PREFS_NAME, 0);
                         String token = settings.getString("token", null);
-                        get.addHeader("Authorization","Token "+token);
-                        Log.d("Group",get.getURI().toString());
-                        HttpResponse responseGet = client.execute(get);
+                        put.addHeader("Authorization", "Token " + token);
+                        if (be.getJsonEntity() != null) {
+                            put.setEntity(new StringEntity(be.getJsonEntity()));
+                        }
+                        Log.d("Group", put.getURI().toString());
+                        HttpResponse responseGet = client.execute(put);
                         HttpEntity resEntityGet = responseGet.getEntity();
                         if (resEntityGet != null) {
                             //do something with the response
@@ -199,18 +221,20 @@ public class BackendRequest {
 
                 @Override
                 protected void onPostExecute(String msg) {
-                    Log.d("Group",""+msg);
+                    Log.d("Group", "" + msg);
                     JSONObject json;
                     try {
                         json = new JSONObject(msg);
-                        SharedPreferences settings = activity.getSharedPreferences(GroupActivity.PREFS_NAME, 0);
-                        SharedPreferences.Editor editor = settings.edit();
+                        SharedPreferences groupSettings = activity.getSharedPreferences(GroupActivity.PREFS_NAME, 0);
+                        SharedPreferences.Editor editor = groupSettings.edit();
                         editor.putInt("group_pk", json.getInt("pk"));
-                        String id = json.getString("group_id");
-                        editor.putString("group_id", id);
+                        JSONObject ownerUserJson = json.getJSONObject("owner").getJSONObject("user");
+                        String ownerUsername = ownerUserJson.getString("username");
+                        editor.putString("group_owner_pk", ownerUsername);
+                        editor.putString("group_owner_username", ownerUsername);
                         editor.commit();
-                        Log.d("Group", "Group ID: " + id);
-                        ((TextView) activity.findViewById(R.id.groupIdText)).setText(id);
+                        Log.d("Group", "Group: " + ownerUsername);
+                        ((TextView) activity.findViewById(R.id.groupIdText)).setText(ownerUsername);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

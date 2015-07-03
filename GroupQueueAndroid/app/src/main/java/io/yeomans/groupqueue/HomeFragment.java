@@ -11,6 +11,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by jason on 7/1/15.
@@ -34,6 +38,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 container, false);
         view.findViewById(R.id.createGroupButton).setOnClickListener(this);
         view.findViewById(R.id.joinGroupButton).setOnClickListener(this);
+        view.findViewById(R.id.joinGroupIdButton).setOnClickListener(this);
         view.findViewById(R.id.logoutButton).setOnClickListener(this);
         this.view = view;
         return view;
@@ -64,7 +69,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             fragmentTransaction.commit();
         } else if (v == view.findViewById(R.id.joinGroupIdButton)) {
             Log.d("Button", "Join Button");
-
+            JSONObject json = new JSONObject();
+            String usernameJoin = ((TextView)parentActivity.findViewById(R.id.joinGroupIdEdit)).getText().toString();
+            try {
+                json.put("username-join",usernameJoin);
+                BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/join-group/",json.toString(),parentActivity);
+                BackendRequest.activateJoinGroup(be);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

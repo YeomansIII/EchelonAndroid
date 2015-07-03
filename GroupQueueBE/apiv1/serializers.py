@@ -5,8 +5,8 @@ from rest_framework import serializers
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ('url', 'pk', 'username', 'password','email')
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ('url', 'pk', 'username', 'password', 'email')
+        extra_kwargs = {'password': {'write_only': True},'email':{'write_only':True}}
         view_name = "apiv1:user-detail"
 
 
@@ -19,9 +19,9 @@ class GroupSerializer(serializers.ModelSerializer):
 
 class ListenerSerializer(serializers.HyperlinkedModelSerializer):
     user = UserSerializer(required=False)
-    active_queuegroup = serializers.SlugRelatedField(slug_field='group_id', queryset=QueueGroup.objects, required=False)
-    leader_of = serializers.SlugRelatedField(slug_field='group_id', queryset=QueueGroup.objects, required=False, allow_null=True)
-    gcm_id = serializers.CharField(required=False)
+    active_queuegroup = serializers.PrimaryKeyRelatedField(queryset=QueueGroup.objects, required=False, allow_null=True)
+    owner_of = serializers.HyperlinkedIdentityField(read_only=True, view_name="apiv1:queuegroup-detail")
+    gcm_id = serializers.CharField(required=False, write_only=True)
 
     def create(self, validated_data):
         # Create the book instance
@@ -33,6 +33,9 @@ class ListenerSerializer(serializers.HyperlinkedModelSerializer):
 
         if 'gcm_id' in validated_data:
             setattr(listener, 'gcm_id', validated_data['gcm_id'])
+
+        queuegroup = QueueGroup.objects.create()
+        listener.owner_of = queuegroup
 
         listener.save()
 
@@ -48,25 +51,27 @@ class ListenerSerializer(serializers.HyperlinkedModelSerializer):
 
         if 'gcm_id' in validated_data:
             instance.gcm_id = validated_data['gcm_id']
+        if 'is_leader' in validated_data:
+            instance.is_leader = validated_data['is_leader']
         if 'active_queuegroup' in validated_data:
-            instance.active_queuegroup = QueueGroup.objects.get(group_id=validated_data['active_queuegroup'])
-        if 'leader_of' in validated_data:
-            instance.leader_of = QueueGroup.objects.get(group_id=validated_data['leader_of'])
+            instance.active_queuegroup = validated_data['active_queuegroup']
+        if 'owner_of' in validated_data:
+            instance.owner_of = validated_data['owner_of']
         instance.save()
 
         return instance
 
     class Meta:
         model = Listener
-        fields = ('url', 'pk','user', 'gcm_id', 'active_queuegroup', 'leader_of')
+        fields = ('url', 'pk','user', 'gcm_id', 'owner_of', 'is_leader', 'active_queuegroup')
         view_name = "apiv1:listener-detail"
 
 
 class QueueGroupSerializer(serializers.HyperlinkedModelSerializer):
-    leader = ListenerSerializer(required=False)
-    participants = ListenerSerializer(many=True, required=False)
+    owner = ListenerSerializer(read_only=False,required=False)
+    participants = ListenerSerializer(many=True,read_only=False, required=False)
 
     class Meta:
         model = QueueGroup
-        fields = ('url', 'pk', 'group_id', 'leader', 'participants')
+        fields = ('url', 'pk',  'owner', 'participants')
         view_name = "apiv1:queuegroup-detail"
