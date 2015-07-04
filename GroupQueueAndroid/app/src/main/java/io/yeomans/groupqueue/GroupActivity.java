@@ -2,6 +2,7 @@ package io.yeomans.groupqueue;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -75,6 +76,9 @@ public class GroupActivity extends Activity implements PlayerNotificationCallbac
             builder.setScopes(new String[]{"user-read-private", "streaming"});
             AuthenticationRequest request = builder.build();
             AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+        } else {
+            SharedPreferences groupSettings = getSharedPreferences(GroupActivity.PREFS_NAME, 0);
+            ((TextView)findViewById(R.id.groupIdText)).setText(groupSettings.getString("group_owner_username", "error"));
         }
     }
 
@@ -93,6 +97,7 @@ public class GroupActivity extends Activity implements PlayerNotificationCallbac
                         mPlayer.addConnectionStateCallback(GroupActivity.this);
                         mPlayer.addPlayerNotificationCallback(GroupActivity.this);
                         playerReady = true;
+                        Log.d("Player", "Player Ready");
                     }
 
                     @Override

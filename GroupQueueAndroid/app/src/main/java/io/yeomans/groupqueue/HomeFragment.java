@@ -72,7 +72,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             JSONObject json = new JSONObject();
             String usernameJoin = ((TextView)parentActivity.findViewById(R.id.joinGroupIdEdit)).getText().toString();
             try {
-                json.put("username-join",usernameJoin);
+                json.put("username_join",usernameJoin);
                 BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/join-group/",json.toString(),parentActivity);
                 BackendRequest.activateJoinGroup(be);
             } catch (JSONException e) {

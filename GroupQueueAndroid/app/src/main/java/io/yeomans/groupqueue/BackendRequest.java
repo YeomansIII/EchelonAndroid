@@ -5,9 +5,13 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.Notification;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.apache.http.Header;
@@ -24,6 +28,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.lang.reflect.AccessibleObject;
@@ -35,7 +40,7 @@ import java.util.ArrayList;
  */
 public class BackendRequest {
 
-    public static final String BASE_URL = "http://192.168.1.2:8000/";
+    public static final String BASE_URL = "http://192.168.2.16:8000/";
 
     private String url;
     private String method;
@@ -168,6 +173,7 @@ public class BackendRequest {
 
                                 return response;
                             }
+                            return response;
                         }
                     } catch (IOException ie) {
                         ie.printStackTrace();
@@ -179,12 +185,30 @@ public class BackendRequest {
 
                 @Override
                 protected void onPostExecute(String msg) {
-                    Fragment fragment = new HomeFragment();
-                    FragmentManager fragmentManager = activity.getFragmentManager();
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    fragmentTransaction.replace(R.id.fragment_container, fragment);
-                    fragmentTransaction.addToBackStack(null);
-                    fragmentTransaction.commit();
+                    Log.d("Login", msg);
+                    if (msg.contains("non_field_errors")) {
+                        TextView loginErrorText = (TextView) activity.findViewById(R.id.loginErrorText);
+                        try {
+                            JSONObject json = new JSONObject(msg);
+                            String loginError = json.getJSONArray("non_field_errors").getString(0);
+                            Log.d("Login", "Error: " + loginError);
+                            loginErrorText.setText(loginError);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            loginErrorText.setText("Unknown Error Occurred");
+                        }
+                        //loginErrorText.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+                    } else if (msg.contains("token")) {
+                        Fragment fragment = new HomeFragment();
+                        FragmentManager fragmentManager = activity.getFragmentManager();
+                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                        fragmentTransaction.replace(R.id.fragment_container, fragment);
+                        fragmentTransaction.addToBackStack(null);
+                        fragmentTransaction.commit();
+                    } else {
+                        TextView loginErrorText = (TextView) activity.findViewById(R.id.loginErrorText);
+                        loginErrorText.setText("Could not connect to server.");
+                    }
                 }
             }.execute(be, null, null);
         }
@@ -192,7 +216,7 @@ public class BackendRequest {
 
     public static void activateJoinGroup(BackendRequest be) {
         if (be.getMethod().equalsIgnoreCase("PUT")) {
-            final Activity activity = be.getMainActivity();
+            final BackendRequest be2 = be;
             new AsyncTask<BackendRequest, Void, String>() {
                 @Override
                 protected String doInBackground(BackendRequest... params) {
@@ -200,7 +224,7 @@ public class BackendRequest {
                         BackendRequest be = params[0];
                         HttpClient client = new DefaultHttpClient();
                         HttpPut put = new HttpPut(BASE_URL + be.getUrl());
-                        SharedPreferences settings = activity.getSharedPreferences(MainActivity.PREFS_NAME, 0);
+                        SharedPreferences settings = be.getMainActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
                         String token = settings.getString("token", null);
                         put.addHeader("Authorization", "Token " + token);
                         if (be.getJsonEntity() != null) {
@@ -222,6 +246,7 @@ public class BackendRequest {
                 @Override
                 protected void onPostExecute(String msg) {
                     Log.d("Group", "" + msg);
+                    Activity activity = be2.getMainActivity();
                     JSONObject json;
                     try {
                         json = new JSONObject(msg);
@@ -234,7 +259,15 @@ public class BackendRequest {
                         editor.putString("group_owner_username", ownerUsername);
                         editor.commit();
                         Log.d("Group", "Group: " + ownerUsername);
-                        ((TextView) activity.findViewById(R.id.groupIdText)).setText(ownerUsername);
+                        if (be2.getUrl().contains("join")) {
+                            Boolean leader = false;
+                            Intent groupIntent = new Intent(activity, GroupActivity.class);
+                            Log.wtf("PuttingIntExtra", "" + leader);
+                            groupIntent.putExtra("extra_stuff", new String[]{"" + leader, "" + leader});
+                            activity.startActivity(groupIntent);
+                        } else {
+                            ((TextView) activity.findViewById(R.id.groupIdText)).setText(ownerUsername);
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
