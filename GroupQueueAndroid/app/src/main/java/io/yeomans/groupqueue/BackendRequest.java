@@ -247,29 +247,39 @@ public class BackendRequest {
                 protected void onPostExecute(String msg) {
                     Log.d("Group", "" + msg);
                     Activity activity = be2.getMainActivity();
-                    JSONObject json;
-                    try {
-                        json = new JSONObject(msg);
-                        SharedPreferences groupSettings = activity.getSharedPreferences(GroupActivity.PREFS_NAME, 0);
-                        SharedPreferences.Editor editor = groupSettings.edit();
-                        editor.putInt("group_pk", json.getInt("pk"));
-                        JSONObject ownerUserJson = json.getJSONObject("owner").getJSONObject("user");
-                        String ownerUsername = ownerUserJson.getString("username");
-                        editor.putString("group_owner_pk", ownerUsername);
-                        editor.putString("group_owner_username", ownerUsername);
-                        editor.commit();
-                        Log.d("Group", "Group: " + ownerUsername);
-                        if (be2.getUrl().contains("join")) {
-                            Boolean leader = false;
-                            Intent groupIntent = new Intent(activity, GroupActivity.class);
-                            Log.wtf("PuttingIntExtra", "" + leader);
-                            groupIntent.putExtra("extra_stuff", new String[]{"" + leader, "" + leader});
-                            activity.startActivity(groupIntent);
-                        } else {
-                            ((TextView) activity.findViewById(R.id.groupIdText)).setText(ownerUsername);
+                    if (msg.contains("join_errors")) {
+                        String joinError = "Unknown error occurred";
+                        try {
+                            joinError = (new JSONObject(msg)).getJSONArray("join_errors").getString(0);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                        ((TextView)activity.findViewById(R.id.joinGroupIdError)).setText(joinError);
+                    } else {
+                        JSONObject json;
+                        try {
+                            json = new JSONObject(msg);
+                            SharedPreferences groupSettings = activity.getSharedPreferences(GroupActivity.PREFS_NAME, 0);
+                            SharedPreferences.Editor editor = groupSettings.edit();
+                            editor.putInt("group_pk", json.getInt("pk"));
+                            JSONObject ownerUserJson = json.getJSONObject("owner").getJSONObject("user");
+                            String ownerUsername = ownerUserJson.getString("username");
+                            editor.putString("group_owner_pk", ownerUsername);
+                            editor.putString("group_owner_username", ownerUsername);
+                            editor.commit();
+                            Log.d("Group", "Group: " + ownerUsername);
+                            if (be2.getUrl().contains("join")) {
+                                Boolean leader = false;
+                                Intent groupIntent = new Intent(activity, GroupActivity.class);
+                                Log.wtf("PuttingIntExtra", "" + leader);
+                                groupIntent.putExtra("extra_stuff", new String[]{"" + leader, "" + leader});
+                                activity.startActivity(groupIntent);
+                            } else {
+                                ((TextView) activity.findViewById(R.id.groupIdText)).setText(ownerUsername);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }.execute(be, null, null);

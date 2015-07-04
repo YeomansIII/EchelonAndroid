@@ -6,9 +6,15 @@ from rest_framework.authtoken.models import Token
 from django.db import models
 from django.contrib.auth.models import User
 
+
 # Create your models here.
+#class Track(models.Model):
+
+
+
 class QueueGroup(models.Model):
     #group_id = models.CharField(max_length=6)
+    is_active = models.BooleanField(default=False)
     pin = models.CharField(max_length=6)
 
     FRIENDS_ONLY = 'FR'
@@ -25,8 +31,7 @@ class QueueGroup(models.Model):
                                       choices=PRIVACY_CHOICES,
                                       default=FRIENDS_ONLY)
 
-    def __unicode__(self):
-        return self.group_id
+
 
 class Listener(models.Model):
     user = models.OneToOneField(User)

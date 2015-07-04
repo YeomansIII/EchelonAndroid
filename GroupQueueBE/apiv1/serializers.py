@@ -73,5 +73,6 @@ class QueueGroupSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = QueueGroup
-        fields = ('url', 'pk',  'owner', 'participants')
+        fields = ('url', 'pk', 'is_active',  'owner', 'participants')
+        extra_kwargs = {'is_active':{'read_only':True}}
         view_name = "apiv1:queuegroup-detail"

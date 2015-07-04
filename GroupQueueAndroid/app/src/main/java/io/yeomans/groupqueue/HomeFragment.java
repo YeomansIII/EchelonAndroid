@@ -55,7 +55,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             startActivity(groupIntent);
         } else if (v == view.findViewById(R.id.joinGroupButton)) {
             Log.d("Button", "Join Group Button");
-            parentActivity.findViewById(R.id.homeButtonsLayout).setVisibility(View.INVISIBLE);
+            parentActivity.findViewById(R.id.homeButtonsLayout).setVisibility(View.GONE);
             parentActivity.findViewById(R.id.joinGroupIdLayout).setVisibility(View.VISIBLE);
         } else if (v == view.findViewById(R.id.logoutButton)) {
             Log.d("Button", "Logout Button");

@@ -9,7 +9,8 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/homeButtonsLayout">
+        android:id="@+id/homeButtonsLayout"
+        android:visibility="visible">
 
         <Button
             android:layout_width="wrap_content"
@@ -43,7 +44,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="invisible"
+        android:visibility="gone"
         android:id="@+id/joinGroupIdLayout">
 
         <TextView
@@ -57,6 +58,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/joinGroupIdEdit" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/joinGroupIdError"
+            android:textColor="@color/full_red" />
 
         <Button
             android:layout_width="wrap_content"

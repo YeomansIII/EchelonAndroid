@@ -64,9 +64,11 @@ class QueueGroupViewSet(viewsets.ModelViewSet):
     def activate_group(self, request):
         listener = Listener.objects.get(user=request.user);
         my_group = listener.owner_of
+        my_group.is_active = True
         listener.is_leader = True
         listener.active_queuegroup = my_group
 
+        my_group.save()
         listener.save()
 
         return Response(self.get_serializer(my_group).data)
@@ -79,10 +81,14 @@ class QueueGroupViewSet(viewsets.ModelViewSet):
         listener = Listener.objects.get(user=request.user);
         join_group = Listener.objects.get(user__username=j['username_join']).owner_of
 
-        if listener.is_leader:
-            listener.is_leader = False
-        listener.active_queuegroup = join_group
+        if join_group.is_active:
+            if listener.is_leader:
+                listener.is_leader = False
+            listener.active_queuegroup = join_group
 
-        listener.save()
-
-        return Response(self.get_serializer(join_group).data)
+            listener.save()
+            return Response(self.get_serializer(join_group).data)
+        else:
+            data = {}
+            data["join_errors"] = ["That group is not active."]
+            return Response(data)
