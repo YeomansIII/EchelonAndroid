@@ -40,7 +40,7 @@ import java.util.ArrayList;
  */
 public class BackendRequest {
 
-    public static final String BASE_URL = "http://192.168.2.16:8000/";
+    public static final String BASE_URL = "http://192.168.1.9:8000/";
 
     private String url;
     private String method;
@@ -202,7 +202,7 @@ public class BackendRequest {
                         Fragment fragment = new HomeFragment();
                         FragmentManager fragmentManager = activity.getFragmentManager();
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                        fragmentTransaction.replace(R.id.fragment_container, fragment);
+                        fragmentTransaction.replace(R.id.container, fragment);
                         fragmentTransaction.addToBackStack(null);
                         fragmentTransaction.commit();
                     } else {

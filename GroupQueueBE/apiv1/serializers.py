@@ -70,9 +70,10 @@ class ListenerSerializer(serializers.HyperlinkedModelSerializer):
 class QueueGroupSerializer(serializers.HyperlinkedModelSerializer):
     owner = ListenerSerializer(read_only=False,required=False)
     participants = ListenerSerializer(many=True,read_only=False, required=False)
+    track_queue = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = QueueGroup
-        fields = ('url', 'pk', 'is_active',  'owner', 'participants')
+        fields = ('url', 'pk', 'is_active',  'owner', 'participants', 'track_queue')
         extra_kwargs = {'is_active':{'read_only':True}}
         view_name = "apiv1:queuegroup-detail"

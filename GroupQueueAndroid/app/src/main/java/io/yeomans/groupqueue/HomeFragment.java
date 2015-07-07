@@ -64,7 +64,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             Fragment fragment = new LoginFragment();
             FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, fragment);
+            fragmentTransaction.replace(R.id.container, fragment);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         } else if (v == view.findViewById(R.id.joinGroupIdButton)) {

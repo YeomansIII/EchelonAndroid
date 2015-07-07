@@ -3,12 +3,10 @@ package io.yeomans.groupqueue;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.LinearLayout;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.widget.TextView;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
@@ -20,18 +18,6 @@ import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerNotificationCallback;
 import com.spotify.sdk.android.player.PlayerState;
 import com.spotify.sdk.android.player.Spotify;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.ArrayList;
 
 /**
  * Created by jason on 6/26/15.
@@ -83,6 +69,14 @@ public class GroupActivity extends Activity implements PlayerNotificationCallbac
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_group, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
@@ -108,48 +102,6 @@ public class GroupActivity extends Activity implements PlayerNotificationCallbac
             }
         }
     }
-
-//    public void showListenerId() {
-//
-//        new AsyncTask<String, Void, String>() {
-//            @Override
-//            protected String doInBackground(String... params) {
-//                String a = "";
-//                HttpURLConnection urlConnection;
-//                try {
-//                    URL urlget = new URL(params[0]);
-//                    urlConnection = (HttpURLConnection) urlget.openConnection();
-//                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-//                    java.util.Scanner s = new java.util.Scanner(in).useDelimiter("\\A");
-//
-//                    //return "works";
-//                    String returner = s.hasNext() ? s.next() : "";
-//                    urlConnection.disconnect();
-//                    return returner;
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//                return "{\"success\":false, \"error\":\"could not connect to server\"}";
-//            }
-//
-//            @Override
-//            protected void onPostExecute(String msg) {
-//                try {
-//                    JSONObject json = new JSONObject(msg);
-//                    if (json.getBoolean("success")) {
-//                        idText.setTextSize(40f);
-//                        myListenerId = json.getString("id");
-//                        idText.setText("Your ID: " + myListenerId);
-//                    } else {
-//                        idText.setText(json.getString("error"));
-//                    }
-//                } catch (JSONException je) {
-//                    je.printStackTrace();
-//                }
-//            }
-//        }.execute(MYIDBASEURL + getRegistrationId(context), null, null);
-//
-//    }
 
 //    public String searchSongs(String searchTerms) {
 //
@@ -248,5 +200,11 @@ public class GroupActivity extends Activity implements PlayerNotificationCallbac
     @Override
     public void onPlaybackError(ErrorType errorType, String s) {
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        Spotify.destroyPlayer(this);
+        super.onDestroy();
     }
 }
