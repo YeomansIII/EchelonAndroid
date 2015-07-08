@@ -1,6 +1,6 @@
 from rest_framework import viewsets, generics
 from apiv1.serializers import ListenerSerializer, QueueGroupSerializer, UserSerializer
-from apiv1.models import Listener, QueueGroup
+from apiv1.models import Listener, QueueGroup, QueueTrack
 from django.contrib.auth.models import User, Group
 from rest_framework.decorators import list_route, api_view
 from rest_framework.permissions import IsAuthenticated
@@ -26,6 +26,14 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     #lookup_field = 'username'
+
+# class QueueTrackViewSet(viewsets.ModelViewSet):
+#     """
+#     API endpoint that allows users to be viewed or edited.
+#     """
+#     queryset = Listener.objects.all()
+#     serializer_class = ListenerSerializer
+#     #lookup_field = 'user__username'
 
 class ListenerViewSet(viewsets.ModelViewSet):
     """
@@ -92,3 +100,16 @@ class QueueGroupViewSet(viewsets.ModelViewSet):
             data = {}
             data["join_errors"] = ["That group is not active."]
             return Response(data)
+
+    @list_route(methods=['put'], permission_classes=[IsAuthenticated], url_path='queue-song')
+    def queue_song(self, request):
+        print(request.body)
+        j = json.loads(request.body)
+
+        listener = Listener.objects.get(user=request.user);
+        my_group = listener.active_queuegroup
+
+        track = QueueTrack.objects.create(spotify_id=j['spotify_id'], in_queue=my_group)
+        track.save()
+
+        return Response(self.get_serializer(my_group).data)

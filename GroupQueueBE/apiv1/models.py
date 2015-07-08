@@ -28,9 +28,13 @@ class QueueGroup(models.Model):
                                       default=FRIENDS_ONLY)
 
 class QueueTrack(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
     spotify_id = models.CharField(max_length=100)
     rating = models.IntegerField(default = 0)
     in_queue = models.ForeignKey(QueueGroup, related_name="track_queue")
+
+    class Meta:
+        ordering = ['rating','created_at']
 
 class Listener(models.Model):
     user = models.OneToOneField(User)

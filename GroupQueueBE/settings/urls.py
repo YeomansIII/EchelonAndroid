@@ -29,6 +29,7 @@ router.register(r'queuegroups', views.QueueGroupViewSet)
 
 urlpatterns = [
     #url(r'^admin/', include(admin.site.urls)),
+    url(r'', include('gcm.urls')),
     url(r'^apiv1/create-listener/', CreateAPIView.as_view(permission_classes = [permissions.AllowAny], serializer_class=ListenerSerializer),name='create-user'),
     url(r'^apiv1/listener/(?P<user__username>.+)/$', views.GetListenerView.as_view()),
     url(r'^apiv1/$', views.api_root),

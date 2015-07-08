@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group
-from apiv1.models import Listener, QueueGroup
+from apiv1.models import Listener, QueueGroup, QueueTrack
 from rest_framework import serializers
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -17,11 +17,18 @@ class GroupSerializer(serializers.ModelSerializer):
         view_name = "apiv1:group-detail"
 
 
+class QueueTrackSeializer(serializers.ModelSerializer):
+    class Meta:
+        model = QueueTrack
+        fields = ('spotify_id','rating')
+        view_name = "apiv1:queuetrack-detail"
+
+
 class ListenerSerializer(serializers.HyperlinkedModelSerializer):
     user = UserSerializer(required=False)
     active_queuegroup = serializers.PrimaryKeyRelatedField(queryset=QueueGroup.objects, required=False, allow_null=True)
     owner_of = serializers.HyperlinkedIdentityField(read_only=True, view_name="apiv1:queuegroup-detail")
-    gcm_id = serializers.CharField(required=False)#, write_only=True)
+    gcm_id = serializers.CharField(required=False, write_only=True)
 
     def create(self, validated_data):
         # Create the book instance
@@ -68,9 +75,9 @@ class ListenerSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class QueueGroupSerializer(serializers.HyperlinkedModelSerializer):
-    owner = ListenerSerializer(read_only=False,required=False)
-    participants = ListenerSerializer(many=True,read_only=False, required=False)
-    track_queue = serializers.StringRelatedField(many=True)
+    owner = ListenerSerializer(read_only=True,required=False)
+    participants = ListenerSerializer(many=True,read_only=True, required=False)
+    track_queue = QueueTrackSeializer(many=True, read_only=True)
 
     class Meta:
         model = QueueGroup

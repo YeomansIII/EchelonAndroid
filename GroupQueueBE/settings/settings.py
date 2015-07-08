@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'gcm',
     'apiv1',
 )
 
@@ -81,6 +82,8 @@ REST_FRAMEWORK = {
     ),
     'PAGE_SIZE': 10
 }
+
+GCM_APIKEY = "AIzaSyBhZLgrZpXvligcmVr19xNyN4J5hRgvJlo"
 
 WSGI_APPLICATION = 'settings.wsgi.application'
 
