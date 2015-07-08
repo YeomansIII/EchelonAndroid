@@ -21,7 +21,7 @@ class ListenerSerializer(serializers.HyperlinkedModelSerializer):
     user = UserSerializer(required=False)
     active_queuegroup = serializers.PrimaryKeyRelatedField(queryset=QueueGroup.objects, required=False, allow_null=True)
     owner_of = serializers.HyperlinkedIdentityField(read_only=True, view_name="apiv1:queuegroup-detail")
-    gcm_id = serializers.CharField(required=False, write_only=True)
+    gcm_id = serializers.CharField(required=False)#, write_only=True)
 
     def create(self, validated_data):
         # Create the book instance

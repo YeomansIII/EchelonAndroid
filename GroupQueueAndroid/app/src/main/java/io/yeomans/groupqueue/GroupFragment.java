@@ -1,50 +1,35 @@
 package io.yeomans.groupqueue;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
-
-import com.spotify.sdk.android.authentication.AuthenticationClient;
-import com.spotify.sdk.android.authentication.AuthenticationRequest;
-import com.spotify.sdk.android.authentication.AuthenticationResponse;
-import com.spotify.sdk.android.player.Config;
-import com.spotify.sdk.android.player.ConnectionStateCallback;
-import com.spotify.sdk.android.player.Player;
-import com.spotify.sdk.android.player.PlayerNotificationCallback;
-import com.spotify.sdk.android.player.PlayerState;
-import com.spotify.sdk.android.player.Spotify;
 
 /**
  * Created by jason on 6/26/15.
  */
-public class GroupActivity extends Activity implements PlayerNotificationCallback, ConnectionStateCallback {
-
-    // TODO: Replace with your client ID
-    private static final String CLIENT_ID = "8b81e3deddce42c4b0f2972e181b8a3a";
-    // TODO: Replace with your redirect URI
-    private static final String REDIRECT_URI = "groupqueue://callback";
+public class GroupFragment extends Fragment {
 
     private String groupId;
     private String playId;
     private boolean leader;
 
-    private static final int REQUEST_CODE = 9001;
+    private View view;
+
     public static final String PREFS_NAME = "group_prefs";
 
-    private Player mPlayer;
-    private boolean playerReady;
 
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_group);
 
         playId = "";
-        Bundle startingIntentBundle = getIntent().getExtras();
+        Bundle startingIntentBundle = this.getArguments();
         if (startingIntentBundle != null) {
             String[] extras = startingIntentBundle.getStringArray("extra_stuff");
             //playId = extras[0];
@@ -54,54 +39,42 @@ public class GroupActivity extends Activity implements PlayerNotificationCallbac
         Log.wtf("Intent Extras", playId);
         if (leader) {
             //((TextView) findViewById(R.id.syncRoom)).setText("Sync Room:" + playId);
-            BackendRequest be = new BackendRequest("PUT","apiv1/queuegroups/activate-my-group/",this);
-            BackendRequest.activateJoinGroup(be);
 
-            AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
-                    AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
-            builder.setScopes(new String[]{"user-read-private", "streaming"});
-            AuthenticationRequest request = builder.build();
-            AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+//            AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
+//                    AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
+//            builder.setScopes(new String[]{"user-read-private", "streaming"});
+//            AuthenticationRequest request = builder.build();
+//            AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
         } else {
-            SharedPreferences groupSettings = getSharedPreferences(GroupActivity.PREFS_NAME, 0);
-            ((TextView)findViewById(R.id.groupIdText)).setText(groupSettings.getString("group_owner_username", "error"));
+            Log.d("Group","Not leader");
         }
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu items for use in the action bar
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_group, menu);
-        return super.onCreateOptionsMenu(menu);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.group_fragment,
+                container, false);
+
+        ///////
+        SharedPreferences groupSettings = getActivity().getSharedPreferences(GroupFragment.PREFS_NAME, 0);
+        ///////
+        ((TextView)view.findViewById(R.id.groupIdText)).setText(groupSettings.getString("group_owner_username", "error"));
+
+        this.view = view;
+        return view;
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-
-        // Check if result comes from the correct activity
-        if (requestCode == REQUEST_CODE) {
-            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-            if (response.getType() == AuthenticationResponse.Type.TOKEN) {
-                Config playerConfig = new Config(this, response.getAccessToken(), CLIENT_ID);
-                mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
-                    @Override
-                    public void onInitialized(Player player) {
-                        mPlayer.addConnectionStateCallback(GroupActivity.this);
-                        mPlayer.addPlayerNotificationCallback(GroupActivity.this);
-                        playerReady = true;
-                        Log.d("Player", "Player Ready");
-                    }
-
-                    @Override
-                    public void onError(Throwable throwable) {
-                        Log.e("MainActivity", "Could not initialize player: " + throwable.getMessage());
-                    }
-                });
-            }
-        }
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
     }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+    }
+
 
 //    public String searchSongs(String searchTerms) {
 //
@@ -166,45 +139,4 @@ public class GroupActivity extends Activity implements PlayerNotificationCallbac
 //        }
 //        return "";
 //    }
-
-    @Override
-    public void onLoggedIn() {
-
-    }
-
-    @Override
-    public void onLoggedOut() {
-
-    }
-
-    @Override
-    public void onLoginFailed(Throwable throwable) {
-
-    }
-
-    @Override
-    public void onTemporaryError() {
-
-    }
-
-    @Override
-    public void onConnectionMessage(String s) {
-
-    }
-
-    @Override
-    public void onPlaybackEvent(EventType eventType, PlayerState playerState) {
-
-    }
-
-    @Override
-    public void onPlaybackError(ErrorType errorType, String s) {
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        Spotify.destroyPlayer(this);
-        super.onDestroy();
-    }
 }

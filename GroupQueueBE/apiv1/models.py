@@ -29,6 +29,7 @@ class QueueGroup(models.Model):
 
 class QueueTrack(models.Model):
     spotify_id = models.CharField(max_length=100)
+    rating = models.IntegerField(default = 0)
     in_queue = models.ForeignKey(QueueGroup, related_name="track_queue")
 
 class Listener(models.Model):

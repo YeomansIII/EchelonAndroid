@@ -1,17 +1,16 @@
 package io.yeomans.groupqueue;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.app.Notification;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.apache.http.Header;
@@ -25,58 +24,58 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
-import java.lang.reflect.AccessibleObject;
-import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by jason on 6/30/15.
  */
 public class BackendRequest {
 
-    public static final String BASE_URL = "http://192.168.1.9:8000/";
+    public static final String BASE_URL = "http://192.168.1.8:8000/";
 
     private String url;
     private String method;
     private Header[] headers;
     private ArrayList<NameValuePair> paramaters;
     private String jsonEntity;
-    private Activity mainActivity;
+    private FragmentActivity mainActivity;
 
-    public BackendRequest(String method, String url, String jsonEntity, Activity mainActivity) {
+    public BackendRequest(String method, String url, String jsonEntity, FragmentActivity mainActivity) {
         this.method = method;
         this.url = url;
         this.jsonEntity = jsonEntity;
         this.mainActivity = mainActivity;
     }
 
-    public BackendRequest(String method, String url, Activity mainActivity) {
+    public BackendRequest(String method, String url, FragmentActivity mainActivity) {
         this.method = method;
         this.url = url;
         this.mainActivity = mainActivity;
     }
 
-    public BackendRequest(String url, Header[] headers, Activity mainActivity) {
+    public BackendRequest(String url, Header[] headers, FragmentActivity mainActivity) {
         this.method = "GET";
         this.url = url;
         this.headers = headers;
         this.mainActivity = mainActivity;
     }
 
-    public BackendRequest(String method, String url, Header[] headers, Activity mainActivity) {
+    public BackendRequest(String method, String url, Header[] headers, FragmentActivity mainActivity) {
         this.method = method;
         this.url = url;
         this.headers = headers;
         this.mainActivity = mainActivity;
     }
 
-    public BackendRequest(String url, ArrayList<NameValuePair> paramaters, Activity mainActivity) {
+    public BackendRequest(String url, ArrayList<NameValuePair> paramaters, FragmentActivity mainActivity) {
         this.method = "POST";
         this.url = url;
         this.paramaters = paramaters;
@@ -123,17 +122,17 @@ public class BackendRequest {
         this.jsonEntity = jsonEntity;
     }
 
-    public Activity getMainActivity() {
+    public FragmentActivity getMainActivity() {
         return mainActivity;
     }
 
-    public void setMainActivity(Activity mainActivity) {
+    public void setMainActivity(FragmentActivity mainActivity) {
         this.mainActivity = mainActivity;
     }
 
     public static void login(BackendRequest be) {
         if (be.getMethod().equalsIgnoreCase("POST")) {
-            final Activity activity = be.getMainActivity();
+            final FragmentActivity activity = be.getMainActivity();
             AsyncTask<BackendRequest, Void, String> get = new AsyncTask<BackendRequest, Void, String>() {
                 @Override
                 protected String doInBackground(BackendRequest... params) {
@@ -163,6 +162,17 @@ public class BackendRequest {
                                 String response2 = EntityUtils.toString(resEntityGet);
 
                                 JSONObject json = new JSONObject(response2);
+
+                                HttpPut put = new HttpPut(BASE_URL + "apiv1/listeners/"+json.getInt("pk")+"/");
+                                JSONObject putJson = new JSONObject("{}");
+                                put.addHeader("Authorization", "Token " + token);
+                                String regId = settings.getString(MainActivity.PROPERTY_REG_ID, null);
+                                putJson.put("gcm_id", regId);
+                                StringEntity se = new StringEntity(putJson.toString());
+                                se.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+                                put.setEntity(se);
+                                HttpResponse responsePut = client.execute(put);
+
                                 editor.putInt("listener_pk", json.getInt("pk"));
                                 editor.putString("listener_owner_of", json.getString("owner_of"));
                                 JSONObject jsonUser = json.getJSONObject("user");
@@ -200,7 +210,7 @@ public class BackendRequest {
                         //loginErrorText.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
                     } else if (msg.contains("token")) {
                         Fragment fragment = new HomeFragment();
-                        FragmentManager fragmentManager = activity.getFragmentManager();
+                        FragmentManager fragmentManager = activity.getSupportFragmentManager();
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                         fragmentTransaction.replace(R.id.container, fragment);
                         fragmentTransaction.addToBackStack(null);
@@ -254,12 +264,12 @@ public class BackendRequest {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        ((TextView)activity.findViewById(R.id.joinGroupIdError)).setText(joinError);
+                        ((TextView) activity.findViewById(R.id.joinGroupIdError)).setText(joinError);
                     } else {
                         JSONObject json;
                         try {
                             json = new JSONObject(msg);
-                            SharedPreferences groupSettings = activity.getSharedPreferences(GroupActivity.PREFS_NAME, 0);
+                            SharedPreferences groupSettings = activity.getSharedPreferences(GroupFragment.PREFS_NAME, 0);
                             SharedPreferences.Editor editor = groupSettings.edit();
                             editor.putInt("group_pk", json.getInt("pk"));
                             JSONObject ownerUserJson = json.getJSONObject("owner").getJSONObject("user");
@@ -268,14 +278,34 @@ public class BackendRequest {
                             editor.putString("group_owner_username", ownerUsername);
                             editor.commit();
                             Log.d("Group", "Group: " + ownerUsername);
-                            if (be2.getUrl().contains("join")) {
-                                Boolean leader = false;
-                                Intent groupIntent = new Intent(activity, GroupActivity.class);
-                                Log.wtf("PuttingIntExtra", "" + leader);
-                                groupIntent.putExtra("extra_stuff", new String[]{"" + leader, "" + leader});
-                                activity.startActivity(groupIntent);
-                            } else {
-                                ((TextView) activity.findViewById(R.id.groupIdText)).setText(ownerUsername);
+                            Boolean leader = true;
+                            if(be2.getUrl().contains("join")) {
+                                leader = false;
+                            }
+                            Fragment fragment = new GroupFragment();
+                            Bundle bundle = new Bundle();
+                            bundle.putStringArray("extra_stuff", new String[]{"" + leader, "" + leader});
+                            fragment.setArguments(bundle);
+                            FragmentManager fragmentManager = be2.getMainActivity().getSupportFragmentManager();
+                            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                            GroupFragment groupFragment = (GroupFragment)fragmentManager.findFragmentByTag("GROUP_FRAG");
+                            if (groupFragment == null) {
+                                fragmentTransaction.replace(R.id.container, fragment, "GROUP_FRAG");
+                                fragmentTransaction.addToBackStack(null);
+                                fragmentTransaction.commit();
+                            } else if(groupFragment != null && !groupFragment.isVisible()) {
+                                List<Fragment> listFrag = fragmentManager.getFragments();
+                                Fragment currentFrag = null;
+                                for(Fragment in: listFrag) {
+                                    if(in.isVisible()) {
+                                        currentFrag = in;
+                                    }
+                                }
+                                if(currentFrag != null) {
+                                    fragmentTransaction.remove(currentFrag);
+                                }
+                                fragmentTransaction.addToBackStack(null);
+                                fragmentTransaction.attach(groupFragment).commit();
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
