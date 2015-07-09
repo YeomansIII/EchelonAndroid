@@ -1,11 +1,14 @@
 package io.yeomans.groupqueue;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -70,7 +73,7 @@ public class MainActivity extends ActionBarActivity
      * Substitute you own sender ID here. This is the project number you got
      * from the API Console, as described in "Getting Started."
      */
-    String SENDER_ID = "853482743730";
+    String SENDER_ID = "45203521863";
 
     /**
      * Tag used on log messages.
@@ -85,6 +88,7 @@ public class MainActivity extends ActionBarActivity
     //COMMON
     SharedPreferences pref;
     Context context;
+    MainActivity mainActivity;
 
 
     /**
@@ -99,8 +103,13 @@ public class MainActivity extends ActionBarActivity
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
 
+        context = getApplicationContext();
+        mainActivity = this;
+
         pref = getSharedPreferences(PREFS_NAME, 0);
         String token = pref.getString("token", null);
+
+        loggedIn = pref.getBoolean("logged_in", false);
 
         setContentViewNav();
 
@@ -108,15 +117,12 @@ public class MainActivity extends ActionBarActivity
         //  GCM registration.
         if (checkPlayServices()) {
             gcm = GoogleCloudMessaging.getInstance(this);
-            regid = getRegistrationId(context);
-            if (regid.isEmpty()) {
-                registerInBackground();
-            }
+            registerInBackground();
         } else {
             Log.i(TAG, "No valid Google Play Services APK found.");
         }
 
-        if (token == null) {
+        if (!loggedIn) {
             setContentViewLogin();
         }
     }
@@ -140,7 +146,7 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
-        // update the main content by replacing fragments
+        // update the group content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
         GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -196,7 +202,7 @@ public class MainActivity extends ActionBarActivity
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.main, menu);
+            //getMenuInflater().inflate(R.menu.group, menu);
             restoreActionBar();
             return true;
         }
@@ -280,6 +286,20 @@ public class MainActivity extends ActionBarActivity
 
     }
 
+    //register your activity onResume()
+    @Override
+    public void onResume() {
+        super.onResume();
+        context.registerReceiver(actionGcmReceiver, new IntentFilter("gcm_intent"));
+    }
+
+    //Must unregister onPause()
+    @Override
+    protected void onPause() {
+        super.onPause();
+        context.unregisterReceiver(actionGcmReceiver);
+    }
+
     @Override
     protected void onDestroy() {
         Spotify.destroyPlayer(this);
@@ -296,7 +316,7 @@ public class MainActivity extends ActionBarActivity
      * it doesn't, display a dialog that allows users to download the APK from
      * the Google Play Store or enable it in the device's system settings.
      */
-    private boolean checkPlayServices() {
+    public boolean checkPlayServices() {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
         if (resultCode != ConnectionResult.SUCCESS) {
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
@@ -316,7 +336,7 @@ public class MainActivity extends ActionBarActivity
      * {@code SharedPreferences}.
      *
      * @param context application's context.
-     * @param regId registration ID
+     * @param regId   registration ID
      */
     private void storeRegistrationId(Context context, String regId) {
         //int appVersion = getAppVersion(context);
@@ -329,11 +349,11 @@ public class MainActivity extends ActionBarActivity
 
     /**
      * Gets the current registration ID for application on GCM service, if there is one.
-     * <p>
+     * <p/>
      * If result is empty, the app needs to register.
      *
      * @return registration ID, or empty string if there is no existing
-     *         registration ID.
+     * registration ID.
      */
     private String getRegistrationId(Context context) {
         String registrationId = pref.getString(PROPERTY_REG_ID, "");
@@ -355,11 +375,11 @@ public class MainActivity extends ActionBarActivity
 
     /**
      * Registers the application with GCM servers asynchronously.
-     * <p>
+     * <p/>
      * Stores the registration ID and the app versionCode in the application's
      * shared preferences.
      */
-    private void registerInBackground() {
+    public void registerInBackground() {
         new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... params) {
@@ -398,6 +418,20 @@ public class MainActivity extends ActionBarActivity
     }
 
     private void sendRegistrationIdToBackend() {
-        Log.d("GCM","Send to backend");
+        Log.d("GCM", "Send to backend");
     }
+
+    //This is the handler that will manager to process the broadcast intent
+    private BroadcastReceiver actionGcmReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("GCM", "gcm_intent received in group activity");
+            // Extract data included in the Intent
+            String action = intent.getStringExtra("action");
+
+            BackendRequest be = new BackendRequest("GET",mainActivity);
+            BackendRequest.refreshGroupQueue(be);
+            //do other stuff here
+        }
+    };
 }

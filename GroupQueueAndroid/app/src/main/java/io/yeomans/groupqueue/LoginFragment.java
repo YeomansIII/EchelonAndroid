@@ -55,7 +55,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         ArrayList<NameValuePair> paramList = new ArrayList<NameValuePair>();
         paramList.add(new BasicNameValuePair("username",((EditText)view.findViewById(R.id.usernameEdit)).getText().toString()));
         paramList.add(new BasicNameValuePair("password",((EditText)view.findViewById(R.id.passwordEdit)).getText().toString()));
-        BackendRequest be = new BackendRequest("api-token-auth/", paramList, getActivity());
+        BackendRequest be = new BackendRequest("api-token-auth/", paramList, (MainActivity)getActivity());
         BackendRequest.login(be);
     }
 

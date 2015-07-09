@@ -24,7 +24,7 @@ public class DrawerItemClickListener implements ListView.OnItemClickListener {
     }
 
     /**
-     * Swaps fragments in the main content view
+     * Swaps fragments in the group content view
      */
     private void selectItem(int position) {
         Log.d("Drawer", "Position: " + position);

@@ -9,6 +9,12 @@ from rest_framework.reverse import reverse
 
 import json
 
+SERVER = 'gcm.googleapis.com'
+PORT = 5235
+USERNAME = "45203521863"
+API_KEY = "AIzaSyBhZLgrZpXvligcmVr19xNyN4J5hRgvJlo"
+REGISTRATION_ID = "Registration Id of the target device"
+
 # Create your views here.
 @api_view(('GET',))
 def api_root(request, format=None):
@@ -111,5 +117,43 @@ class QueueGroupViewSet(viewsets.ModelViewSet):
 
         track = QueueTrack.objects.create(spotify_id=j['spotify_id'], in_queue=my_group)
         track.save()
+
+        from gcm import GCM
+
+        gcm = GCM(API_KEY)
+        data = {'action': 'pull_group', 'group': my_group.pk}
+
+        participants = Listener.objects.filter(active_queuegroup=my_group)
+        print(str(participants))
+        #reg_ids = []
+        for part in participants:
+            gcm.plaintext_request(registration_id=part.gcm_id, data=data)
+            #reg_ids.append(part.gcm_id)
+        #print(str(reg_ids))
+
+        #gcm.plaintext_request(registration_ids=reg_ids, data=data)
+
+        return Response(self.get_serializer(my_group).data)
+
+    @list_route(methods=['get'], permission_classes=[IsAuthenticated], url_path='reset-group')
+    def reset_group(self, request):
+
+        listener = Listener.objects.get(user=request.user);
+        listener.is_leader = False
+
+        my_group = listener.active_queuegroup
+
+        my_group.is_active = False
+
+        partic = Listener.objects.filter(active_queuegroup=my_group)
+        partic.update(active_queuegroup = None)
+
+        tracks = QueueTrack.objects.filter(in_queue=my_group)
+        tracks.delete();
+
+        my_group.save()
+
+        listener.active_queuegroup = None
+        listener.save()
 
         return Response(self.get_serializer(my_group).data)

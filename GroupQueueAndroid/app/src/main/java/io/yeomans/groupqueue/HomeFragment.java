@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,25 +46,28 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         if (v == view.findViewById(R.id.createGroupButton)) {
             boolean leader = true;
             Log.d("Button", "Create Button");
-            BackendRequest be = new BackendRequest("PUT","apiv1/queuegroups/activate-my-group/",getActivity());
-            BackendRequest.activateJoinGroup(be);
-//            Fragment fragment = new GroupFragment();
-//            Bundle bundle = new Bundle();
-//            bundle.putStringArray("extra_stuff", new String[]{"" + leader, "" + leader});
-//            fragment.setArguments(bundle);
-//            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-//            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//            fragmentTransaction.replace(R.id.container, fragment);
-//            fragmentTransaction.addToBackStack(null);
-//            fragmentTransaction.commit();
+            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+            if (groupFragment == null) {
+                BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/activate-my-group/", (MainActivity) getActivity());
+                BackendRequest.activateJoinGroup(be);
+            } else {
+                Toast.makeText(getActivity().getApplicationContext(), "You are already in a group", Toast.LENGTH_SHORT).show();
+            }
         } else if (v == view.findViewById(R.id.joinGroupButton)) {
-            Log.d("Button", "Join Group Button");
-            getActivity().findViewById(R.id.homeButtonsLayout).setVisibility(View.GONE);
-            getActivity().findViewById(R.id.joinGroupIdLayout).setVisibility(View.VISIBLE);
+            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+            if (groupFragment == null) {
+                Log.d("Button", "Join Group Button");
+                getActivity().findViewById(R.id.homeButtonsLayout).setVisibility(View.GONE);
+                getActivity().findViewById(R.id.joinGroupIdLayout).setVisibility(View.VISIBLE);
+            } else {
+                Toast.makeText(getActivity().getApplicationContext(), "You are already in a group", Toast.LENGTH_SHORT).show();
+            }
         } else if (v == view.findViewById(R.id.logoutButton)) {
             Log.d("Button", "Logout Button");
             SharedPreferences pref = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
-            pref.edit().remove("token").commit();
+            pref.edit().remove("token").putBoolean("logged_in", false).commit();
             Fragment fragment = new LoginFragment();
             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -73,10 +77,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         } else if (v == view.findViewById(R.id.joinGroupIdButton)) {
             Log.d("Button", "Join Button");
             JSONObject json = new JSONObject();
-            String usernameJoin = ((TextView)getActivity().findViewById(R.id.joinGroupIdEdit)).getText().toString();
+            String usernameJoin = ((TextView) getActivity().findViewById(R.id.joinGroupIdEdit)).getText().toString();
             try {
-                json.put("username_join",usernameJoin);
-                BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/join-group/",json.toString(),getActivity());
+                json.put("username_join", usernameJoin);
+                BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/join-group/", json.toString(), (MainActivity) getActivity());
                 BackendRequest.activateJoinGroup(be);
             } catch (JSONException e) {
                 e.printStackTrace();

@@ -1,17 +1,18 @@
 package io.yeomans.groupqueue;
 
 import android.app.Activity;
-import android.content.Intent;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
+
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -27,12 +28,14 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by jason on 6/30/15.
@@ -46,36 +49,42 @@ public class BackendRequest {
     private Header[] headers;
     private ArrayList<NameValuePair> paramaters;
     private String jsonEntity;
-    private FragmentActivity mainActivity;
+    private MainActivity mainActivity;
+    private Context mainContext;
 
-    public BackendRequest(String method, String url, String jsonEntity, FragmentActivity mainActivity) {
+    public BackendRequest(String method, MainActivity mainActivity) {
+        this.method = method;
+        this.mainActivity = mainActivity;
+    }
+
+    public BackendRequest(String method, String url, String jsonEntity, MainActivity mainActivity) {
         this.method = method;
         this.url = url;
         this.jsonEntity = jsonEntity;
         this.mainActivity = mainActivity;
     }
 
-    public BackendRequest(String method, String url, FragmentActivity mainActivity) {
+    public BackendRequest(String method, String url, MainActivity mainActivity) {
         this.method = method;
         this.url = url;
         this.mainActivity = mainActivity;
     }
 
-    public BackendRequest(String url, Header[] headers, FragmentActivity mainActivity) {
+    public BackendRequest(String url, Header[] headers, MainActivity mainActivity) {
         this.method = "GET";
         this.url = url;
         this.headers = headers;
         this.mainActivity = mainActivity;
     }
 
-    public BackendRequest(String method, String url, Header[] headers, FragmentActivity mainActivity) {
+    public BackendRequest(String method, String url, Header[] headers, MainActivity mainActivity) {
         this.method = method;
         this.url = url;
         this.headers = headers;
         this.mainActivity = mainActivity;
     }
 
-    public BackendRequest(String url, ArrayList<NameValuePair> paramaters, FragmentActivity mainActivity) {
+    public BackendRequest(String url, ArrayList<NameValuePair> paramaters, MainActivity mainActivity) {
         this.method = "POST";
         this.url = url;
         this.paramaters = paramaters;
@@ -122,17 +131,25 @@ public class BackendRequest {
         this.jsonEntity = jsonEntity;
     }
 
-    public FragmentActivity getMainActivity() {
+    public MainActivity getMainActivity() {
         return mainActivity;
     }
 
-    public void setMainActivity(FragmentActivity mainActivity) {
+    public void setMainActivity(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
+    }
+
+    public Context getMainContext() {
+        return mainContext;
+    }
+
+    public void setMainContext(Context mainContext) {
+        this.mainContext = mainContext;
     }
 
     public static void login(BackendRequest be) {
         if (be.getMethod().equalsIgnoreCase("POST")) {
-            final FragmentActivity activity = be.getMainActivity();
+            final MainActivity activity = be.getMainActivity();
             AsyncTask<BackendRequest, Void, String> get = new AsyncTask<BackendRequest, Void, String>() {
                 @Override
                 protected String doInBackground(BackendRequest... params) {
@@ -163,7 +180,7 @@ public class BackendRequest {
 
                                 JSONObject json = new JSONObject(response2);
 
-                                HttpPut put = new HttpPut(BASE_URL + "apiv1/listeners/"+json.getInt("pk")+"/");
+                                HttpPut put = new HttpPut(BASE_URL + "apiv1/listeners/" + json.getInt("pk") + "/");
                                 JSONObject putJson = new JSONObject("{}");
                                 put.addHeader("Authorization", "Token " + token);
                                 String regId = settings.getString(MainActivity.PROPERTY_REG_ID, null);
@@ -209,6 +226,16 @@ public class BackendRequest {
                         }
                         //loginErrorText.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
                     } else if (msg.contains("token")) {
+                        SharedPreferences pref = activity.getSharedPreferences(MainActivity.PREFS_NAME, 0);
+                        pref.edit().putBoolean("logged_in", true).commit();
+
+                        if (activity.checkPlayServices()) {
+                            activity.gcm = GoogleCloudMessaging.getInstance(activity);
+                            activity.registerInBackground();
+                        } else {
+                            Log.i("GCM", "No valid Google Play Services APK found.");
+                        }
+
                         Fragment fragment = new HomeFragment();
                         FragmentManager fragmentManager = activity.getSupportFragmentManager();
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -269,7 +296,7 @@ public class BackendRequest {
                         JSONObject json;
                         try {
                             json = new JSONObject(msg);
-                            SharedPreferences groupSettings = activity.getSharedPreferences(GroupFragment.PREFS_NAME, 0);
+                            SharedPreferences groupSettings = activity.getSharedPreferences(MainActivity.PREFS_NAME, 0);
                             SharedPreferences.Editor editor = groupSettings.edit();
                             editor.putInt("group_pk", json.getInt("pk"));
                             JSONObject ownerUserJson = json.getJSONObject("owner").getJSONObject("user");
@@ -279,7 +306,7 @@ public class BackendRequest {
                             editor.commit();
                             Log.d("Group", "Group: " + ownerUsername);
                             Boolean leader = true;
-                            if(be2.getUrl().contains("join")) {
+                            if (be2.getUrl().contains("join")) {
                                 leader = false;
                             }
                             Fragment fragment = new GroupFragment();
@@ -288,20 +315,20 @@ public class BackendRequest {
                             fragment.setArguments(bundle);
                             FragmentManager fragmentManager = be2.getMainActivity().getSupportFragmentManager();
                             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                            GroupFragment groupFragment = (GroupFragment)fragmentManager.findFragmentByTag("GROUP_FRAG");
+                            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                             if (groupFragment == null) {
                                 fragmentTransaction.replace(R.id.container, fragment, "GROUP_FRAG");
                                 fragmentTransaction.addToBackStack(null);
                                 fragmentTransaction.commit();
-                            } else if(groupFragment != null && !groupFragment.isVisible()) {
+                            } else if (groupFragment != null && !groupFragment.isVisible()) {
                                 List<Fragment> listFrag = fragmentManager.getFragments();
                                 Fragment currentFrag = null;
-                                for(Fragment in: listFrag) {
-                                    if(in.isVisible()) {
+                                for (Fragment in : listFrag) {
+                                    if (in.isVisible()) {
                                         currentFrag = in;
                                     }
                                 }
-                                if(currentFrag != null) {
+                                if (currentFrag != null) {
                                     fragmentTransaction.remove(currentFrag);
                                 }
                                 fragmentTransaction.addToBackStack(null);
@@ -310,6 +337,68 @@ public class BackendRequest {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                    }
+                }
+            }.execute(be, null, null);
+        }
+    }
+
+
+    public static void refreshGroupQueue(BackendRequest be) {
+        if (be.getMethod().equalsIgnoreCase("GET")) {
+            final MainActivity activity = be.getMainActivity();
+            new AsyncTask<BackendRequest, Void, String>() {
+                @Override
+                protected String doInBackground(BackendRequest... params) {
+                    try {
+                        BackendRequest be = params[0];
+                        HttpClient client = new DefaultHttpClient();
+                        SharedPreferences settings = activity.getSharedPreferences(MainActivity.PREFS_NAME, 0);
+                        HttpGet get = new HttpGet(BASE_URL + "apiv1/queuegroups/" + settings.getInt("group_pk", -1));
+                        String token = settings.getString("token", null);
+                        get.addHeader("Authorization", "Token " + token);
+                        Log.d("RefreshGroupQueue", get.getURI().toString());
+                        HttpResponse responseGet = client.execute(get);
+                        HttpEntity resEntityGet = responseGet.getEntity();
+                        if (resEntityGet != null) {
+                            //do something with the response
+                            JSONObject responseJson = new JSONObject(EntityUtils.toString(resEntityGet));
+
+                            String spotifyTracksUrl = "https://api.spotify.com/v1/tracks/?ids=";
+                            JSONArray trackQueueJson = responseJson.getJSONArray("track_queue");
+                            for (int i = 0; i < trackQueueJson.length(); i++) {
+                                JSONObject trackJson = trackQueueJson.getJSONObject(i);
+                                spotifyTracksUrl += trackJson.getString("spotify_id") + ",";
+                            }
+                            spotifyTracksUrl = spotifyTracksUrl.replaceAll(" ,$", "");
+
+                            HttpGet get2 = new HttpGet(spotifyTracksUrl);
+                            Log.d("RefreshGroupQueue", get2.getURI().toString());
+                            HttpResponse responseGet2 = client.execute(get2);
+                            HttpEntity resEntityGet2 = responseGet2.getEntity();
+                            if (resEntityGet2 != null) {
+                                SharedPreferences.Editor edit = settings.edit();
+                                String spotifyResponse = EntityUtils.toString(resEntityGet2);
+                                edit.putString("group_current_queue_json", spotifyResponse).commit();
+                                return spotifyResponse;
+                            }
+                        }
+                    } catch (IOException ie) {
+                        ie.printStackTrace();
+                    } catch (JSONException je) {
+                        je.printStackTrace();
+                    }
+                    return "{\"error\":\"error\"}";
+                }
+
+                @Override
+                protected void onPostExecute(String msg) {
+                    Log.d("RefreshGroupQueue", "" + msg);
+
+                    FragmentManager fragmentManager = activity.getSupportFragmentManager();
+                    GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+                    if (groupFragment != null && groupFragment.isVisible()) {
+                        groupFragment.refreshQueueFromPref();
                     }
                 }
             }.execute(be, null, null);
