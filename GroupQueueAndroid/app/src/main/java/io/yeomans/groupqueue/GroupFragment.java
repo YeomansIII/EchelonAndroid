@@ -11,13 +11,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -31,10 +32,7 @@ public class GroupFragment extends Fragment {
     private boolean leader;
 
     private View view;
-    private ArrayList<TextView> songListArr;
-
-    public static final String PREFS_NAME = "group_prefs";
-
+    private ArrayList<RelativeLayout> songListArr;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -71,7 +69,7 @@ public class GroupFragment extends Fragment {
                 container, false);
 
         ///////
-        SharedPreferences groupSettings = getActivity().getSharedPreferences(GroupFragment.PREFS_NAME, 0);
+        SharedPreferences groupSettings = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
         ///////
         ((TextView) view.findViewById(R.id.groupIdText)).setText(groupSettings.getString("group_owner_username", "error"));
 
@@ -90,7 +88,7 @@ public class GroupFragment extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         if (view != null) {
-           // refreshQueueFromPref();
+            // refreshQueueFromPref();
         }
     }
 
@@ -100,34 +98,48 @@ public class GroupFragment extends Fragment {
     }
 
     public void refreshQueueFromPref() {
-        Log.d("RefreshQueue","Refresh Queue From Perf");
+        Log.d("RefreshQueue", "Refresh Queue From Perf");
 
         try {
             SharedPreferences pref = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
-            JSONObject json = new JSONObject(pref.getString("group_current_queue_json", null));
-            JSONArray items = json.getJSONArray("tracks");
-            Log.d("RefreshQueue",items.toString());
-            LinearLayout songList = (LinearLayout) view.findViewById(R.id.queueListLayout);
-            songList.removeAllViews();
-            songListArr = new ArrayList<TextView>();
-            for (int i = 0; i < items.length(); i++) {
-                JSONObject curObj = items.getJSONObject(i);
-                TextView tv = new TextView(getActivity());
-                tv.setText(curObj.getString("name") + " by " + curObj.getJSONArray("artists").getJSONObject(0).getString("name"));
-                tv.setTextSize(30f);
-                tv.setTextColor(Color.BLACK);
-                tv.setTag(curObj.getString("uri"));
-                tv.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //trackUri = (String) v.getTag();
-                        for (TextView view : songListArr) {
-                            view.setBackgroundColor(Color.TRANSPARENT);
+            String queue_json = pref.getString("group_current_queue_json", null);
+
+            if(queue_json != null) {
+                JSONObject json = new JSONObject(queue_json);
+                JSONArray items = json.getJSONArray("tracks");
+                Log.d("RefreshQueue", items.toString());
+                LinearLayout songList = (LinearLayout) view.findViewById(R.id.queueListLayout);
+                songList.removeAllViews();
+                songListArr = new ArrayList<RelativeLayout>();
+                for (int i = 0; i < items.length() - 1; i++) {
+                    JSONObject curObj = items.getJSONObject(i);
+
+                    RelativeLayout rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.song_item, null);
+                    ImageView albumArtImage = (ImageView) rt.findViewById(R.id.albumArtImage);
+                    TextView songTitleText = (TextView) rt.findViewById(R.id.songTitleText);
+                    TextView songArtistText = (TextView) rt.findViewById(R.id.songArtistText);
+
+                    songTitleText.setText(curObj.getString("name"));
+                    songArtistText.setText(curObj.getJSONArray("artists").getJSONObject(0).getString("name"));
+                    new ImageLoadTask(curObj.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"), albumArtImage).execute();
+                    //tv.setTag(curObj.getString("uri"));
+                    rt.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            //trackUri = (String) v.getTag();
+                            for (RelativeLayout view : songListArr) {
+                                view.setBackgroundColor(Color.TRANSPARENT);
+                            }
+                            v.setBackgroundColor(Color.GRAY);
                         }
-                        v.setBackgroundColor(Color.GRAY);
-                    }
-                });
-                songListArr.add(tv);
+                    });
+                    songListArr.add(rt);
+                    songList.addView(rt);
+                }
+            } else {
+                LinearLayout songList = (LinearLayout) view.findViewById(R.id.queueListLayout);
+                TextView tv = new TextView(getActivity().getApplicationContext());
+                tv.setText("No songs in queue. Search for a song!");
                 songList.addView(tv);
             }
         } catch (JSONException je) {

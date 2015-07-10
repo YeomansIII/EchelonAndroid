@@ -4,21 +4,6 @@
     android:layout_height="match_parent"
     android:background="#7dffffff">
 
-    <TextView
-        android:id="@+id/groupIdText"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="Group Id"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textSize="20pt"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:textAlignment="center"
-        android:gravity="center"
-        android:background="@drawable/linear_gradient"
-        android:textColor="@android:color/black" />
-
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
@@ -32,12 +17,27 @@
 
             <LinearLayout
                 android:id="@+id/queueListLayout"
-                android:layout_width="match_parent"
+                android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:layout_gravity="center_horizontal"
                 android:orientation="vertical"
                 android:paddingTop="60dp"></LinearLayout>
         </LinearLayout>
     </ScrollView>
+
+    <TextView
+        android:id="@+id/groupIdText"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Group Id"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="20pt"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:textAlignment="center"
+        android:gravity="center"
+        android:textColor="@android:color/black"
+        android:background="@drawable/linear_gradient" />
 
 </RelativeLayout>

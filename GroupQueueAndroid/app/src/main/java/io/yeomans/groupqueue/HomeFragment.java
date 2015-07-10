@@ -67,7 +67,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         } else if (v == view.findViewById(R.id.logoutButton)) {
             Log.d("Button", "Logout Button");
             SharedPreferences pref = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
-            pref.edit().remove("token").putBoolean("logged_in", false).commit();
+            //pref.edit().remove("token").putBoolean("logged_in", false).commit();
+            pref.edit().clear().commit();
             Fragment fragment = new LoginFragment();
             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

@@ -41,7 +41,7 @@ class Listener(models.Model):
     gcm_id = models.CharField(max_length=3000)
     is_leader = models.BooleanField(default=False)
     active_queuegroup = models.ForeignKey(QueueGroup, null=True, related_name="participants")
-    owner_of = models.OneToOneField(QueueGroup, null=True, related_name="owner")
+    owner_of = models.OneToOneField(QueueGroup, related_name="owner")
 
     def __unicode__(self):
         return self.user.username

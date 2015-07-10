@@ -2,8 +2,8 @@ from rest_framework import viewsets, generics
 from apiv1.serializers import ListenerSerializer, QueueGroupSerializer, UserSerializer
 from apiv1.models import Listener, QueueGroup, QueueTrack
 from django.contrib.auth.models import User, Group
-from rest_framework.decorators import list_route, api_view
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import list_route, api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
@@ -23,6 +23,22 @@ def api_root(request, format=None):
         'listeners': reverse('apiv1:listener-list', request=request, format=format),
         'queuegroups': reverse('apiv1:queuegroup-list', request=request, format=format),
     })
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_account(request):
+    print(request.body)
+    j = json.loads(request.body)
+    u = User.objects.create(email=j['email'], username=j['username'])
+    u.set_password(j['password'])
+    u.save()
+    q = QueueGroup.objects.create()
+    q.save()
+    l = Listener.objects.create(user=u, owner_of=q)
+    l.save()
+    return Response("account_created")
+    #else:
+        #return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ModelViewSet):

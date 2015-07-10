@@ -3,6 +3,7 @@ package io.yeomans.groupqueue;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,6 +11,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -35,14 +39,13 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by jason on 6/30/15.
  */
 public class BackendRequest {
 
-    public static final String BASE_URL = "http://192.168.1.8:8000/";
+    public static final String BASE_URL = "http://108.51.178.141:3902/";
 
     private String url;
     private String method;
@@ -157,6 +160,7 @@ public class BackendRequest {
                         BackendRequest be = params[0];
                         HttpClient client = new DefaultHttpClient();
                         HttpPost post = new HttpPost(BASE_URL + be.getUrl());
+                        Log.d("Login", "" + be.getParamaters().toString());
                         post.setEntity(new UrlEncodedFormEntity(be.getParamaters()));
                         HttpResponse responsePost = client.execute(post);
                         HttpEntity resEntityPost = responsePost.getEntity();
@@ -245,6 +249,43 @@ public class BackendRequest {
                     } else {
                         TextView loginErrorText = (TextView) activity.findViewById(R.id.loginErrorText);
                         loginErrorText.setText("Could not connect to server.");
+                    }
+                }
+            }.execute(be, null, null);
+        }
+    }
+
+    public static void createAccount(BackendRequest be) {
+        if (be.getMethod().equalsIgnoreCase("POST")) {
+            final BackendRequest be2 = be;
+            AsyncTask<BackendRequest, Void, String> get = new AsyncTask<BackendRequest, Void, String>() {
+                @Override
+                protected String doInBackground(BackendRequest... params) {
+                    try {
+                        BackendRequest be = params[0];
+                        HttpClient client = new DefaultHttpClient();
+                        HttpPost post = new HttpPost(BASE_URL + be.getUrl());
+                        post.setEntity(new StringEntity(be.getJsonEntity()));
+                        HttpResponse responsePost = client.execute(post);
+                        HttpEntity resEntityPost = responsePost.getEntity();
+                        String response = "";
+                        if (resEntityPost != null) {
+                            //do something with the response
+                            response = EntityUtils.toString(resEntityPost);
+                            return response;
+                        }
+                    } catch (IOException ie) {
+                        ie.printStackTrace();
+                    }
+                    return "{\"error\":\"error\"}";
+                }
+
+                @Override
+                protected void onPostExecute(String msg) {
+                    Log.d("Create Account", msg);
+                    if (msg.contains("account_created")) {
+                        be2.setUrl("api-token-auth/");
+                        BackendRequest.login(be2);
                     }
                 }
             }.execute(be, null, null);
