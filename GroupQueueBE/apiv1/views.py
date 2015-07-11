@@ -151,6 +151,34 @@ class QueueGroupViewSet(viewsets.ModelViewSet):
 
         return Response(self.get_serializer(my_group).data)
 
+    @list_route(methods=['put'], permission_classes=[IsAuthenticated], url_path='remove-song')
+    def remove_song(self, request):
+        print(request.body)
+        j = json.loads(request.body)
+
+        listener = Listener.objects.get(user=request.user);
+        my_group = listener.active_queuegroup
+
+        track = QueueTrack.objects.create(spotify_id=j['spotify_id'], in_queue=my_group)
+        track.save()
+
+        from gcm import GCM
+
+        gcm = GCM(API_KEY)
+        data = {'action': 'pull_group', 'group': my_group.pk}
+
+        participants = Listener.objects.filter(active_queuegroup=my_group)
+        print(str(participants))
+        #reg_ids = []
+        for part in participants:
+            gcm.plaintext_request(registration_id=part.gcm_id, data=data)
+            #reg_ids.append(part.gcm_id)
+        #print(str(reg_ids))
+
+        #gcm.plaintext_request(registration_ids=reg_ids, data=data)
+
+        return Response(self.get_serializer(my_group).data)
+
     @list_route(methods=['get'], permission_classes=[IsAuthenticated], url_path='reset-group')
     def reset_group(self, request):
 
