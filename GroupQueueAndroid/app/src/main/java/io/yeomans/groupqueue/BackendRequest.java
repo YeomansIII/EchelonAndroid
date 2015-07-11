@@ -11,6 +11,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -440,6 +442,98 @@ public class BackendRequest {
                     GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                     if (groupFragment != null && groupFragment.isVisible()) {
                         groupFragment.refreshQueueFromPref();
+                    }
+                }
+            }.execute(be, null, null);
+        }
+    }
+
+    public static void queueNewSong(BackendRequest be) {
+        if (be.getMethod().equalsIgnoreCase("PUT")) {
+            final MainActivity activity = be.getMainActivity();
+            new AsyncTask<BackendRequest, Void, String>() {
+                @Override
+                protected String doInBackground(BackendRequest... params) {
+                    try {
+                        BackendRequest be = params[0];
+                        HttpClient client = new DefaultHttpClient();
+                        HttpPut put = new HttpPut(BASE_URL + be.getUrl());
+                        SharedPreferences settings = be.getMainActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
+                        String token = settings.getString("token", null);
+                        put.addHeader("Authorization", "Token " + token);
+                        put.setEntity(new StringEntity(be.getJsonEntity()));
+                        Log.d("QueueSong", put.getURI().toString());
+                        HttpResponse responseGet = client.execute(put);
+                        HttpEntity resEntityGet = responseGet.getEntity();
+                        if (resEntityGet != null) {
+                            //do something with the response
+                            return EntityUtils.toString(resEntityGet);
+                        }
+                    } catch (IOException ie) {
+                        ie.printStackTrace();
+                    }
+                    return "{\"error\":\"error\"}";
+                }
+
+                @Override
+                protected void onPostExecute(String msg) {
+                    Log.d("QueueSong", msg);
+                    FragmentManager fragmentManager = activity.getSupportFragmentManager();
+                    SongSearchFragment songSearchFragment = (SongSearchFragment) fragmentManager.findFragmentByTag("SEARCH_FRAG");
+                    GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    //if(groupFragment != null && groupFragment.isVisible()) {
+
+                    View view = activity.getCurrentFocus();
+                    if (view != null) {
+                        InputMethodManager imm = (InputMethodManager) activity.getSystemService(
+                                Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    }
+
+                    Log.d("QueueSong", "Song Queue Complete");
+                    fragmentTransaction.remove(songSearchFragment).attach(groupFragment).addToBackStack(null).commit();
+                    //}
+                }
+            }.execute(be, null, null);
+        }
+    }
+
+    public static void resetGroup(BackendRequest be) {
+        if (be.getMethod().equalsIgnoreCase("GET")) {
+            final MainActivity activity = be.getMainActivity();
+            new AsyncTask<BackendRequest, Void, String>() {
+                @Override
+                protected String doInBackground(BackendRequest... params) {
+                    try {
+                        BackendRequest be = params[0];
+                        HttpClient client = new DefaultHttpClient();
+                        HttpGet get = new HttpGet(BASE_URL + be.getUrl());
+                        SharedPreferences settings = be.getMainActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
+                        String token = settings.getString("token", null);
+                        get.addHeader("Authorization", "Token " + token);
+                        Log.d("Group", get.getURI().toString());
+                        HttpResponse responseGet = client.execute(get);
+                        HttpEntity resEntityGet = responseGet.getEntity();
+                        if (resEntityGet != null) {
+                            //do something with the response
+                            return EntityUtils.toString(resEntityGet);
+                        }
+                    } catch (IOException ie) {
+                        ie.printStackTrace();
+                    }
+                    return "{\"error\":\"error\"}";
+                }
+
+                @Override
+                protected void onPostExecute(String msg) {
+                    Log.d("ResetGroup", "" + msg);
+                    FragmentManager fragmentManager = activity.getSupportFragmentManager();
+                    GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    if(groupFragment != null && groupFragment.isVisible()) {
+                        //groupFragment.;
+                        fragmentTransaction.replace(R.id.container, new HomeFragment(), "HOME_FRAG").addToBackStack(null).commit();
                     }
                 }
             }.execute(be, null, null);

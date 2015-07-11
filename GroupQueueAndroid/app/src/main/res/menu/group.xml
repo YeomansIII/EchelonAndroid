@@ -6,11 +6,13 @@
         android:id="@+id/action_leave_group"
         android:title="@string/action_leave_group"
         android:icon="@android:drawable/ic_menu_close_clear_cancel"
+        android:onClick="onLeaveGroupClick"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_search"
         android:title="@string/action_search"
         android:icon="@android:drawable/ic_menu_search"
+        android:onClick="onSearchMenuClick"
         app:showAsAction="always" />
     <!--<item android:id="@+id/action_settings" android:title="@string/action_settings"-->
     <!--android:orderInCategory="100" app:showAsAction="never" />-->

@@ -33,12 +33,14 @@ public class GroupFragment extends Fragment {
 
     private View view;
     private ArrayList<RelativeLayout> songListArr;
+    private MainActivity mainActivity;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+        mainActivity = (MainActivity) getActivity();
 
         playId = "";
         Bundle startingIntentBundle = this.getArguments();
@@ -51,12 +53,12 @@ public class GroupFragment extends Fragment {
         Log.wtf("Intent Extras", playId);
         if (leader) {
             //((TextView) findViewById(R.id.syncRoom)).setText("Sync Room:" + playId);
-
-//            AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
-//                    AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
+//            AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(MainActivity.CLIENT_ID,
+//                    AuthenticationResponse.Type.TOKEN, MainActivity.REDIRECT_URI);
 //            builder.setScopes(new String[]{"user-read-private", "streaming"});
 //            AuthenticationRequest request = builder.build();
-//            AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+//            AuthenticationClient.openLoginActivity(getActivity(), MainActivity.REQUEST_CODE, request);
+            //mainActivity.authenticateSpotify();
         } else {
             Log.d("Group", "Not leader");
         }
@@ -104,13 +106,18 @@ public class GroupFragment extends Fragment {
             SharedPreferences pref = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
             String queue_json = pref.getString("group_current_queue_json", null);
 
-            if(queue_json != null) {
+            if (queue_json != null) {
                 JSONObject json = new JSONObject(queue_json);
                 JSONArray items = json.getJSONArray("tracks");
-                Log.d("RefreshQueue", items.toString());
                 LinearLayout songList = (LinearLayout) view.findViewById(R.id.queueListLayout);
                 songList.removeAllViews();
-                songListArr = new ArrayList<RelativeLayout>();
+                songListArr = new ArrayList<>();
+                boolean firstSong = false;
+                if(mainActivity.playQueue == null || mainActivity.playQueue.size()==0) {
+                    Log.d("Player","setting first song");
+                    firstSong = true;
+                }
+                mainActivity.playQueue = new ArrayList<>();
                 for (int i = 0; i < items.length() - 1; i++) {
                     JSONObject curObj = items.getJSONObject(i);
 
@@ -122,7 +129,16 @@ public class GroupFragment extends Fragment {
                     songTitleText.setText(curObj.getString("name"));
                     songArtistText.setText(curObj.getJSONArray("artists").getJSONObject(0).getString("name"));
                     new ImageLoadTask(curObj.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"), albumArtImage).execute();
-                    //tv.setTag(curObj.getString("uri"));
+                    String uri = curObj.getString("uri");
+                    mainActivity.playQueue.add(uri);
+                    if(firstSong) {
+                        Log.d("Player","first song");
+                        if(mainActivity.playerReady) {
+                            Log.d("Player","Playing first song");
+                            mainActivity.mPlayer.play(uri);
+                        }
+                        firstSong = false;
+                    }
                     rt.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -146,69 +162,4 @@ public class GroupFragment extends Fragment {
             je.printStackTrace();
         }
     }
-
-
-//    public String searchSongs(String searchTerms) {
-//
-//        try {
-//            AsyncTask<String, Void, String> get = new AsyncTask<String, Void, String>() {
-//                @Override
-//                protected String doInBackground(String... params) {
-//                    String a = "";
-//                    HttpURLConnection urlConnection;
-//                    try {
-//                        Log.d("GET", "URL: " + params[0]);
-//                        URL urlget = new URL(params[0]);
-//                        urlConnection = (HttpURLConnection) urlget.openConnection();
-//                        InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-//                        java.util.Scanner s = new java.util.Scanner(in).useDelimiter("\\A");
-//
-//                        //return "works";
-//                        String returner = s.hasNext() ? s.next() : "";
-//                        urlConnection.disconnect();
-//                        return returner;
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                    return "{\"success\":false, \"error\":\"could not connect to server\"}";
-//                }
-//
-//                @Override
-//                protected void onPostExecute(String msg) {
-//                    try {
-//                        Log.d("GET", "PostExecute Song Search");
-//                        JSONObject json = new JSONObject(msg);
-//                        JSONArray items = json.getJSONObject("tracks").getJSONArray("items");
-//                        LinearLayout songList = (LinearLayout) findViewById(R.id.songList);
-//                        songListArr = new ArrayList<TextView>();
-//                        for (int i = 0; i < items.length(); i++) {
-//                            JSONObject curObj = items.getJSONObject(i);
-//                            TextView tv = new TextView(getApplicationContext());
-//                            tv.setText(curObj.getString("name") + " by " + curObj.getJSONArray("artists").getJSONObject(0).getString("name"));
-//                            tv.setTextSize(30f);
-//                            tv.setTextColor(Color.WHITE);
-//                            tv.setTag(curObj.getString("uri"));
-//                            tv.setOnClickListener(new View.OnClickListener() {
-//                                @Override
-//                                public void onClick(View v) {
-//                                    trackUri = (String) v.getTag();
-//                                    for (TextView view : songListArr) {
-//                                        view.setBackgroundColor(Color.TRANSPARENT);
-//                                    }
-//                                    v.setBackgroundColor(Color.GRAY);
-//                                }
-//                            });
-//                            songListArr.add(tv);
-//                            songList.addView(tv);
-//                        }
-//                    } catch (JSONException je) {
-//                        je.printStackTrace();
-//                    }
-//                }
-//            }.execute("https://api.spotify.com/v1/search?q=" + URLEncoder.encode(searchTerms, "UTF-8") + "&type=track", null, null);
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
-//        return "";
-//    }
 }

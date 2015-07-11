@@ -154,20 +154,19 @@ class QueueGroupViewSet(viewsets.ModelViewSet):
     @list_route(methods=['get'], permission_classes=[IsAuthenticated], url_path='reset-group')
     def reset_group(self, request):
 
-        listener = Listener.objects.get(user=request.user);
-        listener.is_leader = False
-
+        listener = Listener.objects.get(user=request.user)
         my_group = listener.active_queuegroup
+        if listener.is_leader:
+            listener.is_leader = False
+            my_group.is_active = False
 
-        my_group.is_active = False
+            partic = Listener.objects.filter(active_queuegroup=my_group)
+            partic.update(active_queuegroup = None)
 
-        partic = Listener.objects.filter(active_queuegroup=my_group)
-        partic.update(active_queuegroup = None)
+            tracks = QueueTrack.objects.filter(in_queue=my_group)
+            tracks.delete()
 
-        tracks = QueueTrack.objects.filter(in_queue=my_group)
-        tracks.delete();
-
-        my_group.save()
+        #my_group.save()
 
         listener.active_queuegroup = None
         listener.save()

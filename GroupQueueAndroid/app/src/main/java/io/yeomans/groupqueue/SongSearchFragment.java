@@ -66,6 +66,7 @@ public class SongSearchFragment extends Fragment implements View.OnClickListener
     }
 
     public void searchSongs(String query) {
+        final SongSearchFragment songSearchFrag = this;
         new AsyncTask<String, Void, String>() {
             @Override
             protected String doInBackground(String... params) {
@@ -93,8 +94,8 @@ public class SongSearchFragment extends Fragment implements View.OnClickListener
                 Log.d("SearchSongs", "" + msg);
 
                 try {
-                    JSONObject json = new JSONObject(msg);
-                    JSONArray items = json.getJSONArray("tracks");
+                    JSONObject json = new JSONObject(msg).getJSONObject("tracks");
+                    JSONArray items = json.getJSONArray("items");
                     Log.d("Search Song", items.toString());
                     LinearLayout songList = (LinearLayout) view.findViewById(R.id.searchSongListLayout);
                     songList.removeAllViews();
@@ -110,15 +111,22 @@ public class SongSearchFragment extends Fragment implements View.OnClickListener
                         songTitleText.setText(curObj.getString("name"));
                         songArtistText.setText(curObj.getJSONArray("artists").getJSONObject(0).getString("name"));
                         new ImageLoadTask(curObj.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"), albumArtImage).execute();
-                        //tv.setTag(curObj.getString("uri"));
+                        rt.setTag(curObj.getString("id"));
                         rt.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                //trackUri = (String) v.getTag();
-                                for (RelativeLayout view : songListArr) {
-                                    view.setBackgroundColor(Color.TRANSPARENT);
+                                try {
+                                    for (RelativeLayout view : songListArr) {
+                                        view.setOnClickListener(null);
+                                    }
+                                    view.setBackgroundColor(Color.DKGRAY);
+                                    JSONObject queueJson = new JSONObject("{}");
+                                    queueJson.put("spotify_id", (String) v.getTag());
+                                    BackendRequest be = new BackendRequest("PUT","apiv1/queuegroups/queue-song/",queueJson.toString(),(MainActivity)songSearchFrag.getActivity());
+                                    BackendRequest.queueNewSong(be);
+                                } catch (JSONException je) {
+                                    je.printStackTrace();
                                 }
-                                v.setBackgroundColor(Color.GRAY);
                             }
                         });
                         songListArr.add(rt);

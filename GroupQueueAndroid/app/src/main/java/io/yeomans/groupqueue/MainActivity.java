@@ -24,6 +24,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
+import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
@@ -33,6 +34,7 @@ import com.spotify.sdk.android.player.PlayerState;
 import com.spotify.sdk.android.player.Spotify;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -55,13 +57,15 @@ public class MainActivity extends ActionBarActivity
     public static final int SETTINGS_POS = 2;
 
     //SPOTIFY
-    private static final String CLIENT_ID = "8b81e3deddce42c4b0f2972e181b8a3a";
-    private static final String REDIRECT_URI = "groupqueue://callback";
-    private static final int REQUEST_CODE = 9001;
+    public static final String CLIENT_ID = "8b81e3deddce42c4b0f2972e181b8a3a";
+    public static final String REDIRECT_URI = "groupqueue://callback";
+    public static final int REQUEST_CODE = 9001;
 
-    private Player mPlayer;
-    private boolean playerReady;
+    public Player mPlayer;
+    public boolean playerReady;
     public boolean loggedIn;
+    public ArrayList<String> playQueue;
+
 
     //GCM
     public static final String EXTRA_MESSAGE = "message";
@@ -209,6 +213,23 @@ public class MainActivity extends ActionBarActivity
         return super.onCreateOptionsMenu(menu);
     }
 
+    public boolean onSearchMenuClick(MenuItem item) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        if (groupFragment != null && groupFragment.isVisible()) {
+            fragmentTransaction.detach(groupFragment).add(R.id.container, new SongSearchFragment(), "SEARCH_FRAG").commit();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean onLeaveGroupClick(MenuItem item) {
+        BackendRequest be = new BackendRequest("GET","apiv1/queuegroups/reset-group/",mainActivity);
+        BackendRequest.resetGroup(be);
+        return true;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -278,7 +299,10 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onPlaybackEvent(EventType eventType, PlayerState playerState) {
-
+        if(eventType == EventType.TRACK_END) {
+            playQueue.remove(0);
+            mPlayer.play(playQueue.get(0));
+        }
     }
 
     @Override
@@ -304,6 +328,14 @@ public class MainActivity extends ActionBarActivity
     protected void onDestroy() {
         Spotify.destroyPlayer(this);
         super.onDestroy();
+    }
+
+    public void authenticateSpotify() {
+        AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(MainActivity.CLIENT_ID,
+                AuthenticationResponse.Type.TOKEN, MainActivity.REDIRECT_URI);
+        builder.setScopes(new String[]{"user-read-private", "streaming"});
+        AuthenticationRequest request = builder.build();
+        AuthenticationClient.openLoginActivity(this, MainActivity.REQUEST_CODE, request);
     }
 
     /**
@@ -429,7 +461,7 @@ public class MainActivity extends ActionBarActivity
             // Extract data included in the Intent
             String action = intent.getStringExtra("action");
 
-            BackendRequest be = new BackendRequest("GET",mainActivity);
+            BackendRequest be = new BackendRequest("GET", mainActivity);
             BackendRequest.refreshGroupQueue(be);
             //do other stuff here
         }
