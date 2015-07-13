@@ -47,7 +47,7 @@ import java.util.List;
  */
 public class BackendRequest {
 
-    public static final String BASE_URL = "http://108.51.178.141:3902/";
+    public static final String BASE_URL = "https://api.echelonapp.io/";
 
     private String url;
     private String method;
