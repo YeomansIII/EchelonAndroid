@@ -1,2 +1,4 @@
 *.pyc
 migrations
+config.py
+secret.py
