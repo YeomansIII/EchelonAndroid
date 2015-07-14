@@ -47,7 +47,11 @@ import java.util.List;
  */
 public class BackendRequest {
 
-    public static final String BASE_URL = "https://api.echelonapp.io/";
+    //PROD
+    //public static final String BASE_URL = "https://api.echelonapp.io/";
+
+    //DEV
+    public static final String BASE_URL = "http://192.168.1.8:8000/";
 
     private String url;
     private String method;
@@ -174,7 +178,7 @@ public class BackendRequest {
                                 JSONObject jsonT = new JSONObject(response);
                                 String token = jsonT.getString("token");
                                 Log.d("login", "Token: " + token);
-                                SharedPreferences settings = activity.getSharedPreferences(MainActivity.PREFS_NAME, 0);
+                                SharedPreferences settings = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
                                 SharedPreferences.Editor editor = settings.edit();
                                 editor.putString("token", token);
 
@@ -232,7 +236,7 @@ public class BackendRequest {
                         }
                         //loginErrorText.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
                     } else if (msg.contains("token")) {
-                        SharedPreferences pref = activity.getSharedPreferences(MainActivity.PREFS_NAME, 0);
+                        SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
                         pref.edit().putBoolean("logged_in", true).commit();
 
                         if (activity.checkPlayServices()) {
@@ -304,7 +308,7 @@ public class BackendRequest {
                         BackendRequest be = params[0];
                         HttpClient client = new DefaultHttpClient();
                         HttpPut put = new HttpPut(BASE_URL + be.getUrl());
-                        SharedPreferences settings = be.getMainActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
+                        SharedPreferences settings = be.getMainActivity().getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
                         String token = settings.getString("token", null);
                         put.addHeader("Authorization", "Token " + token);
                         if (be.getJsonEntity() != null) {
@@ -339,7 +343,7 @@ public class BackendRequest {
                         JSONObject json;
                         try {
                             json = new JSONObject(msg);
-                            SharedPreferences groupSettings = activity.getSharedPreferences(MainActivity.PREFS_NAME, 0);
+                            SharedPreferences groupSettings = activity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
                             SharedPreferences.Editor editor = groupSettings.edit();
                             editor.putInt("group_pk", json.getInt("pk"));
                             JSONObject ownerUserJson = json.getJSONObject("owner").getJSONObject("user");
@@ -358,25 +362,9 @@ public class BackendRequest {
                             fragment.setArguments(bundle);
                             FragmentManager fragmentManager = be2.getMainActivity().getSupportFragmentManager();
                             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-                            if (groupFragment == null) {
-                                fragmentTransaction.replace(R.id.container, fragment, "GROUP_FRAG");
-                                fragmentTransaction.addToBackStack(null);
-                                fragmentTransaction.commit();
-                            } else if (groupFragment != null && !groupFragment.isVisible()) {
-                                List<Fragment> listFrag = fragmentManager.getFragments();
-                                Fragment currentFrag = null;
-                                for (Fragment in : listFrag) {
-                                    if (in.isVisible()) {
-                                        currentFrag = in;
-                                    }
-                                }
-                                if (currentFrag != null) {
-                                    fragmentTransaction.remove(currentFrag);
-                                }
-                                fragmentTransaction.addToBackStack(null);
-                                fragmentTransaction.attach(groupFragment).commit();
-                            }
+                            fragmentTransaction.replace(R.id.container, fragment, "GROUP_FRAG");
+                            fragmentTransaction.addToBackStack(null);
+                            fragmentTransaction.commit();
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -396,8 +384,9 @@ public class BackendRequest {
                     try {
                         BackendRequest be = params[0];
                         HttpClient client = new DefaultHttpClient();
-                        SharedPreferences settings = activity.getSharedPreferences(MainActivity.PREFS_NAME, 0);
-                        HttpGet get = new HttpGet(BASE_URL + "apiv1/queuegroups/" + settings.getInt("group_pk", -1));
+                        SharedPreferences settings = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
+                        SharedPreferences settings2 = activity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
+                        HttpGet get = new HttpGet(BASE_URL + "apiv1/queuegroups/" + settings2.getInt("group_pk", -1));
                         String token = settings.getString("token", null);
                         get.addHeader("Authorization", "Token " + token);
                         Log.d("RefreshGroupQueue", get.getURI().toString());
@@ -409,26 +398,61 @@ public class BackendRequest {
 
                             String spotifyTracksUrl = "https://api.spotify.com/v1/tracks/?ids=";
                             JSONArray trackQueueJson = responseJson.getJSONArray("track_queue");
-                            for (int i = 0; i < trackQueueJson.length(); i++) {
-                                JSONObject trackJson = trackQueueJson.getJSONObject(i);
-                                spotifyTracksUrl += trackJson.getString("spotify_id") + ",";
-                            }
-                            spotifyTracksUrl = spotifyTracksUrl.replaceAll(" ,$", "");
+                            String spotifyResponse = "";
+                            ArrayList<SpotifySong> backStack = activity.backStack;
+                            ArrayList<SpotifySong> playqueue = activity.playQueue;
+                            backStack.clear();
+                            playqueue.clear();
+                            if (trackQueueJson.length() > 0) {
+                                for (int i = 0; i < trackQueueJson.length(); i++) {
+                                    JSONObject trackJson = trackQueueJson.getJSONObject(i);
+                                    spotifyTracksUrl += trackJson.getString("spotify_id") + ",";
+                                }
+                                spotifyTracksUrl = spotifyTracksUrl.replaceAll(",$", "");
 
-                            HttpGet get2 = new HttpGet(spotifyTracksUrl);
-                            Log.d("RefreshGroupQueue", get2.getURI().toString());
-                            HttpResponse responseGet2 = client.execute(get2);
-                            HttpEntity resEntityGet2 = responseGet2.getEntity();
-                            if (resEntityGet2 != null) {
-                                SharedPreferences.Editor edit = settings.edit();
-                                String spotifyResponse = EntityUtils.toString(resEntityGet2);
-                                edit.putString("group_current_queue_json", spotifyResponse).commit();
-                                return spotifyResponse;
+                                HttpGet get2 = new HttpGet(spotifyTracksUrl);
+                                Log.d("RefreshGroupQueue", get2.getURI().toString());
+                                HttpResponse responseGet2 = client.execute(get2);
+                                HttpEntity resEntityGet2 = responseGet2.getEntity();
+                                if (resEntityGet2 != null) {
+                                    spotifyResponse = EntityUtils.toString(resEntityGet2);
+                                    JSONObject json = new JSONObject(spotifyResponse);
+                                    JSONArray items = json.getJSONArray("tracks");
+                                    Log.d("RefreshQueue", "tracks: " + items.length());
+                                    for (int p = 0; p < items.length(); p++) {
+                                        JSONObject spotifyTrackJson = items.getJSONObject(p);
+                                        JSONObject trackJson = trackQueueJson.getJSONObject(p);
+                                        boolean isBackStack = trackJson.getBoolean("played");
+                                        JSONObject album = spotifyTrackJson.getJSONObject("album");
+                                        JSONArray images = album.getJSONArray("images");
+                                        SpotifySong ss = new SpotifySong(
+                                                trackJson.getInt("pk"),
+                                                isBackStack,
+                                                spotifyTrackJson.getString("id"),
+                                                spotifyTrackJson.getString("uri"),
+                                                spotifyTrackJson.getString("name"),
+                                                spotifyTrackJson.getJSONArray("artists").getJSONObject(0).getString("name"),
+                                                album.getString("name"),
+                                                spotifyTrackJson.getInt("duration_ms"),
+                                                images.getJSONObject(2).getString("url"),
+                                                images.getJSONObject(1).getString("url"),
+                                                images.getJSONObject(0).getString("url")
+                                        );
+                                        if (ss.isBackStack()) {
+                                            backStack.add(ss);
+                                        } else {
+                                            playqueue.add(ss);
+                                        }
+                                    }
+                                }
+                            } else {
+
                             }
+                            SharedPreferences.Editor edit = settings2.edit();
+                            //edit.putString("group_current_queue_json", spotifyResponse).commit();
+                            return spotifyResponse;
                         }
-                    } catch (IOException ie) {
-                        ie.printStackTrace();
-                    } catch (JSONException je) {
+                    } catch (Exception je) {
                         je.printStackTrace();
                     }
                     return "{\"error\":\"error\"}";
@@ -441,7 +465,7 @@ public class BackendRequest {
                     FragmentManager fragmentManager = activity.getSupportFragmentManager();
                     GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                     if (groupFragment != null && groupFragment.isVisible()) {
-                        groupFragment.refreshQueueFromPref();
+                        groupFragment.refreshQueueList();
                     }
                 }
             }.execute(be, null, null);
@@ -458,7 +482,7 @@ public class BackendRequest {
                         BackendRequest be = params[0];
                         HttpClient client = new DefaultHttpClient();
                         HttpPut put = new HttpPut(BASE_URL + be.getUrl());
-                        SharedPreferences settings = be.getMainActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
+                        SharedPreferences settings = be.getMainActivity().getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
                         String token = settings.getString("token", null);
                         put.addHeader("Authorization", "Token " + token);
                         put.setEntity(new StringEntity(be.getJsonEntity()));
@@ -499,6 +523,41 @@ public class BackendRequest {
         }
     }
 
+    public static void updateSong(BackendRequest be) {
+        if (be.getMethod().equalsIgnoreCase("PUT")) {
+            final MainActivity activity = be.getMainActivity();
+            new AsyncTask<BackendRequest, Void, String>() {
+                @Override
+                protected String doInBackground(BackendRequest... params) {
+                    try {
+                        BackendRequest be = params[0];
+                        HttpClient client = new DefaultHttpClient();
+                        HttpPut put = new HttpPut(BASE_URL + be.getUrl());
+                        SharedPreferences settings = be.getMainActivity().getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
+                        String token = settings.getString("token", null);
+                        put.addHeader("Authorization", "Token " + token);
+                        put.setEntity(new StringEntity(be.getJsonEntity()));
+                        Log.d("QueueSong", put.getURI().toString());
+                        HttpResponse responseGet = client.execute(put);
+                        HttpEntity resEntityGet = responseGet.getEntity();
+                        if (resEntityGet != null) {
+                            //do something with the response
+                            return EntityUtils.toString(resEntityGet);
+                        }
+                    } catch (IOException ie) {
+                        ie.printStackTrace();
+                    }
+                    return "{\"error\":\"error\"}";
+                }
+
+                @Override
+                protected void onPostExecute(String msg) {
+                    Log.d("QueueSong", msg);
+                }
+            }.execute(be, null, null);
+        }
+    }
+
     public static void resetGroup(BackendRequest be) {
         if (be.getMethod().equalsIgnoreCase("GET")) {
             final MainActivity activity = be.getMainActivity();
@@ -509,7 +568,7 @@ public class BackendRequest {
                         BackendRequest be = params[0];
                         HttpClient client = new DefaultHttpClient();
                         HttpGet get = new HttpGet(BASE_URL + be.getUrl());
-                        SharedPreferences settings = be.getMainActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
+                        SharedPreferences settings = be.getMainActivity().getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
                         String token = settings.getString("token", null);
                         get.addHeader("Authorization", "Token " + token);
                         Log.d("Group", get.getURI().toString());
@@ -531,9 +590,10 @@ public class BackendRequest {
                     FragmentManager fragmentManager = activity.getSupportFragmentManager();
                     GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    if(groupFragment != null && groupFragment.isVisible()) {
+                    if (groupFragment != null && groupFragment.isVisible()) {
                         //groupFragment.;
-                        fragmentTransaction.replace(R.id.container, new HomeFragment(), "HOME_FRAG").addToBackStack(null).commit();
+                        fragmentTransaction.remove(groupFragment).add(R.id.container, new HomeFragment(), "HOME_FRAG").addToBackStack(null).commit();
+                        groupFragment.onDestroy();
                     }
                 }
             }.execute(be, null, null);

@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -17,6 +16,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
@@ -33,6 +33,9 @@ import com.spotify.sdk.android.player.PlayerNotificationCallback;
 import com.spotify.sdk.android.player.PlayerState;
 import com.spotify.sdk.android.player.Spotify;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,14 +45,16 @@ import io.fabric.sdk.android.Fabric;
 
 
 public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks, PlayerNotificationCallback, ConnectionStateCallback {
+        implements View.OnClickListener, NavigationDrawerFragment.NavigationDrawerCallbacks, PlayerNotificationCallback, ConnectionStateCallback {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
-    public static final String PREFS_NAME = "basic_pref";
+    public static final String MAIN_PREFS_NAME = "basic_pref";
+    public static final String GROUP_PREFS_NAME = "group_pref";
+
 
     //POSITIONS
     public static final int HOME_POS = 0;
@@ -62,9 +67,12 @@ public class MainActivity extends ActionBarActivity
     public static final int REQUEST_CODE = 9001;
 
     public Player mPlayer;
+    public boolean mPlayerPlaying;
+    public boolean mPlayerCherry;
     public boolean playerReady;
     public boolean loggedIn;
-    public ArrayList<String> playQueue;
+    public ArrayList<SpotifySong> backStack;
+    public ArrayList<SpotifySong> playQueue;
 
 
     //GCM
@@ -110,11 +118,15 @@ public class MainActivity extends ActionBarActivity
         context = getApplicationContext();
         mainActivity = this;
 
-        pref = getSharedPreferences(PREFS_NAME, 0);
+        pref = getSharedPreferences(MAIN_PREFS_NAME, 0);
         String token = pref.getString("token", null);
 
         loggedIn = pref.getBoolean("logged_in", false);
 
+        playQueue = new ArrayList<>();
+        backStack = new ArrayList<>();
+
+        //setContentViewControl();
         setContentViewNav();
 
         // Check device for Play Services APK. If check succeeds, proceed with
@@ -129,6 +141,8 @@ public class MainActivity extends ActionBarActivity
         if (!loggedIn) {
             setContentViewLogin();
         }
+
+        findViewById(R.id.controlPlayButton).setOnClickListener(this);
     }
 
     private void setContentViewLogin() {
@@ -136,6 +150,13 @@ public class MainActivity extends ActionBarActivity
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.container, newFragment).commit();
     }
+
+//    private void setContentViewControl() {
+//        ControlBarFragment controlFragment = new ControlBarFragment();
+//        controlFragment.mainActivity = this;
+//        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+//        ft.add(R.id.control_bar_container, controlFragment).commit();
+//    }
 
     private void setContentViewNav() {
         mNavigationDrawerFragment = (NavigationDrawerFragment)
@@ -225,7 +246,7 @@ public class MainActivity extends ActionBarActivity
     }
 
     public boolean onLeaveGroupClick(MenuItem item) {
-        BackendRequest be = new BackendRequest("GET","apiv1/queuegroups/reset-group/",mainActivity);
+        BackendRequest be = new BackendRequest("GET", "apiv1/queuegroups/reset-group/", mainActivity);
         BackendRequest.resetGroup(be);
         return true;
     }
@@ -260,6 +281,8 @@ public class MainActivity extends ActionBarActivity
                         mPlayer.addConnectionStateCallback(MainActivity.this);
                         mPlayer.addPlayerNotificationCallback(MainActivity.this);
                         playerReady = true;
+                        mPlayerPlaying = false;
+                        mPlayerCherry = true;
                         Log.d("Player", "Player Ready");
                     }
 
@@ -299,15 +322,38 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onPlaybackEvent(EventType eventType, PlayerState playerState) {
-        if(eventType == EventType.TRACK_END) {
+        if (eventType == EventType.TRACK_END) {
+            SpotifySong old = playQueue.get(0);
+            old.setBackStack(true);
+            try {
+                JSONObject json = new JSONObject("{}");
+                json.put("pk", old.getPk());
+                json.put("played", true);
+                BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
+                be.updateSong(be);
+            } catch (JSONException je) {
+                je.printStackTrace();
+            }
+            backStack.add(old);
             playQueue.remove(0);
-            mPlayer.play(playQueue.get(0));
+            mPlayer.play(playQueue.get(0).getUri());
+        } else if (eventType == EventType.PLAY) {
+            mPlayerPlaying = true;
+        } else if (eventType == EventType.PAUSE) {
+            mPlayerPlaying = false;
         }
     }
 
     @Override
     public void onPlaybackError(ErrorType errorType, String s) {
 
+    }
+
+    public void playFirstSong() {
+        Log.d("Play","PlayQueue: " + playQueue);
+        if (playQueue.size() > 0) {
+            mPlayer.play(playQueue.get(0).getUri());
+        }
     }
 
     //register your activity onResume()
@@ -466,4 +512,23 @@ public class MainActivity extends ActionBarActivity
             //do other stuff here
         }
     };
+
+    @Override
+    public void onClick(View v) {
+        if (v == findViewById(R.id.controlPlayButton)) {
+            Log.d("Play","playlist from ControlFrag: " + playQueue);
+            if (playerReady) {
+                if (!mPlayerPlaying && mPlayerCherry) {
+                    playFirstSong();
+                    v.setBackground(getResources().getDrawable(android.R.drawable.ic_media_pause));
+                } else if (!mPlayerPlaying) {
+                    mPlayer.resume();
+                } else {
+                    mPlayer.pause();
+                }
+            } else {
+                Toast.makeText(getApplicationContext(),"Please log into Spotify",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 }

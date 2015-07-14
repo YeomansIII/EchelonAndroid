@@ -53,7 +53,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             Log.d("Button", "Create Button");
             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
             GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-            if (groupFragment == null) {
+            if (groupFragment == null || groupFragment.isDestroyed) {
                 BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/activate-my-group/", (MainActivity) getActivity());
                 BackendRequest.activateJoinGroup(be);
             } else {
@@ -71,9 +71,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             }
         } else if (v == view.findViewById(R.id.logoutButton)) {
             Log.d("Button", "Logout Button");
-            SharedPreferences pref = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
+            SharedPreferences pref = getActivity().getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
+            SharedPreferences pref2 = getActivity().getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
+
             //pref.edit().remove("token").putBoolean("logged_in", false).commit();
             pref.edit().clear().commit();
+            pref2.edit().clear().commit();
             Fragment fragment = new LoginFragment();
             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

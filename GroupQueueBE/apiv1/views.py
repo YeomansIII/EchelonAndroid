@@ -187,7 +187,9 @@ class QueueGroupViewSet(viewsets.ModelViewSet):
         listener = Listener.objects.get(user=request.user);
         my_group = listener.active_queuegroup
 
-        track = QueueTrack.objects.get(spotify_id=j['spotify_id'], in_queue=my_group)
+        track = QueueTrack.objects.get(pk=j['pk'])
+        if 'played' in j:
+            track.played = j['played']
         track.save()
 
         from gcm import GCM

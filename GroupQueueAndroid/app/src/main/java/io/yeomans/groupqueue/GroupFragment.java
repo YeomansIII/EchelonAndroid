@@ -16,10 +16,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 
 /**
@@ -27,9 +23,9 @@ import java.util.ArrayList;
  */
 public class GroupFragment extends Fragment {
 
-    private String groupId;
     private String playId;
     private boolean leader;
+    public boolean isDestroyed;
 
     private View view;
     private ArrayList<RelativeLayout> songListArr;
@@ -41,6 +37,7 @@ public class GroupFragment extends Fragment {
         setHasOptionsMenu(true);
 
         mainActivity = (MainActivity) getActivity();
+        isDestroyed = false;
 
         playId = "";
         Bundle startingIntentBundle = this.getArguments();
@@ -71,12 +68,13 @@ public class GroupFragment extends Fragment {
                 container, false);
 
         ///////
-        SharedPreferences groupSettings = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
+        SharedPreferences groupSettings = getActivity().getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
         ///////
         ((TextView) view.findViewById(R.id.groupIdText)).setText(groupSettings.getString("group_owner_username", "error"));
 
         this.view = view;
-        refreshQueueFromPref();
+        BackendRequest be = new BackendRequest("GET", mainActivity);
+        BackendRequest.refreshGroupQueue(be);
         return view;
     }
 
@@ -99,67 +97,65 @@ public class GroupFragment extends Fragment {
         super.onDetach();
     }
 
-    public void refreshQueueFromPref() {
-        Log.d("RefreshQueue", "Refresh Queue From Perf");
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        isDestroyed = true;
+    }
 
-        try {
-            SharedPreferences pref = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
-            String queue_json = pref.getString("group_current_queue_json", null);
+    public void refreshQueueList() {
+        Log.d("RefreshQueue", "Refresh Queue List");
 
-            if (queue_json != null) {
-                JSONObject json = new JSONObject(queue_json);
-                JSONArray items = json.getJSONArray("tracks");
-                LinearLayout songList = (LinearLayout) view.findViewById(R.id.queueListLayout);
-                songList.removeAllViews();
-                songListArr = new ArrayList<>();
-                boolean firstSong = false;
-                if(mainActivity.playQueue == null || mainActivity.playQueue.size()==0) {
-                    Log.d("Player","setting first song");
-                    firstSong = true;
-                }
-                mainActivity.playQueue = new ArrayList<>();
-                for (int i = 0; i < items.length() - 1; i++) {
-                    JSONObject curObj = items.getJSONObject(i);
+        //SharedPreferences pref = getActivity().getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
+        //String queue_json = pref.getString("group_current_queue_json", "");
+        ArrayList<SpotifySong> playqueue = mainActivity.playQueue;
 
-                    RelativeLayout rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.song_item, null);
-                    ImageView albumArtImage = (ImageView) rt.findViewById(R.id.albumArtImage);
-                    TextView songTitleText = (TextView) rt.findViewById(R.id.songTitleText);
-                    TextView songArtistText = (TextView) rt.findViewById(R.id.songArtistText);
+        Log.d("Play","PlayQueueList: "+playqueue);
 
-                    songTitleText.setText(curObj.getString("name"));
-                    songArtistText.setText(curObj.getJSONArray("artists").getJSONObject(0).getString("name"));
-                    new ImageLoadTask(curObj.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"), albumArtImage).execute();
-                    String uri = curObj.getString("uri");
-                    mainActivity.playQueue.add(uri);
-                    if(firstSong) {
-                        Log.d("Player","first song");
-                        if(mainActivity.playerReady) {
-                            Log.d("Player","Playing first song");
-                            mainActivity.mPlayer.play(uri);
+        if (playqueue.size() > 0) {
+            //JSONObject json = new JSONObject(queue_json);
+            //JSONArray items = json.getJSONArray("tracks");
+            LinearLayout songList = (LinearLayout) view.findViewById(R.id.queueListLayout);
+            songList.removeAllViews();
+            songListArr = new ArrayList<>();
+            //boolean firstSong = false;
+            //if(mainActivity.mPlayer.)
+            mainActivity.playQueue = new ArrayList<>();
+            for (int i = 0; i < playqueue.size(); i++) {
+                //JSONObject curObj = .getJSONObject(i);
+                SpotifySong curSong = playqueue.get(i);
+
+                RelativeLayout rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.song_item, null);
+                ImageView albumArtImage = (ImageView) rt.findViewById(R.id.albumArtImage);
+                TextView songTitleText = (TextView) rt.findViewById(R.id.songTitleText);
+                TextView songArtistText = (TextView) rt.findViewById(R.id.songArtistText);
+
+                songTitleText.setText(curSong.getTitle());
+                songArtistText.setText(curSong.getArtist());
+                new ImageLoadTask(curSong.getAlbumArtSmall(), albumArtImage).execute();
+                String uri = curSong.getUri();
+                //mainActivity.playQueue.add(uri);
+                rt.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //trackUri = (String) v.getTag();
+                        for (RelativeLayout view : songListArr) {
+                            view.setBackgroundColor(Color.TRANSPARENT);
                         }
-                        firstSong = false;
+                        v.setBackgroundColor(Color.GRAY);
                     }
-                    rt.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            //trackUri = (String) v.getTag();
-                            for (RelativeLayout view : songListArr) {
-                                view.setBackgroundColor(Color.TRANSPARENT);
-                            }
-                            v.setBackgroundColor(Color.GRAY);
-                        }
-                    });
-                    songListArr.add(rt);
-                    songList.addView(rt);
-                }
-            } else {
-                LinearLayout songList = (LinearLayout) view.findViewById(R.id.queueListLayout);
-                TextView tv = new TextView(getActivity().getApplicationContext());
-                tv.setText("No songs in queue. Search for a song!");
-                songList.addView(tv);
+                });
+                songListArr.add(rt);
+                songList.addView(rt);
             }
-        } catch (JSONException je) {
-            je.printStackTrace();
+        } else {
+            LinearLayout songList = (LinearLayout) view.findViewById(R.id.queueListLayout);
+            TextView tv = new TextView(getActivity().getApplicationContext());
+            tv.setText("No songs in queue. Search for a song!");
+            tv.setTextColor(Color.BLACK);
+            songList.addView(tv);
         }
+        Log.d("Play","PlayQueueList End: "+playqueue);
+
     }
 }
