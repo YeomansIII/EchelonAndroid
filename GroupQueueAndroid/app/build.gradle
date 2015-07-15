@@ -49,4 +49,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:21.0.2'
     compile 'com.android.support:support-v4:21.0.2'
     compile 'com.google.android.gms:play-services-gcm:7.5.0'
+    compile 'com.github.markushi:circlebutton:1.1'
 }

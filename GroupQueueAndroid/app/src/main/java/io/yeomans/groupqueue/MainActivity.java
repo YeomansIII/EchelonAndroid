@@ -39,6 +39,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.fabric.sdk.android.Fabric;
@@ -73,6 +74,7 @@ public class MainActivity extends ActionBarActivity
     public boolean loggedIn;
     public ArrayList<SpotifySong> backStack;
     public ArrayList<SpotifySong> playQueue;
+    private OnPlayerControlCallback mPlayerControlCallback;
 
 
     //GCM
@@ -142,7 +144,7 @@ public class MainActivity extends ActionBarActivity
             setContentViewLogin();
         }
 
-        findViewById(R.id.controlPlayButton).setOnClickListener(this);
+        setOnPlayerControlCallback(((OnPlayerControlCallback) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")));
     }
 
     private void setContentViewLogin() {
@@ -234,17 +236,6 @@ public class MainActivity extends ActionBarActivity
         return super.onCreateOptionsMenu(menu);
     }
 
-    public boolean onSearchMenuClick(MenuItem item) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        if (groupFragment != null && groupFragment.isVisible()) {
-            fragmentTransaction.detach(groupFragment).add(R.id.container, new SongSearchFragment(), "SEARCH_FRAG").commit();
-            return true;
-        }
-        return false;
-    }
-
     public boolean onLeaveGroupClick(MenuItem item) {
         BackendRequest be = new BackendRequest("GET", "apiv1/queuegroups/reset-group/", mainActivity);
         BackendRequest.resetGroup(be);
@@ -260,6 +251,8 @@ public class MainActivity extends ActionBarActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        } else if (mNavigationDrawerFragment.onOptionsItemSelected(item)) {
             return true;
         }
 
@@ -336,11 +329,18 @@ public class MainActivity extends ActionBarActivity
             }
             backStack.add(old);
             playQueue.remove(0);
-            mPlayer.play(playQueue.get(0).getUri());
+            if(playQueue.size()>0) {
+                mPlayer.play(playQueue.get(0).getUri());
+            } else {
+                mPlayerCherry = true;
+                mPlayerPlaying = false;
+            }
         } else if (eventType == EventType.PLAY) {
             mPlayerPlaying = true;
+            mPlayerControlCallback.onPlayerPlay();
         } else if (eventType == EventType.PAUSE) {
             mPlayerPlaying = false;
+            mPlayerControlCallback.onPlayerPause();
         }
     }
 
@@ -350,9 +350,10 @@ public class MainActivity extends ActionBarActivity
     }
 
     public void playFirstSong() {
-        Log.d("Play","PlayQueue: " + playQueue);
+        Log.d("Play", "PlayQueue: " + playQueue);
         if (playQueue.size() > 0) {
             mPlayer.play(playQueue.get(0).getUri());
+            mPlayerCherry=false;
         }
     }
 
@@ -515,20 +516,48 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onClick(View v) {
-        if (v == findViewById(R.id.controlPlayButton)) {
-            Log.d("Play","playlist from ControlFrag: " + playQueue);
-            if (playerReady) {
-                if (!mPlayerPlaying && mPlayerCherry) {
-                    playFirstSong();
-                    v.setBackground(getResources().getDrawable(android.R.drawable.ic_media_pause));
-                } else if (!mPlayerPlaying) {
-                    mPlayer.resume();
-                } else {
-                    mPlayer.pause();
-                }
-            } else {
-                Toast.makeText(getApplicationContext(),"Please log into Spotify",Toast.LENGTH_SHORT).show();
-            }
+//        if (v == findViewById(R.id.controlPlayButton)) {
+//            Log.d("Play","playlist from ControlFrag: " + playQueue);
+//            if (playerReady) {
+//                if (!mPlayerPlaying && mPlayerCherry) {
+//                    playFirstSong();
+//                    v.setBackground(getResources().getDrawable(android.R.drawable.ic_media_pause));
+//                } else if (!mPlayerPlaying) {
+//                    mPlayer.resume();
+//                } else {
+//                    mPlayer.pause();
+//                }
+//            } else {
+//                Toast.makeText(getApplicationContext(),"Please log into Spotify",Toast.LENGTH_SHORT).show();
+//            }
+//        }
+    }
+
+    public boolean onPlayControlSelected() {
+        if (!mPlayerPlaying && mPlayerCherry) {
+            playFirstSong();
+            return true;
+        } else if (!mPlayerPlaying) {
+            mPlayer.resume();
+            return true;
         }
+        return false;
+    }
+
+    public boolean onPauseControlSelected() {
+        if(mPlayerPlaying) {
+            mPlayer.pause();
+            return true;
+        }
+        return false;
+    }
+
+    public interface OnPlayerControlCallback {
+        void onPlayerPlay();
+        void onPlayerPause();
+    }
+
+    public void setOnPlayerControlCallback(OnPlayerControlCallback mPlayerControlCallback) {
+        this.mPlayerControlCallback = mPlayerControlCallback;
     }
 }

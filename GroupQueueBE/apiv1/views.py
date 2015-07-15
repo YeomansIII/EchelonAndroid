@@ -8,6 +8,8 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 import json
+from gcm import GCM
+
 
 SERVER = 'gcm.googleapis.com'
 PORT = 5235
@@ -134,8 +136,6 @@ class QueueGroupViewSet(viewsets.ModelViewSet):
         track = QueueTrack.objects.create(spotify_id=j['spotify_id'], in_queue=my_group)
         track.save()
 
-        from gcm import GCM
-
         gcm = GCM(API_KEY)
         data = {'action': 'pull_group', 'group': my_group.pk}
 
@@ -161,8 +161,6 @@ class QueueGroupViewSet(viewsets.ModelViewSet):
 
         track = QueueTrack.objects.create(spotify_id=j['spotify_id'], in_queue=my_group)
         track.save()
-
-        from gcm import GCM
 
         gcm = GCM(API_KEY)
         data = {'action': 'pull_group', 'group': my_group.pk}
@@ -191,8 +189,6 @@ class QueueGroupViewSet(viewsets.ModelViewSet):
         if 'played' in j:
             track.played = j['played']
         track.save()
-
-        from gcm import GCM
 
         gcm = GCM(API_KEY)
         data = {'action': 'pull_group', 'group': my_group.pk}

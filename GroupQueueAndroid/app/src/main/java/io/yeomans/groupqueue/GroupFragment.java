@@ -5,10 +5,13 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -21,7 +24,7 @@ import java.util.ArrayList;
 /**
  * Created by jason on 6/26/15.
  */
-public class GroupFragment extends Fragment {
+public class GroupFragment extends Fragment implements View.OnClickListener {
 
     private String playId;
     private boolean leader;
@@ -49,6 +52,10 @@ public class GroupFragment extends Fragment {
         }
         Log.wtf("Intent Extras", playId);
         if (leader) {
+            ControlBarFragment controlBarFragment = (ControlBarFragment) mainActivity.getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG");
+            if (controlBarFragment != null) {
+                controlBarFragment.ready();
+            }
             //((TextView) findViewById(R.id.syncRoom)).setText("Sync Room:" + playId);
 //            AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(MainActivity.CLIENT_ID,
 //                    AuthenticationResponse.Type.TOKEN, MainActivity.REDIRECT_URI);
@@ -75,6 +82,8 @@ public class GroupFragment extends Fragment {
         this.view = view;
         BackendRequest be = new BackendRequest("GET", mainActivity);
         BackendRequest.refreshGroupQueue(be);
+
+        view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
         return view;
     }
 
@@ -100,6 +109,7 @@ public class GroupFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mainActivity.mPlayer.pause();
         isDestroyed = true;
     }
 
@@ -110,7 +120,7 @@ public class GroupFragment extends Fragment {
         //String queue_json = pref.getString("group_current_queue_json", "");
         ArrayList<SpotifySong> playqueue = mainActivity.playQueue;
 
-        Log.d("Play","PlayQueueList: "+playqueue);
+        Log.d("Play", "PlayQueueList: " + playqueue);
 
         if (playqueue.size() > 0) {
             //JSONObject json = new JSONObject(queue_json);
@@ -120,7 +130,7 @@ public class GroupFragment extends Fragment {
             songListArr = new ArrayList<>();
             //boolean firstSong = false;
             //if(mainActivity.mPlayer.)
-            mainActivity.playQueue = new ArrayList<>();
+            //playqueue.clear();
             for (int i = 0; i < playqueue.size(); i++) {
                 //JSONObject curObj = .getJSONObject(i);
                 SpotifySong curSong = playqueue.get(i);
@@ -155,7 +165,19 @@ public class GroupFragment extends Fragment {
             tv.setTextColor(Color.BLACK);
             songList.addView(tv);
         }
-        Log.d("Play","PlayQueueList End: "+playqueue);
+        Log.d("Play", "PlayQueueList End: " + playqueue);
 
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v == view.findViewById(R.id.groupAddSongButton)) {
+            FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            if (groupFragment != null && groupFragment.isVisible()) {
+                fragmentTransaction.detach(groupFragment).add(R.id.container, new SongSearchFragment(), "SEARCH_FRAG").commit();
+            }
+        }
     }
 }

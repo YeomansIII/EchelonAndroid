@@ -15,23 +15,16 @@
         <FrameLayout
             android:id="@+id/container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="70dp" />
+            android:layout_height="match_parent" />
 
-        <FrameLayout
-            android:id="@+id/control_bar_container"
+        <fragment
+            android:id="@+id/control_bar"
+            android:name="io.yeomans.groupqueue.ControlBarFragment"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
+            android:layout_height="80dp"
             android:layout_gravity="bottom"
-            android:background="@android:color/darker_gray">
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:id="@+id/controlPlayButton"
-                android:layout_gravity="center"
-                android:background="@android:drawable/ic_media_play" />
-        </FrameLayout>
+            android:tag="CONTROL_FRAG"
+            tools:layout="@layout/control_bar_fragment" />
 
     </FrameLayout>
 
