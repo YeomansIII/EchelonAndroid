@@ -48,10 +48,10 @@ import java.util.List;
 public class BackendRequest {
 
     //PROD
-    //public static final String BASE_URL = "https://api.echelonapp.io/";
+    public static final String BASE_URL = "https://api.echelonapp.io/";
 
     //DEV
-    public static final String BASE_URL = "http://192.168.1.8:8000/";
+    //public static final String BASE_URL = "http://192.168.1.8:8000/";
 
     private String url;
     private String method;
