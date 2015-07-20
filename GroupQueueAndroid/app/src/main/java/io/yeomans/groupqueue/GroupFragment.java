@@ -83,7 +83,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         BackendRequest be = new BackendRequest("GET", mainActivity);
         BackendRequest.refreshGroupQueue(be);
 
-        view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
+        //view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
         return view;
     }
 
@@ -110,6 +110,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     public void onDestroy() {
         super.onDestroy();
         mainActivity.mPlayer.pause();
+        mainActivity.mPlayerCherry = true;
         isDestroyed = true;
     }
 
@@ -171,13 +172,13 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        if (v == view.findViewById(R.id.groupAddSongButton)) {
-            FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
-            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            if (groupFragment != null && groupFragment.isVisible()) {
-                fragmentTransaction.detach(groupFragment).add(R.id.container, new SongSearchFragment(), "SEARCH_FRAG").commit();
-            }
-        }
+//        if (v == view.findViewById(R.id.groupAddSongButton)) {
+//            FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+//            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+//            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//            if (groupFragment != null && groupFragment.isVisible()) {
+//                fragmentTransaction.detach(groupFragment).add(R.id.container, new SongSearchFragment(), "SEARCH_FRAG").commit();
+//            }
+//        }
     }
 }
