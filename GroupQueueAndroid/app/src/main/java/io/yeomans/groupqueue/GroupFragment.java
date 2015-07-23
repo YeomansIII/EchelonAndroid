@@ -80,8 +80,8 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         ((TextView) view.findViewById(R.id.groupIdText)).setText(groupSettings.getString("group_owner_username", "error"));
 
         this.view = view;
-        BackendRequest be = new BackendRequest("GET", mainActivity);
-        BackendRequest.refreshGroupQueue(be);
+//        BackendRequest be = new BackendRequest("GET", mainActivity);
+//        BackendRequest.refreshGroupQueue(be);
 
         //view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
         return view;
@@ -104,6 +104,15 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDetach() {
         super.onDetach();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        BackendRequest be = new BackendRequest("GET", mainActivity);
+        BackendRequest.refreshGroupQueue(be);
+        //Log.d("Group","Group onResume()");
+        //refreshQueueList();
     }
 
     @Override

@@ -76,7 +76,6 @@ public class MainActivity extends ActionBarActivity
     public ArrayList<SpotifySong> playQueue;
     private OnPlayerControlCallback mPlayerControlCallback;
 
-
     //GCM
     public static final String EXTRA_MESSAGE = "message";
     public static final String PROPERTY_REG_ID = "listener_gcm_id";
@@ -361,6 +360,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onResume() {
         super.onResume();
+        Log.d("Main", "Activity onResume()");
         context.registerReceiver(actionGcmReceiver, new IntentFilter("gcm_intent"));
     }
 

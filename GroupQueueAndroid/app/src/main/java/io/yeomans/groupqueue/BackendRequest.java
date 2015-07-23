@@ -3,7 +3,6 @@ package io.yeomans.groupqueue;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,10 +11,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -40,7 +35,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by jason on 6/30/15.
@@ -166,7 +160,6 @@ public class BackendRequest {
                         BackendRequest be = params[0];
                         HttpClient client = new DefaultHttpClient();
                         HttpPost post = new HttpPost(BASE_URL + be.getUrl());
-                        Log.d("Login", "" + be.getParamaters().toString());
                         post.setEntity(new UrlEncodedFormEntity(be.getParamaters()));
                         HttpResponse responsePost = client.execute(post);
                         HttpEntity resEntityPost = responsePost.getEntity();
@@ -222,13 +215,11 @@ public class BackendRequest {
 
                 @Override
                 protected void onPostExecute(String msg) {
-                    Log.d("Login", msg);
                     if (msg.contains("non_field_errors")) {
                         TextView loginErrorText = (TextView) activity.findViewById(R.id.loginErrorText);
                         try {
                             JSONObject json = new JSONObject(msg);
                             String loginError = json.getJSONArray("non_field_errors").getString(0);
-                            Log.d("Login", "Error: " + loginError);
                             loginErrorText.setText(loginError);
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -288,7 +279,6 @@ public class BackendRequest {
 
                 @Override
                 protected void onPostExecute(String msg) {
-                    Log.d("Create Account", msg);
                     if (msg.contains("account_created")) {
                         be2.setUrl("api-token-auth/");
                         BackendRequest.login(be2);
@@ -329,7 +319,6 @@ public class BackendRequest {
 
                 @Override
                 protected void onPostExecute(String msg) {
-                    Log.d("Group", "" + msg);
                     Activity activity = be2.getMainActivity();
                     if (msg.contains("join_errors")) {
                         String joinError = "Unknown error occurred";
@@ -460,8 +449,6 @@ public class BackendRequest {
 
                 @Override
                 protected void onPostExecute(String msg) {
-                    Log.d("RefreshGroupQueue", "" + msg);
-
                     FragmentManager fragmentManager = activity.getSupportFragmentManager();
                     GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                     if (groupFragment != null && groupFragment.isVisible()) {
@@ -501,7 +488,6 @@ public class BackendRequest {
 
                 @Override
                 protected void onPostExecute(String msg) {
-                    Log.d("QueueSong", msg);
                     FragmentManager fragmentManager = activity.getSupportFragmentManager();
                     SongSearchFragment songSearchFragment = (SongSearchFragment) fragmentManager.findFragmentByTag("SEARCH_FRAG");
                     GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
@@ -552,7 +538,6 @@ public class BackendRequest {
 
                 @Override
                 protected void onPostExecute(String msg) {
-                    Log.d("QueueSong", msg);
                 }
             }.execute(be, null, null);
         }
@@ -586,7 +571,6 @@ public class BackendRequest {
 
                 @Override
                 protected void onPostExecute(String msg) {
-                    Log.d("ResetGroup", "" + msg);
                     FragmentManager fragmentManager = activity.getSupportFragmentManager();
                     GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

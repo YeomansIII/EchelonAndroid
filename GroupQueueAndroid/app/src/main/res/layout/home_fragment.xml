@@ -10,40 +10,51 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/homeButtonsLayout"
-        android:visibility="visible">
+        android:visibility="visible"
+        android:gravity="center">
 
-        <Button
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/large_logo" />
+
+        <com.gc.materialdesign.views.ButtonFlat
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Create A Group"
             android:id="@+id/createGroupButton"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:layout_alignParentStart="true"
+            android:padding="15dp" />
 
-        <Button
+        <com.gc.materialdesign.views.ButtonFlat
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Join A Group"
             android:id="@+id/joinGroupButton"
             android:layout_below="@+id/createGroupButton"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:layout_alignParentStart="true"
+            android:padding="15dp" />
 
-        <Button
+        <com.gc.materialdesign.views.ButtonFlat
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Logout"
             android:id="@+id/logoutButton"
             android:layout_below="@+id/joinGroupButton"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:layout_alignParentStart="true"
+            android:padding="15dp" />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Spotify Login"
-            android:id="@+id/spotifyLoginButton" />
+        <!--<Button-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="Spotify Login"-->
+            <!--android:id="@+id/spotifyLoginButton" />-->
     </LinearLayout>
 
     <LinearLayout

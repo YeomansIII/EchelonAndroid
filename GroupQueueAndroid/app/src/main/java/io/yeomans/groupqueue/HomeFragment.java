@@ -28,7 +28,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mainActivity = (MainActivity)getActivity();
+        mainActivity = (MainActivity) getActivity();
     }
 
     @Override
@@ -40,7 +40,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         view.findViewById(R.id.joinGroupButton).setOnClickListener(this);
         view.findViewById(R.id.joinGroupIdButton).setOnClickListener(this);
         view.findViewById(R.id.logoutButton).setOnClickListener(this);
-        view.findViewById(R.id.spotifyLoginButton).setOnClickListener(this);
+        //view.findViewById(R.id.spotifyLoginButton).setOnClickListener(this);
 
         this.view = view;
         return view;
@@ -94,8 +94,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        } else if (v == view.findViewById(R.id.spotifyLoginButton)) {
-            mainActivity.authenticateSpotify();
         }
+//        } else if (v == view.findViewById(R.id.spotifyLoginButton)) {
+//            mainActivity.authenticateSpotify();
+//        }
     }
 }
