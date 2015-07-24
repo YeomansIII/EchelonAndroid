@@ -500,9 +500,8 @@ public class BackendRequest {
                                 Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                     }
-
                     Log.d("QueueSong", "Song Queue Complete");
-                    fragmentTransaction.remove(songSearchFragment).attach(groupFragment).addToBackStack(null).commit();
+                    fragmentTransaction.replace(R.id.container, groupFragment).commit();
                     //}
                 }
             }.execute(be, null, null);

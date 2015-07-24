@@ -1,92 +1,101 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/large_logo" />
 
     <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:id="@+id/homeButtonsLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
         android:visibility="visible"
-        android:gravity="center">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/imageView"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/large_logo" />
+        android:layout_below="@+id/imageView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp">
 
         <com.gc.materialdesign.views.ButtonFlat
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Create A Group"
             android:id="@+id/createGroupButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:padding="15dp" />
+            android:padding="15dp"
+            android:text="Create A Group" />
 
         <com.gc.materialdesign.views.ButtonFlat
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Join A Group"
             android:id="@+id/joinGroupButton"
-            android:layout_below="@+id/createGroupButton"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:padding="15dp" />
-
-        <com.gc.materialdesign.views.ButtonFlat
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Logout"
-            android:id="@+id/logoutButton"
-            android:layout_below="@+id/joinGroupButton"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:padding="15dp" />
+            android:layout_below="@+id/createGroupButton"
+            android:padding="15dp"
+            android:text="Join A Group" />
+
+        <com.gc.materialdesign.views.ButtonFlat
+            android:id="@+id/logoutButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/joinGroupButton"
+            android:padding="15dp"
+            android:text="Logout" />
 
         <!--<Button-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="Spotify Login"-->
-            <!--android:id="@+id/spotifyLoginButton" />-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="Spotify Login"-->
+        <!--android:id="@+id/spotifyLoginButton" />-->
     </LinearLayout>
 
     <LinearLayout
-        android:orientation="vertical"
+        android:id="@+id/joinGroupIdLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
-        android:id="@+id/joinGroupIdLayout">
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <TextView
+            android:id="@+id/joinGroupIdText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="Group ID"
-            android:id="@+id/joinGroupIdText" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <EditText
+            android:id="@+id/joinGroupIdEdit"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/joinGroupIdEdit" />
+            android:layout_height="wrap_content" />
 
         <TextView
+            android:id="@+id/joinGroupIdError"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/joinGroupIdError"
             android:textColor="@color/full_red" />
 
         <Button
+            android:id="@+id/joinGroupIdButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Join"
-            android:id="@+id/joinGroupIdButton" />
+            android:text="Join" />
     </LinearLayout>
 
 </RelativeLayout>

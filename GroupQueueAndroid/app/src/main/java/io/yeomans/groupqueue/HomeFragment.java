@@ -2,10 +2,15 @@ package io.yeomans.groupqueue;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,12 +28,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     private View view;
     private MainActivity mainActivity;
+    private SharedPreferences mainPref;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mainActivity = (MainActivity) getActivity();
+        mainPref = mainActivity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
     }
 
     @Override
@@ -47,6 +54,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        Drawable colorDrawable = new ColorDrawable(Color.TRANSPARENT);
+        ActionBar actionBar = ((ActionBarActivity) activity).getSupportActionBar();
+        actionBar.setBackgroundDrawable(colorDrawable);
+        actionBar.setTitle("");
+    }
+
+    @Override
     public void onClick(View v) {
         if (v == view.findViewById(R.id.createGroupButton)) {
             boolean leader = true;
@@ -54,8 +70,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
             GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
             if (groupFragment == null || groupFragment.isDestroyed) {
-                BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/activate-my-group/", (MainActivity) getActivity());
-                BackendRequest.activateJoinGroup(be);
+                if (mainPref.getBoolean("SPOTIFY_AUTHENTICATED", false)) {
+                    BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/activate-my-group/", (MainActivity) getActivity());
+                    BackendRequest.activateJoinGroup(be);
+                } else {
+                    Toast.makeText(getActivity().getApplicationContext(), "Please login to your Spotify Premium account under settings", Toast.LENGTH_LONG).show();
+                }
             } else {
                 Toast.makeText(getActivity().getApplicationContext(), "You are already in a group", Toast.LENGTH_SHORT).show();
             }

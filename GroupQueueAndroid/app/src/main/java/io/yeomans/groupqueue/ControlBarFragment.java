@@ -83,8 +83,7 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             if (groupFragment != null && groupFragment.isVisible()) {
                 Log.d("Control", "add song 2");
-                fragmentTransaction.detach(groupFragment).add(R.id.container, new SongSearchFragment(), "SEARCH_FRAG").commit();
-
+                fragmentTransaction.replace(R.id.container, new SongSearchFragment(), "SEARCH_FRAG").addToBackStack(null).commit();
             }
         }
     }

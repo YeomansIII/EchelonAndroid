@@ -29,10 +29,12 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     private String playId;
     private boolean leader;
     public boolean isDestroyed;
+    private boolean shouldExecuteOnResume;
 
     private View view;
     private ArrayList<RelativeLayout> songListArr;
     private MainActivity mainActivity;
+    private ControlBarFragment controlBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
 
         mainActivity = (MainActivity) getActivity();
         isDestroyed = false;
+        shouldExecuteOnResume = false;
 
         playId = "";
         Bundle startingIntentBundle = this.getArguments();
@@ -51,10 +54,10 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
             Log.wtf("Test", "leader: " + leader);
         }
         Log.wtf("Intent Extras", playId);
+        controlBar = (ControlBarFragment) mainActivity.getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG");
         if (leader) {
-            ControlBarFragment controlBarFragment = (ControlBarFragment) mainActivity.getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG");
-            if (controlBarFragment != null) {
-                controlBarFragment.ready();
+            if (controlBar != null) {
+                controlBar.ready();
             }
             //((TextView) findViewById(R.id.syncRoom)).setText("Sync Room:" + playId);
 //            AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(MainActivity.CLIENT_ID,
@@ -84,6 +87,8 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
 //        BackendRequest.refreshGroupQueue(be);
 
         //view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
+        controlBar.getView().findViewById(R.id.groupAddSongButton).setVisibility(View.VISIBLE);
+
         return view;
     }
 
@@ -97,7 +102,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         if (view != null) {
-            // refreshQueueFromPref();
+
         }
     }
 
@@ -109,17 +114,29 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
-        BackendRequest be = new BackendRequest("GET", mainActivity);
-        BackendRequest.refreshGroupQueue(be);
+        //if(shouldExecuteOnResume) {
+            BackendRequest be = new BackendRequest("GET", mainActivity);
+            BackendRequest.refreshGroupQueue(be);
+        //} else {
+        //    shouldExecuteOnResume = true;
+        //}
         //Log.d("Group","Group onResume()");
         //refreshQueueList();
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        controlBar.getView().findViewById(R.id.groupAddSongButton).setVisibility(View.GONE);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
-        mainActivity.mPlayer.pause();
-        mainActivity.mPlayerCherry = true;
+        if (mainActivity.mPlayer != null) {
+            mainActivity.mPlayer.pause();
+            mainActivity.mPlayerCherry = true;
+        }
         isDestroyed = true;
     }
 

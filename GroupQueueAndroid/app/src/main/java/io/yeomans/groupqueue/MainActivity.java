@@ -67,6 +67,8 @@ public class MainActivity extends ActionBarActivity
     public static final String REDIRECT_URI = "groupqueue://callback";
     public static final int REQUEST_CODE = 9001;
 
+    public boolean spotifyAuthenticated;
+
     public Player mPlayer;
     public boolean mPlayerPlaying;
     public boolean mPlayerCherry;
@@ -141,6 +143,8 @@ public class MainActivity extends ActionBarActivity
 
         if (!loggedIn) {
             setContentViewLogin();
+        } else if (pref.getBoolean("SPOTIFY_AUTHENTICATED", false)) {
+            authenticateSpotify();
         }
 
         setOnPlayerControlCallback(((OnPlayerControlCallback) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")));
@@ -174,11 +178,7 @@ public class MainActivity extends ActionBarActivity
     public void onNavigationDrawerItemSelected(int position) {
         // update the group content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
-        GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        if (groupFragment != null && groupFragment.isVisible()) {
-            fragmentTransaction.detach(groupFragment);
-        }
         switch (position) {
             case HOME_POS:
                 fragmentTransaction
@@ -186,6 +186,7 @@ public class MainActivity extends ActionBarActivity
                         .commit();
                 break;
             case GROUP_POS:
+                GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                 if (groupFragment != null && !groupFragment.isVisible()) {
                     List<Fragment> listFrag = fragmentManager.getFragments();
                     Fragment currentFrag = null;
@@ -198,7 +199,7 @@ public class MainActivity extends ActionBarActivity
                         fragmentTransaction.remove(currentFrag);
                     }
                     fragmentTransaction.addToBackStack(null);
-                    fragmentTransaction.attach(groupFragment).commit();
+                    fragmentTransaction.add(R.id.container, groupFragment).commit();
                 } else if (groupFragment == null) {
                     Toast.makeText(getApplicationContext(), "Please create or join a group first", Toast.LENGTH_SHORT).show();
 //                    fragmentManager.beginTransaction()
@@ -207,6 +208,7 @@ public class MainActivity extends ActionBarActivity
                 }
                 break;
             case SETTINGS_POS:
+                fragmentTransaction.replace(R.id.container, new SettingsFragment(), "SETTINGS_FRAG").commit();
                 break;
         }
 //        fragmentManager.beginTransaction()
@@ -289,12 +291,14 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onLoggedIn() {
-
+        spotifyAuthenticated = true;
+        pref.edit().putBoolean("SPOTIFY_AUTHENTICATED", true).apply();
     }
 
     @Override
     public void onLoggedOut() {
-
+        spotifyAuthenticated = false;
+        pref.edit().putBoolean("SPOTIFY_AUTHENTICATED", false).apply();
     }
 
     @Override
@@ -328,7 +332,7 @@ public class MainActivity extends ActionBarActivity
             }
             backStack.add(old);
             playQueue.remove(0);
-            if(playQueue.size()>0) {
+            if (playQueue.size() > 0) {
                 mPlayer.play(playQueue.get(0).getUri());
             } else {
                 mPlayerCherry = true;
@@ -352,7 +356,7 @@ public class MainActivity extends ActionBarActivity
         Log.d("Play", "PlayQueue: " + playQueue);
         if (playQueue.size() > 0) {
             mPlayer.play(playQueue.get(0).getUri());
-            mPlayerCherry=false;
+            mPlayerCherry = false;
         }
     }
 
@@ -545,7 +549,7 @@ public class MainActivity extends ActionBarActivity
     }
 
     public boolean onPauseControlSelected() {
-        if(mPlayerPlaying) {
+        if (mPlayerPlaying) {
             mPlayer.pause();
             return true;
         }
@@ -554,6 +558,7 @@ public class MainActivity extends ActionBarActivity
 
     public interface OnPlayerControlCallback {
         void onPlayerPlay();
+
         void onPlayerPause();
     }
 
