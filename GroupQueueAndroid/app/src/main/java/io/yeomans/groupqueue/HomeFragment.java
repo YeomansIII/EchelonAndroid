@@ -1,6 +1,7 @@
 package io.yeomans.groupqueue;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -15,6 +16,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,7 +61,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         Drawable colorDrawable = new ColorDrawable(Color.TRANSPARENT);
         ActionBar actionBar = ((ActionBarActivity) activity).getSupportActionBar();
         actionBar.setBackgroundDrawable(colorDrawable);
-        actionBar.setTitle("");
+        actionBar.setDisplayShowTitleEnabled(false);
     }
 
     @Override
@@ -84,6 +86,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
             if (groupFragment == null) {
                 Log.d("Button", "Join Group Button");
+                getActivity().findViewById(R.id.homeLogoImage).setVisibility(View.GONE);
                 getActivity().findViewById(R.id.homeButtonsLayout).setVisibility(View.GONE);
                 getActivity().findViewById(R.id.joinGroupIdLayout).setVisibility(View.VISIBLE);
             } else {

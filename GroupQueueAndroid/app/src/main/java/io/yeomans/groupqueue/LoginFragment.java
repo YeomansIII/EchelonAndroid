@@ -1,11 +1,13 @@
 package io.yeomans.groupqueue;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -40,6 +42,17 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
         this.view = view;
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        View view2 = getActivity().getCurrentFocus();
+        if (view2 != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                    Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     @Override
@@ -98,7 +111,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 ((TextView) view.findViewById(R.id.createAccountErrorText)).setText("Make sure all information is correct and try again");
             } else {
                 //json.put("user", userArrayJson);
-                Log.d("CreateAccount",json.toString());
+                Log.d("CreateAccount", json.toString());
                 BackendRequest be = new BackendRequest("POST", "apiv1/create-account/", json.toString(), (MainActivity) getActivity());
                 be.setParamaters(loginParamList);
                 BackendRequest.createAccount(be);

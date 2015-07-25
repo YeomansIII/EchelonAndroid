@@ -57,7 +57,10 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
         Log.d("Control", "set callback");
     }
 
-    public void ready() {
+    public void ready(boolean isLeader) {
+        if(!isLeader) {
+            getView().findViewById(R.id.controlPlayButton).setVisibility(View.GONE);
+        }
         getView().setVisibility(View.VISIBLE);
     }
 

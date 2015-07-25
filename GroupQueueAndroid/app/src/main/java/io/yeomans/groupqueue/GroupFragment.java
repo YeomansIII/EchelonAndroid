@@ -57,17 +57,13 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         controlBar = (ControlBarFragment) mainActivity.getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG");
         if (leader) {
             if (controlBar != null) {
-                controlBar.ready();
+                controlBar.ready(true);
             }
-            //((TextView) findViewById(R.id.syncRoom)).setText("Sync Room:" + playId);
-//            AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(MainActivity.CLIENT_ID,
-//                    AuthenticationResponse.Type.TOKEN, MainActivity.REDIRECT_URI);
-//            builder.setScopes(new String[]{"user-read-private", "streaming"});
-//            AuthenticationRequest request = builder.build();
-//            AuthenticationClient.openLoginActivity(getActivity(), MainActivity.REQUEST_CODE, request);
-            //mainActivity.authenticateSpotify();
         } else {
             Log.d("Group", "Not leader");
+            if (controlBar != null) {
+                controlBar.ready(false);
+            }
         }
     }
 
@@ -115,8 +111,8 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     public void onResume() {
         super.onResume();
         //if(shouldExecuteOnResume) {
-            BackendRequest be = new BackendRequest("GET", mainActivity);
-            BackendRequest.refreshGroupQueue(be);
+        BackendRequest be = new BackendRequest("GET", mainActivity);
+        BackendRequest.refreshGroupQueue(be);
         //} else {
         //    shouldExecuteOnResume = true;
         //}
