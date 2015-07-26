@@ -173,7 +173,7 @@ public class BackendRequest {
                                 Log.d("login", "Token: " + token);
                                 SharedPreferences settings = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
                                 SharedPreferences.Editor editor = settings.edit();
-                                editor.putString("token", token);
+                                editor.putString(MainActivity.PREF_ECHELON_API_TOKEN, token);
 
                                 HttpGet get = new HttpGet(BASE_URL + "apiv1/listeners/my-user-info/");
                                 get.addHeader("Authorization", "Token " + token);
@@ -193,12 +193,12 @@ public class BackendRequest {
                                 put.setEntity(se);
                                 HttpResponse responsePut = client.execute(put);
 
-                                editor.putInt("listener_pk", json.getInt("pk"));
-                                editor.putString("listener_owner_of", json.getString("owner_of"));
+                                editor.putInt(MainActivity.PREF_LISTENER_PK, json.getInt("pk"));
+                                editor.putString(MainActivity.PREF_LISTENER_OWNER_OF, json.getString("owner_of"));
                                 JSONObject jsonUser = json.getJSONObject("user");
-                                editor.putInt("user_pk", jsonUser.getInt("pk"));
-                                editor.putString("listener_username", jsonUser.getString("username"));
-                                //editor.putString("listener_email", jsonUser.getString("email"));
+                                editor.putInt(MainActivity.PREF_LISTENER_USER_PK, jsonUser.getInt("pk"));
+                                editor.putString(MainActivity.PREF_LISTENER_USERNAME, jsonUser.getString("username"));
+                                //editor.putString(MainActivity.PREF_LISTENER_EMAIL, jsonUser.getString("email"));
                                 editor.commit();
 
                                 return response;
@@ -228,7 +228,7 @@ public class BackendRequest {
                         //loginErrorText.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
                     } else if (msg.contains("token")) {
                         SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
-                        pref.edit().putBoolean("logged_in", true).commit();
+                        pref.edit().putBoolean(MainActivity.PREF_LISTENER_LOGGED_IN, true).commit();
 
                         if (activity.checkPlayServices()) {
                             activity.gcm = GoogleCloudMessaging.getInstance(activity);
@@ -299,7 +299,7 @@ public class BackendRequest {
                         HttpClient client = new DefaultHttpClient();
                         HttpPut put = new HttpPut(BASE_URL + be.getUrl());
                         SharedPreferences settings = be.getMainActivity().getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
-                        String token = settings.getString("token", null);
+                        String token = settings.getString(MainActivity.PREF_ECHELON_API_TOKEN, null);
                         put.addHeader("Authorization", "Token " + token);
                         if (be.getJsonEntity() != null) {
                             put.setEntity(new StringEntity(be.getJsonEntity()));
@@ -334,11 +334,11 @@ public class BackendRequest {
                             json = new JSONObject(msg);
                             SharedPreferences groupSettings = activity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
                             SharedPreferences.Editor editor = groupSettings.edit();
-                            editor.putInt("group_pk", json.getInt("pk"));
+                            editor.putInt(MainActivity.PREF_GROUP_PK, json.getInt("pk"));
                             JSONObject ownerUserJson = json.getJSONObject("owner").getJSONObject("user");
                             String ownerUsername = ownerUserJson.getString("username");
-                            editor.putString("group_owner_pk", ownerUsername);
-                            editor.putString("group_owner_username", ownerUsername);
+                            editor.putInt(MainActivity.PREF_GROUP_OWNER_PK, ownerUserJson.getInt("pk"));
+                            editor.putString(MainActivity.PREF_GROUP_OWNER_USERNAME, ownerUsername);
                             editor.commit();
                             Log.d("Group", "Group: " + ownerUsername);
                             Boolean leader = true;
@@ -376,7 +376,7 @@ public class BackendRequest {
                         SharedPreferences settings = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
                         SharedPreferences settings2 = activity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
                         HttpGet get = new HttpGet(BASE_URL + "apiv1/queuegroups/" + settings2.getInt("group_pk", -1));
-                        String token = settings.getString("token", null);
+                        String token = settings.getString(MainActivity.PREF_ECHELON_API_TOKEN, null);
                         get.addHeader("Authorization", "Token " + token);
                         Log.d("RefreshGroupQueue", get.getURI().toString());
                         HttpResponse responseGet = client.execute(get);
@@ -470,7 +470,7 @@ public class BackendRequest {
                         HttpClient client = new DefaultHttpClient();
                         HttpPut put = new HttpPut(BASE_URL + be.getUrl());
                         SharedPreferences settings = be.getMainActivity().getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
-                        String token = settings.getString("token", null);
+                        String token = settings.getString(MainActivity.PREF_ECHELON_API_TOKEN, null);
                         put.addHeader("Authorization", "Token " + token);
                         put.setEntity(new StringEntity(be.getJsonEntity()));
                         Log.d("QueueSong", put.getURI().toString());
@@ -519,7 +519,7 @@ public class BackendRequest {
                         HttpClient client = new DefaultHttpClient();
                         HttpPut put = new HttpPut(BASE_URL + be.getUrl());
                         SharedPreferences settings = be.getMainActivity().getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
-                        String token = settings.getString("token", null);
+                        String token = settings.getString(MainActivity.PREF_ECHELON_API_TOKEN, null);
                         put.addHeader("Authorization", "Token " + token);
                         put.setEntity(new StringEntity(be.getJsonEntity()));
                         Log.d("QueueSong", put.getURI().toString());
@@ -553,7 +553,7 @@ public class BackendRequest {
                         HttpClient client = new DefaultHttpClient();
                         HttpGet get = new HttpGet(BASE_URL + be.getUrl());
                         SharedPreferences settings = be.getMainActivity().getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
-                        String token = settings.getString("token", null);
+                        String token = settings.getString(MainActivity.PREF_ECHELON_API_TOKEN, null);
                         get.addHeader("Authorization", "Token " + token);
                         Log.d("Group", get.getURI().toString());
                         HttpResponse responseGet = client.execute(get);

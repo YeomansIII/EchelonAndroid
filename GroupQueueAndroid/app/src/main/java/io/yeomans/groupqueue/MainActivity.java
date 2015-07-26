@@ -12,7 +12,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,13 +39,12 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.fabric.sdk.android.Fabric;
 
 
-public class MainActivity extends ActionBarActivity
+public class MainActivity extends AppCompatActivity
         implements View.OnClickListener, NavigationDrawerFragment.NavigationDrawerCallbacks, PlayerNotificationCallback, ConnectionStateCallback {
 
     /**
@@ -55,6 +54,21 @@ public class MainActivity extends ActionBarActivity
 
     public static final String MAIN_PREFS_NAME = "basic_pref";
     public static final String GROUP_PREFS_NAME = "group_pref";
+
+    //USER PREF
+    public static final String PREF_ECHELON_API_TOKEN = "echelon_api_token";
+    public static final String PREF_LISTENER_LOGGED_IN = "listener_logged_in";
+    public static final String PREF_LISTENER_PK = "listener_pk";
+    public static final String PREF_LISTENER_OWNER_OF = "listener_owner_of";
+    public static final String PREF_LISTENER_USER_PK = "listener_user_pk";
+    public static final String PREF_LISTENER_USERNAME = "listener_username";
+    public static final String PREF_LISTENER_EMAIL = "listener_email";
+    public static final String PREF_LISTENER_GCM_ID = "listener_gcm_id";
+
+    //GROUP PREF
+    public static final String PREF_GROUP_PK = "group_pk";
+    public static final String PREF_GROUP_OWNER_PK = "group_owner_pk";
+    public static final String PREF_GROUP_OWNER_USERNAME = "group_owner_username";
 
 
     //POSITIONS
@@ -68,6 +82,7 @@ public class MainActivity extends ActionBarActivity
     public static final int REQUEST_CODE = 9001;
 
     public boolean spotifyAuthenticated;
+    public static final String PREF_SPOTIFY_AUTHENTICATED = "spotify_authenticated";
 
     public Player mPlayer;
     public boolean mPlayerPlaying;
@@ -122,9 +137,9 @@ public class MainActivity extends ActionBarActivity
         mainActivity = this;
 
         pref = getSharedPreferences(MAIN_PREFS_NAME, 0);
-        String token = pref.getString("token", null);
+        //String token = pref.getString(PREF_ECHELON_API_TOKEN, null);
 
-        loggedIn = pref.getBoolean("logged_in", false);
+        loggedIn = pref.getBoolean(PREF_LISTENER_LOGGED_IN, false);
 
         playQueue = new ArrayList<>();
         backStack = new ArrayList<>();
@@ -143,8 +158,21 @@ public class MainActivity extends ActionBarActivity
 
         if (!loggedIn) {
             setContentViewLogin();
-        } else if (pref.getBoolean("SPOTIFY_AUTHENTICATED", false)) {
-            authenticateSpotify();
+        } else {
+            if (pref.getBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false)) {
+                authenticateSpotify();
+            }
+            String usernameJoin = pref.getString(MainActivity.PREF_GROUP_OWNER_USERNAME, null);
+            if (usernameJoin != null) {
+                try {
+                    JSONObject json = new JSONObject("{}");
+                    json.put("username_join", usernameJoin);
+                    BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/join-group/", json.toString(), this);
+                    BackendRequest.activateJoinGroup(be);
+                } catch (JSONException je) {
+                    je.printStackTrace();
+                }
+            }
         }
 
         setOnPlayerControlCallback(((OnPlayerControlCallback) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")));
@@ -292,13 +320,13 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onLoggedIn() {
         spotifyAuthenticated = true;
-        pref.edit().putBoolean("SPOTIFY_AUTHENTICATED", true).apply();
+        pref.edit().putBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, true).apply();
     }
 
     @Override
     public void onLoggedOut() {
         spotifyAuthenticated = false;
-        pref.edit().putBoolean("SPOTIFY_AUTHENTICATED", false).apply();
+        pref.edit().putBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false).apply();
     }
 
     @Override
@@ -326,7 +354,7 @@ public class MainActivity extends ActionBarActivity
                 json.put("pk", old.getPk());
                 json.put("played", true);
                 BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
-                be.updateSong(be);
+                BackendRequest.updateSong(be);
             } catch (JSONException je) {
                 je.printStackTrace();
             }

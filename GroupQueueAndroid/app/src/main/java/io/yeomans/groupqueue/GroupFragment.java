@@ -76,7 +76,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         ///////
         SharedPreferences groupSettings = getActivity().getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
         ///////
-        ((TextView) view.findViewById(R.id.groupIdText)).setText(groupSettings.getString("group_owner_username", "error"));
+        ((TextView) view.findViewById(R.id.groupIdText)).setText(groupSettings.getString(MainActivity.PREF_GROUP_OWNER_USERNAME, "error"));
 
         this.view = view;
 //        BackendRequest be = new BackendRequest("GET", mainActivity);

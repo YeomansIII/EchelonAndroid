@@ -2,6 +2,7 @@ package io.yeomans.groupqueue;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -93,16 +94,14 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
 
     @Override
     public void onPlayerPlay() {
-//        CircleButton v = (CircleButton) getView().findViewById(R.id.controlPlayButton);
-//        v.setImageResource(android.R.drawable.ic_media_pause);
-        //v.setBackground(getResources().getDrawable(android.R.drawable.ic_media_pause));
+        FloatingActionButton v = (FloatingActionButton) getView().findViewById(R.id.controlPlayButton);
+        v.setImageDrawable(getView().getResources().getDrawable(R.drawable.ic_pause_white_48dp));
     }
 
     @Override
     public void onPlayerPause() {
-//        CircleButton v = (CircleButton) getView().findViewById(R.id.controlPlayButton);
-//        v.setImageResource(android.R.drawable.ic_media_play);
-        //v.setBackground(getResources().getDrawable(android.R.drawable.ic_media_play));
+        FloatingActionButton v = (FloatingActionButton) getView().findViewById(R.id.controlPlayButton);
+        v.setImageDrawable(getView().getResources().getDrawable(R.drawable.ic_play_arrow_white_48dp));
     }
 
     public interface OnMediaControlSelectedListener {

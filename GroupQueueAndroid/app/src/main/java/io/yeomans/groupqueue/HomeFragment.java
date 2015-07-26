@@ -1,7 +1,6 @@
 package io.yeomans.groupqueue;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -11,12 +10,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,7 +57,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         Drawable colorDrawable = new ColorDrawable(Color.TRANSPARENT);
-        ActionBar actionBar = ((ActionBarActivity) activity).getSupportActionBar();
+        ActionBar actionBar = ((AppCompatActivity) activity).getSupportActionBar();
         actionBar.setBackgroundDrawable(colorDrawable);
         actionBar.setDisplayShowTitleEnabled(false);
     }
@@ -72,7 +70,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
             GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
             if (groupFragment == null || groupFragment.isDestroyed) {
-                if (mainPref.getBoolean("SPOTIFY_AUTHENTICATED", false)) {
+                if (mainPref.getBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false)) {
                     BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/activate-my-group/", (MainActivity) getActivity());
                     BackendRequest.activateJoinGroup(be);
                 } else {
