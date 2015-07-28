@@ -7,6 +7,7 @@ Echelon is good for parties, listening to music in the car, and public use at re
 
 ## Technical Specs
 **Android min SDK:** 16
+
 **Android target SDK:** 21
 
 **Libraries:**
