@@ -7,14 +7,16 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -45,13 +47,14 @@ import io.fabric.sdk.android.Fabric;
 
 
 public class MainActivity extends AppCompatActivity
-        implements View.OnClickListener, NavigationDrawerFragment.NavigationDrawerCallbacks, PlayerNotificationCallback, ConnectionStateCallback {
+        implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener, PlayerNotificationCallback, ConnectionStateCallback {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
-    private NavigationDrawerFragment mNavigationDrawerFragment;
-
+    private Toolbar toolbar;
+    private NavigationView navigationView;
+    private DrawerLayout drawerLayout;
     public static final String MAIN_PREFS_NAME = "basic_pref";
     public static final String GROUP_PREFS_NAME = "group_pref";
 
@@ -69,12 +72,6 @@ public class MainActivity extends AppCompatActivity
     public static final String PREF_GROUP_PK = "group_pk";
     public static final String PREF_GROUP_OWNER_PK = "group_owner_pk";
     public static final String PREF_GROUP_OWNER_USERNAME = "group_owner_username";
-
-
-    //POSITIONS
-    public static final int HOME_POS = 0;
-    public static final int GROUP_POS = 1;
-    public static final int SETTINGS_POS = 2;
 
     //SPOTIFY
     public static final String CLIENT_ID = "8b81e3deddce42c4b0f2972e181b8a3a";
@@ -120,13 +117,6 @@ public class MainActivity extends AppCompatActivity
     Context context;
     MainActivity mainActivity;
 
-
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
-    private CharSequence mTitle;
-    //public Fragment groupFrag;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -144,8 +134,37 @@ public class MainActivity extends AppCompatActivity
         playQueue = new ArrayList<>();
         backStack = new ArrayList<>();
 
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         //setContentViewControl();
-        setContentViewNav();
+        //setContentViewNav();
+        navigationView = (NavigationView) findViewById(R.id.navigation_drawer);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // Initializing Drawer Layout and ActionBarToggle
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                // Code here will be triggered once the drawer closes as we dont want anything to happen so we leave this blank
+                super.onDrawerClosed(drawerView);
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                // Code here will be triggered once the drawer open as we dont want anything to happen so we leave this blank
+
+                super.onDrawerOpened(drawerView);
+            }
+        };
+
+        //Setting the actionbarToggle to drawer layout
+        drawerLayout.setDrawerListener(actionBarDrawerToggle);
+
+        //calling sync state is necessay or else your hamburger icon wont show up
+        actionBarDrawerToggle.syncState();
 
         // Check device for Play Services APK. If check succeeds, proceed with
         //  GCM registration.
@@ -172,6 +191,8 @@ public class MainActivity extends AppCompatActivity
                 } catch (JSONException je) {
                     je.printStackTrace();
                 }
+            } else {
+                setContentViewHome();
             }
         }
 
@@ -184,36 +205,40 @@ public class MainActivity extends AppCompatActivity
         ft.replace(R.id.container, newFragment).commit();
     }
 
-//    private void setContentViewControl() {
-//        ControlBarFragment controlFragment = new ControlBarFragment();
-//        controlFragment.mainActivity = this;
-//        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-//        ft.add(R.id.control_bar_container, controlFragment).commit();
-//    }
+    private void setContentViewHome() {
+        Fragment newFragment = new HomeFragment();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.container, newFragment).commit();
+    }
 
-    private void setContentViewNav() {
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
-
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
+    public boolean onLeaveGroupClick(MenuItem item) {
+        BackendRequest be = new BackendRequest("GET", "apiv1/queuegroups/reset-group/", mainActivity);
+        BackendRequest.resetGroup(be);
+        return true;
     }
 
     @Override
-    public void onNavigationDrawerItemSelected(int position) {
-        // update the group content by replacing fragments
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        //int id = item.getItemId();
+        Log.d("Nav", "onOptionsItemSelected");
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem menuItem) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        switch (position) {
-            case HOME_POS:
+        switch (menuItem.getItemId()) {
+            case R.id.drawer_home:
                 fragmentTransaction
                         .replace(R.id.container, new HomeFragment(), "HOME_FRAG")
                         .commit();
-                break;
-            case GROUP_POS:
+                return true;
+            case R.id.drawer_group:
                 GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                 if (groupFragment != null && !groupFragment.isVisible()) {
                     List<Fragment> listFrag = fragmentManager.getFragments();
@@ -234,58 +259,12 @@ public class MainActivity extends AppCompatActivity
 //                            .add(R.id.container, new GroupFragment(), "GROUP_FRAG")
 //                            .commit();
                 }
-                break;
-            case SETTINGS_POS:
+                return true;
+            case R.id.drawer_settings:
                 fragmentTransaction.replace(R.id.container, new SettingsFragment(), "SETTINGS_FRAG").commit();
-                break;
+                return true;
         }
-//        fragmentManager.beginTransaction()
-//                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-//                .commit();
-    }
-
-    public void restoreActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
-            //getMenuInflater().inflate(R.menu.group, menu);
-            restoreActionBar();
-            return true;
-        }
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    public boolean onLeaveGroupClick(MenuItem item) {
-        BackendRequest be = new BackendRequest("GET", "apiv1/queuegroups/reset-group/", mainActivity);
-        BackendRequest.resetGroup(be);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        } else if (mNavigationDrawerFragment.onOptionsItemSelected(item)) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        return false;
     }
 
     @Override

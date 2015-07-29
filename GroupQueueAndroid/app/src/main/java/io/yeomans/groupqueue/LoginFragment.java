@@ -2,6 +2,7 @@ package io.yeomans.groupqueue;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 public class LoginFragment extends Fragment implements View.OnClickListener {
 
     private View view;
+    TextInputLayout usernameWrapper, passwordWrapper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -36,8 +38,15 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.login_fragment,
                 container, false);
+
+        usernameWrapper = (TextInputLayout) view.findViewById(R.id.usernameEditWrapper);
+        passwordWrapper = (TextInputLayout) view.findViewById(R.id.passwordEditWrapper);
+
+        usernameWrapper.setHint("Username");
+        passwordWrapper.setHint("Password");
+
         view.findViewById(R.id.loginButton).setOnClickListener(this);
-        view.findViewById(R.id.createAccountButton).setOnClickListener(this);
+        //view.findViewById(R.id.createAccountButton).setOnClickListener(this);
         view.findViewById(R.id.createNewAccountButton).setOnClickListener(this);
 
         this.view = view;
@@ -65,59 +74,60 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
             //Log.wtf("PuttingIntExtra", ""+leader);
             //groupIntent.putExtra("extra_stuff", new String[]{""+leader, ""+leader});
             //startActivity(groupIntent);
-        } else if (v == getActivity().findViewById(R.id.createNewAccountButton)) {
-            Log.d("Button", "Create New Account Button");
-            view.findViewById(R.id.loginLayout).setVisibility(View.GONE);
-            v.setVisibility(View.GONE);
-            view.findViewById(R.id.createAccountLayout).setVisibility(View.VISIBLE);
-        } else if (v == getActivity().findViewById(R.id.createAccountButton)) {
-            Log.d("Button", "Create Account Button");
-            createAccount();
-
         }
+//        } else if (v == getActivity().findViewById(R.id.createNewAccountButton)) {
+//            Log.d("Button", "Create New Account Button");
+//            view.findViewById(R.id.loginLayout).setVisibility(View.GONE);
+//            v.setVisibility(View.GONE);
+//            view.findViewById(R.id.createAccountLayout).setVisibility(View.VISIBLE);
+//        } else if (v == getActivity().findViewById(R.id.createAccountButton)) {
+//            Log.d("Button", "Create Account Button");
+//            createAccount();
+//
+//        }
     }
 
     public void login() {
         ArrayList<NameValuePair> paramList = new ArrayList<NameValuePair>();
-        paramList.add(new BasicNameValuePair("username", ((EditText) view.findViewById(R.id.usernameEdit)).getText().toString()));
-        paramList.add(new BasicNameValuePair("password", ((EditText) view.findViewById(R.id.passwordEdit)).getText().toString()));
+        paramList.add(new BasicNameValuePair("username", ((TextInputLayout) view.findViewById(R.id.usernameEditWrapper)).getEditText().getText().toString()));
+        paramList.add(new BasicNameValuePair("password", ((TextInputLayout) view.findViewById(R.id.passwordEditWrapper)).getEditText().getText().toString()));
         BackendRequest be = new BackendRequest("api-token-auth/", paramList, (MainActivity) getActivity());
         BackendRequest.login(be);
     }
 
-    public void createAccount() {
-        try {
-            ArrayList<NameValuePair> loginParamList = new ArrayList<NameValuePair>();
-            JSONObject json = new JSONObject("{}");
-            //JSONObject userArrayJson = new JSONObject("{}");
-            String username = ((EditText) view.findViewById(R.id.createUsernameEdit)).getText().toString();
-            boolean fieldsExist = false;
-            if (!username.equals("")) {
-                json.put("username", username);
-                String password = ((EditText) view.findViewById(R.id.createPasswordEdit)).getText().toString();
-                String password2 = ((EditText) view.findViewById(R.id.createPassword2Edit)).getText().toString();
-                if (password.equals(password2) && !password.equals("")) {
-                    json.put("password", password);
-                    String email = ((EditText) view.findViewById(R.id.createEmailEdit)).getText().toString();
-                    if (!email.equals("") && email.contains("@") && email.contains(".")) {
-                        json.put("email", email);
-                        fieldsExist = true;
-                        loginParamList.add(new BasicNameValuePair("username", username));
-                        loginParamList.add(new BasicNameValuePair("password", password));
-                    }
-                }
-            }
-            if (!fieldsExist) {
-                ((TextView) view.findViewById(R.id.createAccountErrorText)).setText("Make sure all information is correct and try again");
-            } else {
-                //json.put("user", userArrayJson);
-                Log.d("CreateAccount", json.toString());
-                BackendRequest be = new BackendRequest("POST", "apiv1/create-account/", json.toString(), (MainActivity) getActivity());
-                be.setParamaters(loginParamList);
-                BackendRequest.createAccount(be);
-            }
-        } catch (JSONException je) {
-            je.printStackTrace();
-        }
-    }
+//    public void createAccount() {
+//        try {
+//            ArrayList<NameValuePair> loginParamList = new ArrayList<NameValuePair>();
+//            JSONObject json = new JSONObject("{}");
+//            //JSONObject userArrayJson = new JSONObject("{}");
+//            String username = ((EditText) view.findViewById(R.id.createUsernameEdit)).getText().toString();
+//            boolean fieldsExist = false;
+//            if (!username.equals("")) {
+//                json.put("username", username);
+//                String password = ((EditText) view.findViewById(R.id.createPasswordEdit)).getText().toString();
+//                String password2 = ((EditText) view.findViewById(R.id.createPassword2Edit)).getText().toString();
+//                if (password.equals(password2) && !password.equals("")) {
+//                    json.put("password", password);
+//                    String email = ((EditText) view.findViewById(R.id.createEmailEdit)).getText().toString();
+//                    if (!email.equals("") && email.contains("@") && email.contains(".")) {
+//                        json.put("email", email);
+//                        fieldsExist = true;
+//                        loginParamList.add(new BasicNameValuePair("username", username));
+//                        loginParamList.add(new BasicNameValuePair("password", password));
+//                    }
+//                }
+//            }
+//            if (!fieldsExist) {
+//                ((TextView) view.findViewById(R.id.createAccountErrorText)).setText("Make sure all information is correct and try again");
+//            } else {
+//                //json.put("user", userArrayJson);
+//                Log.d("CreateAccount", json.toString());
+//                BackendRequest be = new BackendRequest("POST", "apiv1/create-account/", json.toString(), (MainActivity) getActivity());
+//                be.setParamaters(loginParamList);
+//                BackendRequest.createAccount(be);
+//            }
+//        } catch (JSONException je) {
+//            je.printStackTrace();
+//        }
+//    }
 }

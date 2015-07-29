@@ -2,15 +2,10 @@ package io.yeomans.groupqueue;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,10 +51,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        Drawable colorDrawable = new ColorDrawable(Color.TRANSPARENT);
-        ActionBar actionBar = ((AppCompatActivity) activity).getSupportActionBar();
-        actionBar.setBackgroundDrawable(colorDrawable);
-        actionBar.setDisplayShowTitleEnabled(false);
+//        Drawable colorDrawable = new ColorDrawable(Color.TRANSPARENT);
+//        ActionBar actionBar = ((AppCompatActivity) activity).getSupportActionBar();
+//        actionBar.setBackgroundDrawable(colorDrawable);
+//        actionBar.setDisplayShowTitleEnabled(false);
     }
 
     @Override
