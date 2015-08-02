@@ -42,7 +42,7 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
         View view = inflater.inflate(R.layout.control_bar_fragment,
                 container, false);
 
-        view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
+       // view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
         view.findViewById(R.id.controlPlayButton).setOnClickListener(this);
 
         return view;
@@ -59,7 +59,7 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
     }
 
     public void ready(boolean isLeader) {
-        if(!isLeader) {
+        if (!isLeader) {
             getView().findViewById(R.id.controlPlayButton).setVisibility(View.GONE);
         }
         getView().setVisibility(View.VISIBLE);
@@ -80,28 +80,35 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
                     //playing = true;
                 }
             }
-        } else if (v == getView().findViewById(R.id.groupAddSongButton)) {
-            Log.d("Control", "add song 1");
-            FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
-            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            if (groupFragment != null && groupFragment.isVisible()) {
-                Log.d("Control", "add song 2");
-                fragmentTransaction.replace(R.id.container, new SongSearchFragment(), "SEARCH_FRAG").addToBackStack(null).commit();
-            }
         }
+//        else if (v == getView().findViewById(R.id.groupAddSongButton)) {
+//            Log.d("Control", "add song 1");
+//            FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+//            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+//            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//            if (groupFragment != null && groupFragment.isVisible()) {
+//                Log.d("Control", "add song 2");
+//                fragmentTransaction.replace(R.id.container, new SongSearchFragment(), "SEARCH_FRAG").addToBackStack(null).commit();
+//            }
+//        }
     }
 
     @Override
     public void onPlayerPlay() {
         FloatingActionButton v = (FloatingActionButton) getView().findViewById(R.id.controlPlayButton);
         v.setImageDrawable(getView().getResources().getDrawable(R.drawable.ic_pause_white_48dp));
+        if (mCallback != null) {
+            mCallback.onPlayControlSelected();
+        }
     }
 
     @Override
     public void onPlayerPause() {
         FloatingActionButton v = (FloatingActionButton) getView().findViewById(R.id.controlPlayButton);
         v.setImageDrawable(getView().getResources().getDrawable(R.drawable.ic_play_arrow_white_48dp));
+        if (mCallback != null) {
+            mCallback.onPauseControlSelected();
+        }
     }
 
     public interface OnMediaControlSelectedListener {

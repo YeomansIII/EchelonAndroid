@@ -2,6 +2,7 @@ package io.yeomans.groupqueue;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -43,6 +44,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         view.findViewById(R.id.joinGroupIdButton).setOnClickListener(this);
         view.findViewById(R.id.logoutButton).setOnClickListener(this);
         //view.findViewById(R.id.spotifyLoginButton).setOnClickListener(this);
+
+        mainActivity.toolbar.setBackgroundColor(Color.TRANSPARENT);
+        mainActivity.getSupportActionBar().setTitle("");
 
         this.view = view;
         return view;

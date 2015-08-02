@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="20dp">
 
     <LinearLayout
         android:id="@+id/loginLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true">
 
         <TextView
             android:id="@+id/loginText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="10dp"
-            android:text="Login"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:text="Login to Echelon"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_gravity="center" />
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/usernameEditWrapper"
@@ -50,104 +54,112 @@
             android:layout_height="wrap_content"
             android:textColor="@color/full_red" />
 
-        <Button
+        <io.yeomans.groupqueue.ButtonRectangle
             android:id="@+id/loginButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="Login" />
+
+        <io.yeomans.groupqueue.ButtonFlat
+            android:id="@+id/createNewAccountButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create New Account"
+            android:layout_below="@+id/loginLayout"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center_horizontal"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp"
+            android:gravity="center_vertical|center|center_horizontal"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" />
     </LinearLayout>
 
-    <!--<LinearLayout-->
-        <!--android:id="@+id/createAccountLayout"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:orientation="vertical"-->
-        <!--android:visibility="gone">-->
+    <LinearLayout
+        android:id="@+id/createAccountLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
 
-        <!--<TextView-->
-            <!--android:id="@+id/createAccountText"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:padding="10dp"-->
-            <!--android:text="Create Account"-->
-            <!--android:textAppearance="?android:attr/textAppearanceLarge" />-->
+        <TextView
+            android:id="@+id/createAccountText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="Create Account"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <!--<TextView-->
-            <!--android:id="@+id/createUsernameText"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="Username" />-->
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/createUsernameEditWrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <!--<EditText-->
-            <!--android:id="@+id/createUsernameEdit"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center_horizontal"-->
-            <!--android:inputType="textShortMessage"-->
-            <!--android:singleLine="true" />-->
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:hint="Username"
+                android:inputType="textShortMessage"
+                android:singleLine="true" />
+        </android.support.design.widget.TextInputLayout>
 
-        <!--<TextView-->
-            <!--android:id="@+id/createPasswordText"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="Password" />-->
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/createPasswordEditWrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <!--<EditText-->
-            <!--android:id="@+id/createPasswordEdit"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center_horizontal"-->
-            <!--android:ems="10"-->
-            <!--android:inputType="textPassword" />-->
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:ems="10"
+                android:hint="Password"
+                android:inputType="textPassword" />
+        </android.support.design.widget.TextInputLayout>
 
-        <!--<TextView-->
-            <!--android:id="@+id/createPassword2Text"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="Re-enter Password" />-->
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/createPassword2EditWrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <!--<EditText-->
-            <!--android:id="@+id/createPassword2Edit"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center_horizontal"-->
-            <!--android:ems="10"-->
-            <!--android:inputType="textPassword" />-->
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:ems="10"
+                android:hint="Re-enter Password"
+                android:inputType="textPassword" />
 
-        <!--<TextView-->
-            <!--android:id="@+id/createEmailText"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="Email" />-->
+        </android.support.design.widget.TextInputLayout>
 
-        <!--<EditText-->
-            <!--android:id="@+id/createEmailEdit"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center_horizontal"-->
-            <!--android:ems="10"-->
-            <!--android:inputType="textEmailAddress" />-->
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/createEmailEditWrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <!--<TextView-->
-            <!--android:id="@+id/createAccountErrorText"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:textColor="@color/full_red" />-->
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:ems="10"
+                android:hint="Email"
+                android:inputType="textEmailAddress" />
+        </android.support.design.widget.TextInputLayout>
 
-        <!--<Button-->
-            <!--android:id="@+id/createAccountButton"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center_horizontal"-->
-            <!--android:text="Create Account" />-->
-    <!--</LinearLayout>-->
+        <TextView
+            android:id="@+id/createAccountErrorText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/full_red" />
 
-    <Button
-        android:id="@+id/createNewAccountButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="Create New Account" />
+        <io.yeomans.groupqueue.ButtonRectangle
+            android:id="@+id/createAccountButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Create Account" />
+    </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>

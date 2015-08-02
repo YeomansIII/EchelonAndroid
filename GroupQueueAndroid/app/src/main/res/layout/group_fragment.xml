@@ -3,6 +3,7 @@
     xmlns:materialdesign="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/tools"
     android:background="#7dffffff">
 
     <ScrollView
@@ -40,5 +41,17 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@android:color/black"
         android:textSize="20pt" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/groupAddSongButton"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:src="@drawable/ic_add_white_36dp"
+        app:elevation="4dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp" />
 
 </RelativeLayout>

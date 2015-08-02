@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -55,15 +56,22 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         }
         Log.wtf("Intent Extras", playId);
         controlBar = (ControlBarFragment) mainActivity.getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG");
-        if (leader) {
-            if (controlBar != null) {
-                controlBar.ready(true);
+        if(controlBar != null) {
+            if (leader) {
+                    controlBar.ready(true);
+            } else {
+                Log.d("Group", "Not leader");
+                    controlBar.ready(false);
             }
-        } else {
-            Log.d("Group", "Not leader");
-            if (controlBar != null) {
-                controlBar.ready(false);
-            }
+//            ControlBarFragment controlBar = (ControlBarFragment) mainActivity.getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG");
+//            View cL = controlBar.getView().findViewById(R.id.controlCoordinatorLayout);
+//            Snackbar snackbar = Snackbar
+//                    .make(cL, "Had a snack at Snackbar", Snackbar.LENGTH_LONG);
+//            View snackbarView = snackbar.getView();
+//            snackbarView.setBackgroundColor(Color.DKGRAY);
+//            TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+//            textView.setTextColor(Color.YELLOW);
+//            snackbar.show();
         }
     }
 
@@ -78,12 +86,15 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         ///////
         ((TextView) view.findViewById(R.id.groupIdText)).setText(groupSettings.getString(MainActivity.PREF_GROUP_OWNER_USERNAME, "error"));
 
+        mainActivity.toolbar.setBackgroundColor(getResources().getColor(R.color.primaryColor));
+        mainActivity.getSupportActionBar().setTitle("Echelon");
+
         this.view = view;
 //        BackendRequest be = new BackendRequest("GET", mainActivity);
 //        BackendRequest.refreshGroupQueue(be);
 
         //view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
-        controlBar.getView().findViewById(R.id.groupAddSongButton).setVisibility(View.VISIBLE);
+        //controlBar.getView().findViewById(R.id.groupAddSongButton).setVisibility(View.VISIBLE);
 
         return view;
     }

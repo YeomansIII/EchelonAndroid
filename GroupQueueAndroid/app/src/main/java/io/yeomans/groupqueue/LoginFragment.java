@@ -17,6 +17,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -26,11 +27,15 @@ import java.util.ArrayList;
 public class LoginFragment extends Fragment implements View.OnClickListener {
 
     private View view;
+    private MainActivity mainActivity;
     TextInputLayout usernameWrapper, passwordWrapper;
+    private boolean creatingAccount;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mainActivity = (MainActivity) getActivity();
     }
 
     @Override
@@ -46,8 +51,11 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         passwordWrapper.setHint("Password");
 
         view.findViewById(R.id.loginButton).setOnClickListener(this);
-        //view.findViewById(R.id.createAccountButton).setOnClickListener(this);
+        view.findViewById(R.id.createAccountButton).setOnClickListener(this);
         view.findViewById(R.id.createNewAccountButton).setOnClickListener(this);
+
+        mainActivity.toolbar.setVisibility(View.GONE);
+        creatingAccount = false;
 
         this.view = view;
         return view;
@@ -62,6 +70,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                     Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+
+        mainActivity.toolbar.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -74,17 +84,17 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
             //Log.wtf("PuttingIntExtra", ""+leader);
             //groupIntent.putExtra("extra_stuff", new String[]{""+leader, ""+leader});
             //startActivity(groupIntent);
+        } else if (v == getActivity().findViewById(R.id.createNewAccountButton)) {
+            Log.d("Button", "Create New Account Button");
+            view.findViewById(R.id.loginLayout).setVisibility(View.GONE);
+            v.setVisibility(View.GONE);
+            view.findViewById(R.id.createAccountLayout).setVisibility(View.VISIBLE);
+            creatingAccount = true;
+        } else if (v == getActivity().findViewById(R.id.createAccountButton)) {
+            Log.d("Button", "Create Account Button");
+            createAccount();
+
         }
-//        } else if (v == getActivity().findViewById(R.id.createNewAccountButton)) {
-//            Log.d("Button", "Create New Account Button");
-//            view.findViewById(R.id.loginLayout).setVisibility(View.GONE);
-//            v.setVisibility(View.GONE);
-//            view.findViewById(R.id.createAccountLayout).setVisibility(View.VISIBLE);
-//        } else if (v == getActivity().findViewById(R.id.createAccountButton)) {
-//            Log.d("Button", "Create Account Button");
-//            createAccount();
-//
-//        }
     }
 
     public void login() {
@@ -95,39 +105,60 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         BackendRequest.login(be);
     }
 
-//    public void createAccount() {
-//        try {
-//            ArrayList<NameValuePair> loginParamList = new ArrayList<NameValuePair>();
-//            JSONObject json = new JSONObject("{}");
-//            //JSONObject userArrayJson = new JSONObject("{}");
-//            String username = ((EditText) view.findViewById(R.id.createUsernameEdit)).getText().toString();
-//            boolean fieldsExist = false;
-//            if (!username.equals("")) {
-//                json.put("username", username);
-//                String password = ((EditText) view.findViewById(R.id.createPasswordEdit)).getText().toString();
-//                String password2 = ((EditText) view.findViewById(R.id.createPassword2Edit)).getText().toString();
-//                if (password.equals(password2) && !password.equals("")) {
-//                    json.put("password", password);
-//                    String email = ((EditText) view.findViewById(R.id.createEmailEdit)).getText().toString();
-//                    if (!email.equals("") && email.contains("@") && email.contains(".")) {
-//                        json.put("email", email);
-//                        fieldsExist = true;
-//                        loginParamList.add(new BasicNameValuePair("username", username));
-//                        loginParamList.add(new BasicNameValuePair("password", password));
-//                    }
-//                }
-//            }
-//            if (!fieldsExist) {
-//                ((TextView) view.findViewById(R.id.createAccountErrorText)).setText("Make sure all information is correct and try again");
-//            } else {
-//                //json.put("user", userArrayJson);
-//                Log.d("CreateAccount", json.toString());
-//                BackendRequest be = new BackendRequest("POST", "apiv1/create-account/", json.toString(), (MainActivity) getActivity());
-//                be.setParamaters(loginParamList);
-//                BackendRequest.createAccount(be);
-//            }
-//        } catch (JSONException je) {
-//            je.printStackTrace();
-//        }
-//    }
+    public void createAccount() {
+        try {
+            ArrayList<NameValuePair> loginParamList = new ArrayList<NameValuePair>();
+            JSONObject json = new JSONObject("{}");
+            //JSONObject userArrayJson = new JSONObject("{}");
+            TextInputLayout usernameInput = (TextInputLayout) view.findViewById(R.id.createUsernameEditWrapper);
+            TextInputLayout passwordInput = (TextInputLayout) view.findViewById(R.id.createPasswordEditWrapper);
+            TextInputLayout password2Input = (TextInputLayout) view.findViewById(R.id.createPassword2EditWrapper);
+            TextInputLayout emailInput = (TextInputLayout) view.findViewById(R.id.createEmailEditWrapper);
+            usernameInput.setErrorEnabled(false);
+            passwordInput.setErrorEnabled(false);
+            password2Input.setErrorEnabled(false);
+            emailInput.setErrorEnabled(false);
+
+            String username = usernameInput.getEditText().getText().toString();
+            boolean fieldsExist = false;
+            if (!username.equals("")) {
+                json.put("username", username);
+                String password = passwordInput.getEditText().getText().toString();
+                String password2 = password2Input.getEditText().getText().toString();
+                if (password.equals(password2) && !password.equals("")) {
+                    json.put("password", password);
+                    String email = emailInput.getEditText().getText().toString();
+                    if (!email.equals("") && email.contains("@") && email.contains(".")) {
+                        json.put("email", email);
+                        fieldsExist = true;
+                        loginParamList.add(new BasicNameValuePair("username", username));
+                        loginParamList.add(new BasicNameValuePair("password", password));
+                    } else {
+                        emailInput.setErrorEnabled(true);
+                        emailInput.setError("Please enter a valid email address");
+                    }
+                } else if(!password.equals(password2) && !password.equals("")) {
+                    password2Input.setErrorEnabled(true);
+                    password2Input.setError("Passwords must match");
+                } else {
+                    passwordInput.setErrorEnabled(true);
+                    passwordInput.setError("Please enter a password");
+                }
+            } else {
+                usernameInput.setErrorEnabled(true);
+                usernameInput.setError("Please enter a username");
+            }
+            if (!fieldsExist) {
+                ((TextView) view.findViewById(R.id.createAccountErrorText)).setText("Make sure all information is correct and try again");
+            } else {
+                //json.put("user", userArrayJson);
+                Log.d("CreateAccount", json.toString());
+                BackendRequest be = new BackendRequest("POST", "apiv1/create-account/", json.toString(), (MainActivity) getActivity());
+                be.setParamaters(loginParamList);
+                BackendRequest.createAccount(be);
+            }
+        } catch (JSONException je) {
+            je.printStackTrace();
+        }
+    }
 }

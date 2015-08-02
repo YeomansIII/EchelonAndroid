@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -52,9 +53,9 @@ public class MainActivity extends AppCompatActivity
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
-    private Toolbar toolbar;
+    public Toolbar toolbar;
     private NavigationView navigationView;
-    private DrawerLayout drawerLayout;
+    public DrawerLayout drawerLayout;
     public static final String MAIN_PREFS_NAME = "basic_pref";
     public static final String GROUP_PREFS_NAME = "group_pref";
 
@@ -230,6 +231,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onNavigationItemSelected(MenuItem menuItem) {
+        boolean returner = false;
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         switch (menuItem.getItemId()) {
@@ -237,7 +239,8 @@ public class MainActivity extends AppCompatActivity
                 fragmentTransaction
                         .replace(R.id.container, new HomeFragment(), "HOME_FRAG")
                         .commit();
-                return true;
+                returner = true;
+                break;
             case R.id.drawer_group:
                 GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                 if (groupFragment != null && !groupFragment.isVisible()) {
@@ -259,10 +262,16 @@ public class MainActivity extends AppCompatActivity
 //                            .add(R.id.container, new GroupFragment(), "GROUP_FRAG")
 //                            .commit();
                 }
-                return true;
+                returner = true;
+                break;
             case R.id.drawer_settings:
                 fragmentTransaction.replace(R.id.container, new SettingsFragment(), "SETTINGS_FRAG").commit();
-                return true;
+                returner = true;
+                break;
+        }
+        if (returner) {
+            drawerLayout.closeDrawer(navigationView);
+            return true;
         }
         return false;
     }
