@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -13,7 +12,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -114,7 +112,7 @@ public class MainActivity extends AppCompatActivity
 
 
     //COMMON
-    SharedPreferences pref;
+    SharedPreferences pref, groupPref;
     Context context;
     MainActivity mainActivity;
 
@@ -128,6 +126,8 @@ public class MainActivity extends AppCompatActivity
         mainActivity = this;
 
         pref = getSharedPreferences(MAIN_PREFS_NAME, 0);
+        groupPref = getSharedPreferences(GROUP_PREFS_NAME, 0);
+
         //String token = pref.getString(PREF_ECHELON_API_TOKEN, null);
 
         loggedIn = pref.getBoolean(PREF_LISTENER_LOGGED_IN, false);
@@ -182,9 +182,15 @@ public class MainActivity extends AppCompatActivity
             if (pref.getBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false)) {
                 authenticateSpotify();
             }
-            String usernameJoin = pref.getString(MainActivity.PREF_GROUP_OWNER_USERNAME, null);
-            if (usernameJoin != null) {
+            String usernameJoin = groupPref.getString(MainActivity.PREF_GROUP_OWNER_USERNAME, null);
+            Log.d("Main", "Part of group: " + usernameJoin);
+            if (usernameJoin != null && usernameJoin.equals(pref.getString(PREF_LISTENER_USERNAME, ""))) {
+                Log.d("Main", "In group. Leader");
+                BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/activate-my-group/", this);
+                BackendRequest.activateJoinGroup(be);
+            } else if (usernameJoin != null) {
                 try {
+                    Log.d("Main", "In group.");
                     JSONObject json = new JSONObject("{}");
                     json.put("username_join", usernameJoin);
                     BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/join-group/", json.toString(), this);

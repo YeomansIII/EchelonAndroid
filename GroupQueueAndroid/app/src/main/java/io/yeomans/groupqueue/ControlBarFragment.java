@@ -2,14 +2,12 @@ package io.yeomans.groupqueue;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 /**
  * Created by jason on 7/13/15.
@@ -95,7 +93,7 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
 
     @Override
     public void onPlayerPlay() {
-        FloatingActionButton v = (FloatingActionButton) getView().findViewById(R.id.controlPlayButton);
+        ImageButton v = (ImageButton) getView().findViewById(R.id.controlPlayButton);
         v.setImageDrawable(getView().getResources().getDrawable(R.drawable.ic_pause_white_48dp));
         if (mCallback != null) {
             mCallback.onPlayControlSelected();
@@ -104,7 +102,7 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
 
     @Override
     public void onPlayerPause() {
-        FloatingActionButton v = (FloatingActionButton) getView().findViewById(R.id.controlPlayButton);
+        ImageButton v = (ImageButton) getView().findViewById(R.id.controlPlayButton);
         v.setImageDrawable(getView().getResources().getDrawable(R.drawable.ic_play_arrow_white_48dp));
         if (mCallback != null) {
             mCallback.onPauseControlSelected();

@@ -357,7 +357,7 @@ public class BackendRequest {
                             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                             fragmentTransaction.replace(R.id.container, fragment, "GROUP_FRAG");
                             fragmentTransaction.addToBackStack(null);
-                            fragmentTransaction.commit();
+                            fragmentTransaction.commitAllowingStateLoss();
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
