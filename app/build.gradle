@@ -12,10 +12,10 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
-def gitVersion() {
-    def process = "git rev-list master --first-parent --count".execute()
-    return process.text.toInteger()
-}
+//def gitVersion() {
+//    def process = "git rev-list master --first-parent --count".execute()
+//    return process.text.toInteger()
+//}
 
 //def buildNumber() {
 //    return "${versionMajor}.${versionMinor}.${versionPatch}";
@@ -37,14 +37,6 @@ def buildTime() {
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
-    
-    applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            output.outputFile = new File(
-                    output.outputFile.parent,
-                    output.outputFile.name.replace(".apk", "-${variant.versionName}_${buildTime()}.apk"))
-        }
-    }
 
     defaultConfig {
         applicationId "io.yeomans.groupqueue"
@@ -53,6 +45,7 @@ android {
         //versionCode 9
         versionCode 10
         versionName "0.1.3"
+        archivesBaseName = "Echelon-$versionName"
     }
     signingConfigs {
         release {
