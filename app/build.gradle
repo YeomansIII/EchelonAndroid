@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat
+
 buildscript {
     repositories {
         maven { url 'https://maven.fabric.io/public' }
@@ -10,6 +12,28 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
+def gitVersion() {
+    def process = "git rev-list master --first-parent --count".execute()
+    return process.text.toInteger()
+}
+
+//def buildNumber() {
+//    return "${versionMajor}.${versionMinor}.${versionPatch}";
+//}
+
+def buildTime() {
+    def df = new SimpleDateFormat("yyMMddhhmm")
+    return df.format(new Date())
+}
+
+//def genVersionName() {
+//    return buildNumber() + "." + buildTime();
+//}
+//
+//def genVersionCode() {
+//    return versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100;
+//}
+
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
@@ -18,13 +42,32 @@ android {
         applicationId "io.yeomans.groupqueue"
         minSdkVersion 16
         targetSdkVersion 21
-        versionCode 9
+        //versionCode 9
+        versionCode 10
         versionName "0.1.3"
     }
-    buildTypes {
+    signingConfigs {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            storeFile file("/opt/android-keys/echelon-keystore.jks")
+            storePassword "echelon-store-VAHP4NfRjydnC9X9"
+            keyAlias "echelon"
+            keyPassword "echelon-keypass-4CFuZzyuM5AW8cWy"
+        }
+    }
+    buildTypes {
+        debug {
+            runProguard true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            debuggable true
+        }
+        release {
+            runProguard true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            signingConfig signingConfigs.release
+            applicationVariants.all { variant ->
+                def file = variant.outputFile
+                variant.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + "-" + buildTime() + ".apk"))
+            }
         }
     }
 }
