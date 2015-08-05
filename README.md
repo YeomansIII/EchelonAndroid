@@ -20,4 +20,5 @@ Echelon is good for parties, listening to music in the car, and public use at re
   - Google play-services-gcm == 7.5.0
 
 **Continuos Integration:**
+
 This project builds to: https://jenkins.yeomans.io/job/dev-echelon/
