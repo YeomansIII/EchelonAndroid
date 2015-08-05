@@ -59,6 +59,14 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             debuggable true
+            signingConfig signingConfigs.release
+            applicationVariants.all { variant ->
+                variant.outputs.each { output ->
+                    def file = output.outputFile
+                    //output.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + "-" + buildTime() + ".apk"))
+                    output.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + ".apk"))
+                }
+            }
         }
         release {
             minifyEnabled true
