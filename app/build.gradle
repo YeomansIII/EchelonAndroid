@@ -46,6 +46,13 @@ android {
         versionCode 10
         versionName "0.1.3"
     }
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            output.outputFile = new File(
+                    output.outputFile.parent,
+                    output.outputFile.name.replace(".apk", "-${variant.versionName}.apk"))
+        }
+    }
     signingConfigs {
         release {
             storeFile file("/opt/android-keys/echelon-keystore.jks")
@@ -60,25 +67,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             debuggable true
             signingConfig signingConfigs.release
-            applicationVariants.all { variant ->
-                variant.outputs.each { output ->
-                    def file = output.outputFile
-                    //output.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + "-" + buildTime() + ".apk"))
-                    output.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + ".apk"))
-                }
-            }
         }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             signingConfig signingConfigs.release
-            applicationVariants.all { variant ->
-                variant.outputs.each { output ->
-                    def file = output.outputFile
-                    //output.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + "-" + buildTime() + ".apk"))
-                    output.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + ".apk"))
-                }
-            }
         }
     }
 }
