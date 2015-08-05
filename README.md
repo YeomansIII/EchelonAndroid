@@ -3,7 +3,7 @@ A Spotify jukebox created for small to large groups of individuals to listen to 
 
 A leader creates a group and allows other users to join that group and queue up music of their own liking.  All users in the group can then up and down vote songs that they do and don't like, in return affecting the order of the queue.
 
-Echelon is good for parties, listening to music in the car, and public use at restaurants and other venues.
+Echelon is good for parties, listening to music in the car, and public use at restaurants and other venues (though this is something that would need to be discussed with Spotify, probably can't do this.)
 
 ## Technical Specs
 **Android min SDK:** 16
