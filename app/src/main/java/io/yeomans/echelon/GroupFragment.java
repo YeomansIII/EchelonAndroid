@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -92,7 +94,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
 //        BackendRequest be = new BackendRequest("GET", mainActivity);
 //        BackendRequest.refreshGroupQueue(be);
 
-        //view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
+        view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
         //controlBar.getView().findViewById(R.id.groupAddSongButton).setVisibility(View.VISIBLE);
 
         return view;
@@ -148,7 +150,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         }
         groupSettings.edit().clear().commit();
         controlBar.getView().setVisibility(View.GONE);
-        Log.d("Group","Leaving Group");
+        Log.d("Group", "Leaving Group");
         isDestroyed = true;
     }
 
@@ -210,13 +212,13 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-//        if (v == view.findViewById(R.id.groupAddSongButton)) {
-//            FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
-//            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-//            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//            if (groupFragment != null && groupFragment.isVisible()) {
-//                fragmentTransaction.detach(groupFragment).add(R.id.container, new SongSearchFragment(), "SEARCH_FRAG").commit();
-//            }
-//        }
+        if (v == view.findViewById(R.id.groupAddSongButton)) {
+            FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            if (groupFragment != null && groupFragment.isVisible()) {
+                fragmentTransaction.replace(R.id.container, new SongSearchFragment(), "SEARCH_FRAG").addToBackStack(null).commit();
+            }
+        }
     }
 }
