@@ -12,8 +12,6 @@ import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import io.yeomans.groupqueue.R;
-
 public class ButtonFlat extends Button {
 
     TextView textButton;

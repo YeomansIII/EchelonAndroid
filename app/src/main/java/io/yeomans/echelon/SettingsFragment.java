@@ -6,8 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import io.yeomans.groupqueue.R;
-
 /**
  * Created by jason on 7/24/15.
  */

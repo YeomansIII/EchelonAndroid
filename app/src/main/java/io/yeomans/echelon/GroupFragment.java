@@ -20,8 +20,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import io.yeomans.groupqueue.R;
-
 /**
  * Created by jason on 6/26/15.
  */

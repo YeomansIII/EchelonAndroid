@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.fabric.sdk.android.Fabric;
-import io.yeomans.groupqueue.R;
 
 
 public class MainActivity extends AppCompatActivity

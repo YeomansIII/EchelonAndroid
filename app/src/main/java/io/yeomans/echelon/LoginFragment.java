@@ -18,8 +18,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import io.yeomans.groupqueue.R;
-
 /**
  * Created by jason on 6/30/15.
  */

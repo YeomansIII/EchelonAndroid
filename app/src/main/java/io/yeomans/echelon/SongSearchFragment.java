@@ -28,8 +28,6 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
-import io.yeomans.groupqueue.R;
-
 /**
  * Created by jason on 7/10/15.
  */

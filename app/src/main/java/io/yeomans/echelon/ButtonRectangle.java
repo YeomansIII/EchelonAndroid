@@ -10,8 +10,6 @@ import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import io.yeomans.groupqueue.R;
-
 public class ButtonRectangle extends Button {
 
     TextView textButton;

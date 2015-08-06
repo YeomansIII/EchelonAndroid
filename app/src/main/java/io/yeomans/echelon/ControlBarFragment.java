@@ -9,8 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
-import io.yeomans.groupqueue.R;
-
 /**
  * Created by jason on 7/13/15.
  */
