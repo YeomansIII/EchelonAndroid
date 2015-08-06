@@ -574,13 +574,16 @@ public class BackendRequest {
 
                 @Override
                 protected void onPostExecute(String msg) {
+                    Log.d("Group","backend leaving1");
+
                     FragmentManager fragmentManager = activity.getSupportFragmentManager();
                     GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                     if (groupFragment != null && groupFragment.isVisible()) {
                         //groupFragment.;
-                        fragmentTransaction.remove(groupFragment).add(R.id.container, new HomeFragment(), "HOME_FRAG").addToBackStack(null).commit();
-                        groupFragment.onDestroy();
+                        Log.d("Group","backend leaving2");
+                        fragmentTransaction.replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
+                        groupFragment.leaveGroup();
                     }
                 }
             }.execute(be, null, null);

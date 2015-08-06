@@ -31,6 +31,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     private boolean leader;
     public boolean isDestroyed;
     private boolean shouldExecuteOnResume;
+    private SharedPreferences groupSettings;
 
     private View view;
     private ArrayList<RelativeLayout> songListArr;
@@ -56,12 +57,12 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         }
         Log.wtf("Intent Extras", playId);
         controlBar = (ControlBarFragment) mainActivity.getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG");
-        if(controlBar != null) {
+        if (controlBar != null) {
             if (leader) {
-                    controlBar.ready(true);
+                controlBar.ready(true);
             } else {
                 Log.d("Group", "Not leader");
-                    controlBar.ready(false);
+                controlBar.ready(false);
             }
 //            ControlBarFragment controlBar = (ControlBarFragment) mainActivity.getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG");
 //            View cL = controlBar.getView().findViewById(R.id.controlCoordinatorLayout);
@@ -82,7 +83,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                 container, false);
 
         ///////
-        SharedPreferences groupSettings = getActivity().getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
+        groupSettings = getActivity().getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
         ///////
         ((TextView) view.findViewById(R.id.groupIdText)).setText(groupSettings.getString(MainActivity.PREF_GROUP_OWNER_USERNAME, "error"));
 
@@ -134,16 +135,22 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        controlBar.getView().findViewById(R.id.groupAddSongButton).setVisibility(View.GONE);
+        getView().findViewById(R.id.groupAddSongButton).setVisibility(View.GONE);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+    public void leaveGroup() {
         if (mainActivity.mPlayer != null) {
             mainActivity.mPlayer.pause();
             mainActivity.mPlayerCherry = true;
         }
+        groupSettings.edit().clear().commit();
+        controlBar.getView().setVisibility(View.GONE);
+        Log.d("Group","Leaving Group");
         isDestroyed = true;
     }
 
