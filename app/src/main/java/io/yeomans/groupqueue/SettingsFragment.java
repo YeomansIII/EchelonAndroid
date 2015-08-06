@@ -29,7 +29,6 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
         view.findViewById(R.id.settingsSpotifyLogin).setOnClickListener(this);
         view.findViewById(R.id.settingsSpotifyLogout).setOnClickListener(this);
-        view.findViewById(R.id.settingsSubmitBug).setOnClickListener(this);
 
         return view;
     }
@@ -40,9 +39,6 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
             mainActivity.authenticateSpotify();
         } else if(v == getView().findViewById(R.id.settingsSpotifyLogout)) {
 
-        } else if(v == getView().findViewById(R.id.settingsSubmitBug)) {
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://docs.google.com/forms/d/1xta8IsctqjHZ-o5-NNOgUUIuX9WFjsqvWFFaWnLauLw/viewform?usp=send_form"));
-            startActivity(browserIntent);
         }
     }
 }

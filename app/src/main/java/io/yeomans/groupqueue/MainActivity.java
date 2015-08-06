@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -273,6 +274,10 @@ public class MainActivity extends AppCompatActivity
             case R.id.drawer_settings:
                 fragmentTransaction.replace(R.id.container, new SettingsFragment(), "SETTINGS_FRAG").commit();
                 returner = true;
+                break;
+            case R.id.drawer_bug:
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://docs.google.com/forms/d/1xta8IsctqjHZ-o5-NNOgUUIuX9WFjsqvWFFaWnLauLw/viewform?usp=send_form"));
+                startActivity(browserIntent);
                 break;
         }
         if (returner) {
