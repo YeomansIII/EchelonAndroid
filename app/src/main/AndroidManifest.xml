@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="io.yeomans.groupqueue">
+    package="io.yeomans.echelon">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
-    <permission android:name="io.yeomans.groupqueue.permission.C2D_MESSAGE"
+    <permission android:name="io.yeomans.echelon.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
-    <uses-permission android:name="io.yeomans.groupqueue.permission.C2D_MESSAGE" />
+    <uses-permission android:name="io.yeomans.echelon.permission.C2D_MESSAGE" />
 
     <application
         android:allowBackup="true"
@@ -22,7 +22,7 @@
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <category android:name="io.yeomans.groupqueue" />
+                <category android:name="io.yeomans.echelon" />
             </intent-filter>
         </receiver>
         <service
