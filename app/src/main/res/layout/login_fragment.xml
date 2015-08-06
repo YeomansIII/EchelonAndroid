@@ -54,14 +54,14 @@
             android:layout_height="wrap_content"
             android:textColor="@color/full_red" />
 
-        <io.yeomans.groupqueue.ButtonRectangle
+        <io.yeomans.echelon.ButtonRectangle
             android:id="@+id/loginButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="Login" />
 
-        <io.yeomans.groupqueue.ButtonFlat
+        <io.yeomans.echelon.ButtonFlat
             android:id="@+id/createNewAccountButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -154,7 +154,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/full_red" />
 
-        <io.yeomans.groupqueue.ButtonRectangle
+        <io.yeomans.echelon.ButtonRectangle
             android:id="@+id/createAccountButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

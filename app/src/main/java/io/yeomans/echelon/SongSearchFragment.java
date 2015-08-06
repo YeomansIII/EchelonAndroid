@@ -1,6 +1,5 @@
-package io.yeomans.groupqueue;
+package io.yeomans.echelon;
 
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,6 +27,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+
+import io.yeomans.groupqueue.R;
 
 /**
  * Created by jason on 7/10/15.

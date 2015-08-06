@@ -1,4 +1,4 @@
-package io.yeomans.groupqueue;
+package io.yeomans.echelon;
 
 /**
  * Created by jason on 7/25/15.
@@ -15,6 +15,8 @@ import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.TextView;
+
+import io.yeomans.groupqueue.R;
 
 public abstract class Button extends CustomView {
 

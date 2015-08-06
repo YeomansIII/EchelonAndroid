@@ -1,4 +1,4 @@
-package io.yeomans.groupqueue;
+package io.yeomans.echelon;
 
 /**
  * Created by jason on 7/25/15.
@@ -11,6 +11,8 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import io.yeomans.groupqueue.R;
 
 public class ButtonFlat extends Button {
 
@@ -47,7 +49,7 @@ public class ButtonFlat extends Button {
             textButton.setTextColor(backgroundColor);
             textButton.setTypeface(null, Typeface.BOLD);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
-            params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+            params.addRule(CENTER_IN_PARENT, TRUE);
             textButton.setLayoutParams(params);
             addView(textButton);
         }

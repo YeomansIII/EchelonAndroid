@@ -1,4 +1,4 @@
-package io.yeomans.groupqueue;
+package io.yeomans.echelon;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.fabric.sdk.android.Fabric;
+import io.yeomans.groupqueue.R;
 
 
 public class MainActivity extends AppCompatActivity

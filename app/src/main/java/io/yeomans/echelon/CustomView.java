@@ -1,4 +1,4 @@
-package io.yeomans.groupqueue;
+package io.yeomans.echelon;
 
 /**
  * Created by jason on 7/25/15.

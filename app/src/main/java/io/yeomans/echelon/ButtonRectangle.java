@@ -1,4 +1,4 @@
-package io.yeomans.groupqueue;
+package io.yeomans.echelon;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -9,6 +9,8 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import io.yeomans.groupqueue.R;
 
 public class ButtonRectangle extends Button {
 
@@ -85,7 +87,7 @@ public class ButtonRectangle extends Button {
             textButton.setTextColor(Color.WHITE);
             textButton.setTypeface(null, Typeface.BOLD);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-            params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+            params.addRule(CENTER_IN_PARENT, TRUE);
             params.setMargins(ViewUtils.dpToPx(5, getResources()), ViewUtils.dpToPx(5, getResources()), ViewUtils.dpToPx(5, getResources()), ViewUtils.dpToPx(5, getResources()));
             textButton.setLayoutParams(params);
             addView(textButton);

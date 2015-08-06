@@ -1,4 +1,4 @@
-package io.yeomans.groupqueue;
+package io.yeomans.echelon;
 
 import android.content.Intent;
 import android.os.Bundle;

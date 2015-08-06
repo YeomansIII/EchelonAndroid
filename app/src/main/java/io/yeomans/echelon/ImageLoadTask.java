@@ -1,4 +1,4 @@
-package io.yeomans.groupqueue;
+package io.yeomans.echelon;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

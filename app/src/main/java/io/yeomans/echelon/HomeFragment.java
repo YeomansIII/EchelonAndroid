@@ -1,4 +1,4 @@
-package io.yeomans.groupqueue;
+package io.yeomans.echelon;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -16,6 +16,8 @@ import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import io.yeomans.groupqueue.R;
 
 /**
  * Created by jason on 7/1/15.
