@@ -45,11 +45,11 @@ android {
         //versionCode 9
         versionCode 10
         versionName "0.1.3"
-        archivesBaseName = "Echelon-$versionName"
+        archivesBaseName = "Echelon-$versionName-"+buildTime()
     }
     signingConfigs {
         release {
-            storeFile file("/opt/android-keys/echelon-keystore.jks")
+            storeFile file("/opt/android-keys/echelon_keystore.jks")
             storePassword "echelon-store-VAHP4NfRjydnC9X9"
             keyAlias "echelon"
             keyPassword "echelon-keypass-4CFuZzyuM5AW8cWy"

@@ -11,13 +11,13 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/controlPlayButton"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:background="@android:color/transparent"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:src="@drawable/ic_play_arrow_white_36dp" />
+        <ImageButton
+            android:id="@+id/controlPlayButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:src="@drawable/ic_play_arrow_white_36dp" />
     </LinearLayout>
 </RelativeLayout>
