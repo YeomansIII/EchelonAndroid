@@ -2,31 +2,42 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="190dp"
-    android:background="@drawable/background_material"
+    android:background="@drawable/nav_header_bg"
     android:orientation="vertical">
-    <!--<TextView-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="Jason Yeomans"-->
-        <!--android:textSize="14sp"-->
-        <!--android:textColor="#FFF"-->
-        <!--android:textStyle="bold"-->
-        <!--android:gravity="start"-->
-        <!--android:paddingBottom="4dp"-->
-        <!--android:id="@+id/username"-->
-        <!--android:layout_centerVertical="true"-->
-        <!--android:layout_alignParentLeft="true"-->
-        <!--android:layout_alignParentStart="true" />-->
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:background="#99000000">
+
+        <TextView
+            android:id="@+id/navHeaderUsernameText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:paddingBottom="4dp"
+            android:text="Username"
+            android:textColor="#FFF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="14dp" />
+
+
+    </RelativeLayout>
 
     <!--<TextView-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="jyeo098@gmail.com"-->
-        <!--android:id="@+id/email"-->
-        <!--android:gravity="start"-->
-        <!--android:textSize="14sp"-->
-        <!--android:textColor="#fff"-->
-        <!--android:layout_below="@+id/username"-->
-        <!--android:layout_alignParentLeft="true"-->
-        <!--android:layout_alignParentStart="true" />-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:text="jyeo098@gmail.com"-->
+    <!--android:id="@+id/email"-->
+    <!--android:gravity="start"-->
+    <!--android:textSize="14sp"-->
+    <!--android:textColor="#fff"-->
+    <!--android:layout_below="@+id/username"-->
+    <!--android:layout_alignParentLeft="true"-->
+    <!--android:layout_alignParentStart="true" />-->
 </RelativeLayout>

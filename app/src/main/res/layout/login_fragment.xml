@@ -31,7 +31,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:inputType="textShortMessage" />
+                android:inputType="textShortMessage"
+                android:hint="Username"
+                android:drawableLeft="@drawable/account_outline"/>
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
@@ -44,7 +46,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:ems="10"
-                android:inputType="textPassword" />
+                android:inputType="textPassword"
+                android:hint="Password"
+                android:drawableLeft="@drawable/lock_outline"/>
         </android.support.design.widget.TextInputLayout>
 
 
@@ -56,14 +60,14 @@
 
         <io.yeomans.echelon.ButtonRectangle
             android:id="@+id/loginButton"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="Login" />
 
         <io.yeomans.echelon.ButtonFlat
             android:id="@+id/createNewAccountButton"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Create New Account"
             android:layout_below="@+id/loginLayout"

@@ -4,6 +4,11 @@
     <color name="primaryColorDark">#412F49</color>
     <color name="primaryAccent">#57387B</color>
     <color name="full_red">#ff0000</color>
-    <color name="colorControlActivated">#3399FF</color>
+    <color name="pearlBlueLuster">#E3E1F6</color>
+    <color name="seaFrost">#94BAC7</color>
+    <color name="heroMode">#57387B</color>
+    <color name="purpleRain">#4A3264</color>
+    <color name="otherSide">#412F49</color>
+
 
 </resources>

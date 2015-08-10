@@ -3,6 +3,7 @@ package io.yeomans.echelon;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -60,7 +61,7 @@ public class SongSearchFragment extends Fragment implements View.OnClickListener
     public void onClick(View v) {
         if (v == getActivity().findViewById(R.id.searchSongButton)) {
             Log.d("Button", "Song Search Button");
-            searchSongs(((EditText) view.findViewById(R.id.searchSongEdit)).getText().toString());
+            searchSongs(((TextInputLayout) view.findViewById(R.id.searchSongEditWrapper)).getEditText().getText().toString());
         }
     }
 

@@ -243,6 +243,7 @@ public class BackendRequest {
                         fragmentTransaction.replace(R.id.container, fragment);
                         fragmentTransaction.addToBackStack(null);
                         fragmentTransaction.commit();
+                        activity.setUpNavDrawerAndActionBar();
                     } else {
                         TextView loginErrorText = (TextView) activity.findViewById(R.id.loginErrorText);
                         loginErrorText.setText("Could not connect to server.");

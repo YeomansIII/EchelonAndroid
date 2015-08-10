@@ -44,9 +44,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         usernameWrapper = (TextInputLayout) view.findViewById(R.id.usernameEditWrapper);
         passwordWrapper = (TextInputLayout) view.findViewById(R.id.passwordEditWrapper);
 
-        usernameWrapper.setHint("Username");
-        passwordWrapper.setHint("Password");
-
         view.findViewById(R.id.loginButton).setOnClickListener(this);
         view.findViewById(R.id.createAccountButton).setOnClickListener(this);
         view.findViewById(R.id.createNewAccountButton).setOnClickListener(this);
@@ -134,7 +131,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                         emailInput.setErrorEnabled(true);
                         emailInput.setError("Please enter a valid email address");
                     }
-                } else if(!password.equals(password2) && !password.equals("")) {
+                } else if (!password.equals(password2) && !password.equals("")) {
                     password2Input.setErrorEnabled(true);
                     password2Input.setError("Passwords must match");
                 } else {
@@ -157,5 +154,11 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         } catch (JSONException je) {
             je.printStackTrace();
         }
+    }
+
+    public interface OnEchelonLoginListener {
+        void userLoggedIn();
+
+        void userAccountCreated();
     }
 }

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Generated with http://android-holo-colors.com -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <style name="LoginTheme" parent="@style/_LoginTheme"/>
+
+  <style name="_LoginTheme" parent="android:Theme.Holo.Light">
+
+    <item name="android:editTextBackground">@drawable/logintheme_edit_text_holo_light</item>
+
+    <item name="android:textColorHighlight">#99ffffff</item>
+    <item name="android:textSelectHandleLeft">@drawable/logintheme_text_select_handle_left</item>
+    <item name="android:textSelectHandleRight">@drawable/logintheme_text_select_handle_right</item>
+    <item name="android:textSelectHandle">@drawable/logintheme_text_select_handle_middle</item>
+
+    <item name="android:dropDownSpinnerStyle">@style/SpinnerLoginTheme</item>
+
+  </style>
+
+</resources>
