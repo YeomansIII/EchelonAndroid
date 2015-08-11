@@ -346,7 +346,7 @@ public class BackendRequest {
                             if (be2.getUrl().contains("join")) {
                                 leader = false;
                             }
-                            Fragment fragment = new GroupFragment();
+                            Fragment fragment = new QueueFragment();
                             Bundle bundle = new Bundle();
                             bundle.putStringArray("extra_stuff", new String[]{"" + leader, "" + leader});
                             fragment.setArguments(bundle);
@@ -451,7 +451,7 @@ public class BackendRequest {
                 @Override
                 protected void onPostExecute(String msg) {
                     FragmentManager fragmentManager = activity.getSupportFragmentManager();
-                    GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+                    QueueFragment groupFragment = (QueueFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                     if (groupFragment != null && groupFragment.isVisible()) {
                         groupFragment.refreshQueueList();
                     }
@@ -491,7 +491,7 @@ public class BackendRequest {
                 protected void onPostExecute(String msg) {
                     FragmentManager fragmentManager = activity.getSupportFragmentManager();
                     SongSearchFragment songSearchFragment = (SongSearchFragment) fragmentManager.findFragmentByTag("SEARCH_FRAG");
-                    GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+                    QueueFragment groupFragment = (QueueFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                     //if(groupFragment != null && groupFragment.isVisible()) {
 
@@ -574,7 +574,7 @@ public class BackendRequest {
                     Log.d("Group","backend leaving1");
 
                     FragmentManager fragmentManager = activity.getSupportFragmentManager();
-                    GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+                    QueueFragment groupFragment = (QueueFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                     if (groupFragment != null && groupFragment.isVisible()) {
                         //groupFragment.;

@@ -19,6 +19,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
@@ -138,6 +139,8 @@ public class MainActivity extends AppCompatActivity
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
 
         // Check device for Play Services APK. If check succeeds, proceed with
         //  GCM registration.
@@ -198,8 +201,10 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         // Initializing Drawer Layout and ActionBarToggle
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawerLayout.setVisibility(View.VISIBLE);
+        //drawerLayout.setVisibility(View.VISIBLE);
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        ((TextView) findViewById(R.id.navHeaderUsernameText)).setText(pref.getString(PREF_LISTENER_USERNAME, "error"));
+
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
 
             @Override
@@ -253,8 +258,8 @@ public class MainActivity extends AppCompatActivity
                 returner = true;
                 break;
             case R.id.drawer_group:
-                GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-                if (groupFragment != null && !groupFragment.isVisible()) {
+                QueueFragment queueFragment = (QueueFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+                if (queueFragment != null && !queueFragment.isVisible()) {
                     List<Fragment> listFrag = fragmentManager.getFragments();
                     Fragment currentFrag = null;
                     for (Fragment in : listFrag) {
@@ -266,11 +271,11 @@ public class MainActivity extends AppCompatActivity
                         fragmentTransaction.remove(currentFrag);
                     }
                     fragmentTransaction.addToBackStack(null);
-                    fragmentTransaction.add(R.id.container, groupFragment).commit();
-                } else if (groupFragment == null) {
+                    fragmentTransaction.add(R.id.container, queueFragment).commit();
+                } else if (queueFragment == null) {
                     Toast.makeText(getApplicationContext(), "Please create or join a group first", Toast.LENGTH_SHORT).show();
 //                    fragmentManager.beginTransaction()
-//                            .add(R.id.container, new GroupFragment(), "GROUP_FRAG")
+//                            .add(R.id.container, new queueFragment(), "GROUP_FRAG")
 //                            .commit();
                 }
                 returner = true;

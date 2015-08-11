@@ -9,6 +9,7 @@
     <color name="heroMode">#57387B</color>
     <color name="purpleRain">#4A3264</color>
     <color name="otherSide">#412F49</color>
+    <color name="transparent">#FF000000</color>
 
 
 </resources>

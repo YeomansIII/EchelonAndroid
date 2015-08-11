@@ -1,57 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:materialdesign="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/tools"
-    android:background="#7dffffff">
+    android:layout_height="match_parent">
 
-    <ScrollView
-        android:id="@+id/scrollView"
+    <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal">
+        android:layout_height="match_parent">
 
-        <LinearLayout
+        <android.support.design.widget.TabLayout
+            android:id="@+id/group_tab_tabs"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content" />
 
-            <LinearLayout
-                android:id="@+id/queueListLayout"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_gravity="center_horizontal"
-                android:orientation="vertical"
-                android:paddingTop="60dp" />
-        </LinearLayout>
-    </ScrollView>
-
-    <TextView
-        android:id="@+id/groupIdText"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center_horizontal"
-        android:background="@drawable/linear_gradient"
-        android:gravity="center"
-        android:text="Group Id"
-        android:textAlignment="center"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@android:color/black"
-        android:textSize="20pt" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/groupAddSongButton"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:src="@drawable/ic_add_white_36dp"
-        app:elevation="4dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="20dp"
-        android:layout_marginBottom="20dp" />
-
+        <android.support.v4.view.ViewPager
+            android:id="@+id/group_tab_viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </android.support.design.widget.CoordinatorLayout>
 </RelativeLayout>

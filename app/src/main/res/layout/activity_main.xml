@@ -22,9 +22,8 @@
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/toolbar"
-            android:layout_above="@+id/control_bar">
-        </FrameLayout>
+            android:layout_above="@+id/control_bar"
+            android:layout_below="@+id/toolbar"></FrameLayout>
 
         <fragment
             android:id="@+id/control_bar"
@@ -46,7 +45,6 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:visibility="gone"
         app:headerLayout="@layout/nav_header"
         app:itemIconTint="#8b8b8b"
         app:itemTextColor="#666666"
