@@ -39,39 +39,13 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+        //setHasOptionsMenu(true);
 
         mainActivity = (MainActivity) getActivity();
         isDestroyed = false;
         shouldExecuteOnResume = false;
 
-        playId = "";
-        Bundle startingIntentBundle = this.getArguments();
-        if (startingIntentBundle != null) {
-            String[] extras = startingIntentBundle.getStringArray("extra_stuff");
-            //playId = extras[0];
-            leader = Boolean.parseBoolean(extras[1]);
-            Log.wtf("Test", "leader: " + leader);
-        }
-        Log.wtf("Intent Extras", playId);
-        controlBar = (ControlBarFragment) mainActivity.getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG");
-        if (controlBar != null) {
-            if (leader) {
-                controlBar.ready(true);
-            } else {
-                Log.d("Group", "Not leader");
-                //controlBar.ready(false);
-            }
-//            ControlBarFragment controlBar = (ControlBarFragment) mainActivity.getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG");
-//            View cL = controlBar.getView().findViewById(R.id.controlCoordinatorLayout);
-//            Snackbar snackbar = Snackbar
-//                    .make(cL, "Had a snack at Snackbar", Snackbar.LENGTH_LONG);
-//            View snackbarView = snackbar.getView();
-//            snackbarView.setBackgroundColor(Color.DKGRAY);
-//            TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
-//            textView.setTextColor(Color.YELLOW);
-//            snackbar.show();
-        }
+
     }
 
     @Override
@@ -85,9 +59,6 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
         ///////
         ((TextView) view.findViewById(R.id.groupIdText)).setText(groupSettings.getString(MainActivity.PREF_GROUP_OWNER_USERNAME, "error"));
 
-        mainActivity.toolbar.setBackgroundColor(getResources().getColor(R.color.primaryColor));
-        mainActivity.getSupportActionBar().setTitle("Echelon");
-
         this.view = view;
 //        BackendRequest be = new BackendRequest("GET", mainActivity);
 //        BackendRequest.refreshGroupQueue(be);
@@ -96,12 +67,6 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
         //controlBar.getView().findViewById(R.id.groupAddSongButton).setVisibility(View.VISIBLE);
 
         return view;
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.group, menu);
-        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
@@ -139,17 +104,6 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-    }
-
-    public void leaveGroup() {
-        if (mainActivity.mPlayer != null) {
-            mainActivity.mPlayer.pause();
-            mainActivity.mPlayerCherry = true;
-        }
-        groupSettings.edit().clear().commit();
-        controlBar.getView().setVisibility(View.GONE);
-        Log.d("Group", "Leaving Group");
-        isDestroyed = true;
     }
 
     public void refreshQueueList() {
@@ -212,7 +166,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         if (v == view.findViewById(R.id.groupAddSongButton)) {
             FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
-            QueueFragment groupFragment = (QueueFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             if (groupFragment != null && groupFragment.isVisible()) {
                 fragmentTransaction.replace(R.id.container, new SongSearchFragment(), "SEARCH_FRAG").addToBackStack(null).commit();

@@ -346,7 +346,7 @@ public class BackendRequest {
                             if (be2.getUrl().contains("join")) {
                                 leader = false;
                             }
-                            Fragment fragment = new QueueFragment();
+                            Fragment fragment = new GroupFragment();
                             Bundle bundle = new Bundle();
                             bundle.putStringArray("extra_stuff", new String[]{"" + leader, "" + leader});
                             fragment.setArguments(bundle);
@@ -387,16 +387,26 @@ public class BackendRequest {
                             JSONObject responseJson = new JSONObject(EntityUtils.toString(resEntityGet));
 
                             String spotifyTracksUrl = "https://api.spotify.com/v1/tracks/?ids=";
+                            JSONArray participantsJson = responseJson.getJSONArray("participants");
+                            String jsonArrayString = participantsJson.toString();
+                            Log.d("BackendRequest", jsonArrayString);
+                            Log.d("BackendRequest", "Wrote to storage: "+settings2.edit().putString(MainActivity.PREF_GROUP_PARTICIPANTS_JSON, jsonArrayString).commit());
                             JSONArray trackQueueJson = responseJson.getJSONArray("track_queue");
                             String spotifyResponse = "";
                             ArrayList<SpotifySong> backStack = activity.backStack;
                             ArrayList<SpotifySong> playqueue = activity.playQueue;
                             backStack.clear();
                             playqueue.clear();
+                            int startAt = -1;
                             if (trackQueueJson.length() > 0) {
                                 for (int i = 0; i < trackQueueJson.length(); i++) {
                                     JSONObject trackJson = trackQueueJson.getJSONObject(i);
-                                    spotifyTracksUrl += trackJson.getString("spotify_id") + ",";
+                                    if (!trackJson.getBoolean("played")) {
+                                        if (startAt == -1) {
+                                            startAt = i;
+                                        }
+                                        spotifyTracksUrl += trackJson.getString("spotify_id") + ",";
+                                    }
                                 }
                                 spotifyTracksUrl = spotifyTracksUrl.replaceAll(",$", "");
 
@@ -411,7 +421,7 @@ public class BackendRequest {
                                     Log.d("RefreshQueue", "tracks: " + items.length());
                                     for (int p = 0; p < items.length(); p++) {
                                         JSONObject spotifyTrackJson = items.getJSONObject(p);
-                                        JSONObject trackJson = trackQueueJson.getJSONObject(p);
+                                        JSONObject trackJson = trackQueueJson.getJSONObject(startAt + p);
                                         boolean isBackStack = trackJson.getBoolean("played");
                                         JSONObject album = spotifyTrackJson.getJSONObject("album");
                                         JSONArray images = album.getJSONArray("images");
@@ -451,9 +461,10 @@ public class BackendRequest {
                 @Override
                 protected void onPostExecute(String msg) {
                     FragmentManager fragmentManager = activity.getSupportFragmentManager();
-                    QueueFragment groupFragment = (QueueFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+                    GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                     if (groupFragment != null && groupFragment.isVisible()) {
-                        groupFragment.refreshQueueList();
+                        groupFragment.queueFragment.refreshQueueList();
+                        groupFragment.participantsFragment.buildParticiantList();
                     }
                 }
             }.execute(be, null, null);
@@ -491,7 +502,7 @@ public class BackendRequest {
                 protected void onPostExecute(String msg) {
                     FragmentManager fragmentManager = activity.getSupportFragmentManager();
                     SongSearchFragment songSearchFragment = (SongSearchFragment) fragmentManager.findFragmentByTag("SEARCH_FRAG");
-                    QueueFragment groupFragment = (QueueFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+                    GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                     //if(groupFragment != null && groupFragment.isVisible()) {
 
@@ -571,14 +582,14 @@ public class BackendRequest {
 
                 @Override
                 protected void onPostExecute(String msg) {
-                    Log.d("Group","backend leaving1");
+                    Log.d("Group", "backend leaving1");
 
                     FragmentManager fragmentManager = activity.getSupportFragmentManager();
-                    QueueFragment groupFragment = (QueueFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+                    GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                     if (groupFragment != null && groupFragment.isVisible()) {
                         //groupFragment.;
-                        Log.d("Group","backend leaving2");
+                        Log.d("Group", "backend leaving2");
                         fragmentTransaction.replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
                         groupFragment.leaveGroup();
                     }

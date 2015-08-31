@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity
     public static final String PREF_GROUP_PK = "group_pk";
     public static final String PREF_GROUP_OWNER_PK = "group_owner_pk";
     public static final String PREF_GROUP_OWNER_USERNAME = "group_owner_username";
+    public static final String PREF_GROUP_PARTICIPANTS_JSON = "group_participants_json";
 
     //SPOTIFY
     public static final String CLIENT_ID = "8b81e3deddce42c4b0f2972e181b8a3a";
@@ -258,8 +259,8 @@ public class MainActivity extends AppCompatActivity
                 returner = true;
                 break;
             case R.id.drawer_group:
-                QueueFragment queueFragment = (QueueFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-                if (queueFragment != null && !queueFragment.isVisible()) {
+                GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+                if (groupFragment != null && !groupFragment.isVisible()) {
                     List<Fragment> listFrag = fragmentManager.getFragments();
                     Fragment currentFrag = null;
                     for (Fragment in : listFrag) {
@@ -271,8 +272,8 @@ public class MainActivity extends AppCompatActivity
                         fragmentTransaction.remove(currentFrag);
                     }
                     fragmentTransaction.addToBackStack(null);
-                    fragmentTransaction.add(R.id.container, queueFragment).commit();
-                } else if (queueFragment == null) {
+                    fragmentTransaction.add(R.id.container, groupFragment).commit();
+                } else if (groupFragment == null) {
                     Toast.makeText(getApplicationContext(), "Please create or join a group first", Toast.LENGTH_SHORT).show();
 //                    fragmentManager.beginTransaction()
 //                            .add(R.id.container, new queueFragment(), "GROUP_FRAG")
