@@ -501,7 +501,7 @@ public class BackendRequest {
                 @Override
                 protected void onPostExecute(String msg) {
                     FragmentManager fragmentManager = activity.getSupportFragmentManager();
-                    SongSearchFragment songSearchFragment = (SongSearchFragment) fragmentManager.findFragmentByTag("SEARCH_FRAG");
+                    AddSongFragment addSongFragment = (AddSongFragment) fragmentManager.findFragmentByTag("ADD_SONG_FRAG");
                     GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                     //if(groupFragment != null && groupFragment.isVisible()) {

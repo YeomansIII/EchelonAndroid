@@ -11,23 +11,23 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 /**
  * Created by jason on 8/10/15.
  */
-public class GroupFragment extends Fragment {
+public class AddSongFragment extends Fragment {
     MainActivity mainActivity;
     TabLayout tabLayout;
     ViewPager viewPager;
     ViewPagerAdapter viewPagerAdapter;
     QueueFragment queueFragment;
-    ParticipantsFragment participantsFragment;
     boolean isDestroyed = false;
-    private SharedPreferences groupSettings;
     private ControlBarFragment controlBar;
     private boolean leader;
     private boolean shouldExecuteOnResume;
+    private SongSearchFragment songSearchFragment;
+    private BrowseSongsFragment browseSongsFragment;
+    private SharedPreferences groupSettings;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,7 +38,7 @@ public class GroupFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.group_fragment,
+        View view = inflater.inflate(R.layout.add_song_fragment,
                 container, false);
 
         groupSettings = getActivity().getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
@@ -46,27 +46,10 @@ public class GroupFragment extends Fragment {
         mainActivity.toolbar.setBackgroundColor(getResources().getColor(R.color.primaryColor));
         mainActivity.getSupportActionBar().setTitle("Echelon");
 
-        setHasOptionsMenu(true);
+        //setHasOptionsMenu(true);
 
         mainActivity = (MainActivity) getActivity();
-        isDestroyed = false;
-        shouldExecuteOnResume = false;
 
-        Bundle startingIntentBundle = this.getArguments();
-        if (startingIntentBundle != null) {
-            String[] extras = startingIntentBundle.getStringArray("extra_stuff");
-            //playId = extras[0];
-            leader = Boolean.parseBoolean(extras[1]);
-            Log.wtf("Test", "leader: " + leader);
-        }
-        controlBar = (ControlBarFragment) mainActivity.getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG");
-        if (controlBar != null) {
-            if (leader) {
-                controlBar.ready(true);
-            } else {
-                Log.d("Group", "Not leader");
-                //controlBar.ready(false);
-            }
 //            ControlBarFragment controlBar = (ControlBarFragment) mainActivity.getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG");
 //            View cL = controlBar.getView().findViewById(R.id.controlCoordinatorLayout);
 //            Snackbar snackbar = Snackbar
@@ -76,21 +59,24 @@ public class GroupFragment extends Fragment {
 //            TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
 //            textView.setTextColor(Color.YELLOW);
 //            snackbar.show();
-        }
 
-        viewPager = (ViewPager) view.findViewById(R.id.group_tab_viewpager);
+
+        viewPager = (ViewPager) view.findViewById(R.id.add_song_tab_viewpager);
         setupViewPager(viewPager);
-        tabLayout = (TabLayout) view.findViewById(R.id.group_tab_tabs);
+        tabLayout = (TabLayout) view.findViewById(R.id.add_song_tab_tabs);
         tabLayout.setupWithViewPager(viewPager);
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 viewPager.setCurrentItem(tab.getPosition());
-//                switch (tab.getPosition()) {
-//                    case 0:
-//                        Toast.makeText(mainActivity.context, "Tab One Selected", Toast.LENGTH_SHORT).show();
-//                        break;
-//                }
+                switch (tab.getPosition()) {
+                    case 0:
+                        //Toast.makeText(mainActivity.context, "Tab One Selected", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 1:
+                        browseSongsFragment.select();
+                        break;
+                }
             }
 
             @Override
@@ -108,10 +94,10 @@ public class GroupFragment extends Fragment {
         Log.d("GroupFragment", "Setting up viewPager");
         if (viewPagerAdapter == null) {
             ViewPagerAdapter adapter = new ViewPagerAdapter(getChildFragmentManager());
-            queueFragment = new QueueFragment();
-            adapter.addFrag(queueFragment, "Queue");
-            participantsFragment = new ParticipantsFragment();
-            adapter.addFrag(participantsFragment, "Participants");
+            songSearchFragment = new SongSearchFragment();
+            adapter.addFrag(songSearchFragment, "Search");
+            browseSongsFragment = new BrowseSongsFragment();
+            adapter.addFrag(browseSongsFragment, "Browse");
             viewPagerAdapter = adapter;
             viewPager.setAdapter(adapter);
         } else {
@@ -130,16 +116,5 @@ public class GroupFragment extends Fragment {
         super.onResume();
         // queueFragment.onResume();
         //participantsFragment.onResume();
-    }
-
-    public void leaveGroup() {
-        if (mainActivity.mPlayer != null) {
-            mainActivity.mPlayer.pause();
-            mainActivity.mPlayerCherry = true;
-        }
-        groupSettings.edit().clear().commit();
-        controlBar.getView().setVisibility(View.GONE);
-        Log.d("Group", "Leaving Group");
-        isDestroyed = true;
     }
 }

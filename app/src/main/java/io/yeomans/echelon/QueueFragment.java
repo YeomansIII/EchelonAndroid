@@ -153,9 +153,11 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
             }
         } else {
             LinearLayout songList = (LinearLayout) view.findViewById(R.id.queueListLayout);
+            songList.removeAllViews();
             TextView tv = new TextView(getActivity().getApplicationContext());
             tv.setText("No songs in queue. Search for a song!");
             tv.setTextColor(Color.BLACK);
+            tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             songList.addView(tv);
         }
         Log.d("Play", "PlayQueueList End: " + playqueue);
@@ -169,7 +171,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
             GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             if (groupFragment != null && groupFragment.isVisible()) {
-                fragmentTransaction.replace(R.id.container, new SongSearchFragment(), "SEARCH_FRAG").addToBackStack(null).commit();
+                fragmentTransaction.replace(R.id.container, new AddSongFragment(), "ADD_SONG_FRAG").addToBackStack(null).commit();
             }
         }
     }

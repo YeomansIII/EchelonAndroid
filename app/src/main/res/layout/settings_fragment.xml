@@ -32,19 +32,5 @@
         android:layout_height="1dp"
         android:background="#6F6F6F" />
 
-    <TextView
-        android:id="@+id/settingsSubmitBug"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:padding="15dp"
-        android:text="Submit Bug/Feature Request"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#6F6F6F" />
-
 
 </LinearLayout>

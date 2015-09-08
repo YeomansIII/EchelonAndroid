@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.spotify.sdk.android.authentication.AuthenticationClient;
+
 /**
  * Created by jason on 7/24/15.
  */
@@ -25,6 +27,9 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.settings_fragment,
                 container, false);
 
+        mainActivity.toolbar.setBackgroundColor(getResources().getColor(R.color.primaryColor));
+        mainActivity.getSupportActionBar().setTitle("Settings");
+
         view.findViewById(R.id.settingsSpotifyLogin).setOnClickListener(this);
         view.findViewById(R.id.settingsSpotifyLogout).setOnClickListener(this);
 
@@ -33,10 +38,10 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        if(v == getView().findViewById(R.id.settingsSpotifyLogin)) {
+        if (v == getView().findViewById(R.id.settingsSpotifyLogin)) {
             mainActivity.authenticateSpotify();
-        } else if(v == getView().findViewById(R.id.settingsSpotifyLogout)) {
-
+        } else if (v == getView().findViewById(R.id.settingsSpotifyLogout)) {
+            mainActivity.spotifyLogout();
         }
     }
 }

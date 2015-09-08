@@ -82,6 +82,8 @@ public class MainActivity extends AppCompatActivity
 
     public boolean spotifyAuthenticated;
     public static final String PREF_SPOTIFY_AUTHENTICATED = "spotify_authenticated";
+    public AuthenticationResponse authResponse;
+    public String spotifyAuthToken;
 
     public Player mPlayer;
     public boolean mPlayerPlaying;
@@ -303,9 +305,12 @@ public class MainActivity extends AppCompatActivity
 
         // Check if result comes from the correct activity
         if (requestCode == REQUEST_CODE) {
-            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-            if (response.getType() == AuthenticationResponse.Type.TOKEN) {
-                Config playerConfig = new Config(this, response.getAccessToken(), CLIENT_ID);
+            authResponse = AuthenticationClient.getResponse(resultCode, intent);
+            if (authResponse.getType() == AuthenticationResponse.Type.TOKEN) {
+                spotifyAuthenticated = true;
+                pref.edit().putBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, true).apply();
+                spotifyAuthToken = authResponse.getAccessToken();
+                Config playerConfig = new Config(this, spotifyAuthToken, CLIENT_ID);
                 mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
                     @Override
                     public void onInitialized(Player player) {
@@ -330,12 +335,21 @@ public class MainActivity extends AppCompatActivity
     public void onLoggedIn() {
         spotifyAuthenticated = true;
         pref.edit().putBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, true).apply();
+        Log.d("Authentication", "Logged In to Spotify");
     }
 
     @Override
     public void onLoggedOut() {
         spotifyAuthenticated = false;
         pref.edit().putBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false).apply();
+        Log.d("Authentication", "Logged Out of Spotify");
+    }
+
+    public void spotifyLogout() {
+        AuthenticationClient.logout(mainActivity.getApplicationContext());
+        spotifyAuthenticated = false;
+        pref.edit().putBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false).apply();
+        Log.d("Authentication", "Logged Out of Spotify");
     }
 
     @Override
