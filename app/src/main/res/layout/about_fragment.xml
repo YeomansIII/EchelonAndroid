@@ -18,15 +18,15 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Created By: Jason Yeomans"
         android:id="@+id/textView2"
-        android:padding="5dp" />
+        android:padding="10dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Version: 1.5"
+        android:text="Version: 0.1.5"
         android:id="@+id/textView3"
-        android:padding="5dp" />
+        android:padding="10dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -34,7 +34,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Special thanks to all testers! ;-)"
         android:id="@+id/textView4"
-        android:padding="5dp" />
+        android:padding="10dp" />
 
     <TextView
         android:layout_width="wrap_content"
