@@ -27,9 +27,9 @@ public class AboutFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.list_song_fragment,
+        View view = inflater.inflate(R.layout.about_fragment,
                 container, false);
-        
+
         this.view = view;
         return view;
     }
