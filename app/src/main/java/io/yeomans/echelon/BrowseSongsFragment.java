@@ -5,13 +5,16 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import org.apache.http.HttpEntity;
@@ -53,6 +56,8 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
         View view = inflater.inflate(R.layout.browse_songs_fragment,
                 container, false);
 
+        getFeaturedPlaylists();
+
         this.view = view;
         return view;
     }
@@ -62,10 +67,10 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
     }
 
     public void select() {
-        if (!selected) {
-            selected = true;
-            getFeaturedPlaylists();
-        }
+//        if (!selected) {
+//            selected = true;
+//            getFeaturedPlaylists();
+//        }
     }
 
     public void getFeaturedPlaylists() {
@@ -97,13 +102,18 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
                 Log.d("GettingPlaylists", msg);
 
                 try {
-                    JSONObject json = new JSONObject(msg).getJSONObject("playlists");
+                    JSONObject msgJson = new JSONObject(msg);
+                    ((TextView) view.findViewById(R.id.featuredPlaylistsMessage)).setText(msgJson.getString("message"));
+                    JSONObject json = msgJson.getJSONObject("playlists");
                     JSONArray items = json.getJSONArray("items");
                     Log.d("GettingPlaylists", items.toString());
-                    LinearLayout playlistList = (LinearLayout) view.findViewById(R.id.featuredPlaylistsListLayout);
-                    playlistList.removeAllViews();
+                    LinearLayout playlistListLeft = (LinearLayout) view.findViewById(R.id.featuredPlaylistsListLayoutLeft);
+                    LinearLayout playlistListRight = (LinearLayout) view.findViewById(R.id.featuredPlaylistsListLayoutRight);
+                    playlistListLeft.removeAllViews();
+                    playlistListRight.removeAllViews();
                     playlistListArr = new ArrayList<>();
-                    for (int i = 0; i < items.length() - 1; i++) {
+                    boolean colLeft = true;
+                    for (int i = 0; i < items.length(); i++) {
                         JSONObject curObj = items.getJSONObject(i);
 
                         RelativeLayout rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.playlist_item, null);
@@ -112,26 +122,28 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
 
                         songTitleText.setText(curObj.getString("name"));
                         new ImageLoadTask(curObj.getJSONArray("images").getJSONObject(0).getString("url"), albumArtImage).execute();
-                        rt.setTag(curObj.getString("id"));
-//                        rt.setOnClickListener(new View.OnClickListener() {
-//                            @Override
-//                            public void onClick(View v) {
-//                                try {
-//                                    for (RelativeLayout view : songListArr) {
-//                                        view.setOnClickListener(null);
-//                                    }
-//                                    view.setBackgroundColor(Color.DKGRAY);
-//                                    JSONObject queueJson = new JSONObject("{}");
-//                                    queueJson.put("spotify_id", (String) v.getTag());
-//                                    BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/queue-song/", queueJson.toString(), (MainActivity) songSearchFrag.getActivity());
-//                                    BackendRequest.queueNewSong(be);
-//                                } catch (JSONException je) {
-//                                    je.printStackTrace();
-//                                }
-//                            }
-//                        });
+                        rt.setTag(R.string.list_id, curObj.getString("id"));
+                        rt.setTag(R.string.owner_id, curObj.getJSONObject("owner").getString("id"));
+                        rt.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                FragmentTransaction ft = mainActivity.getSupportFragmentManager().beginTransaction();
+                                ListSongFragment lsf = new ListSongFragment();
+                                Bundle bundle = new Bundle();
+                                bundle.putString("list_id", v.getTag(R.string.list_id).toString());
+                                bundle.putString("owner_id", v.getTag(R.string.owner_id).toString());
+                                lsf.setArguments(bundle);
+                                ft.replace(R.id.container, lsf, "SONG_LIST_FRAG").addToBackStack(null).commit();
+                            }
+                        });
                         playlistListArr.add(rt);
-                        playlistList.addView(rt);
+                        if(colLeft) {
+                            playlistListLeft.addView(rt);
+                            colLeft = false;
+                        } else {
+                            playlistListRight.addView(rt);
+                            colLeft = true;
+                        }
                     }
                 } catch (JSONException je) {
                     je.printStackTrace();

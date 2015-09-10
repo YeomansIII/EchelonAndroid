@@ -95,7 +95,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
     public void login() {
         ArrayList<NameValuePair> paramList = new ArrayList<NameValuePair>();
-        paramList.add(new BasicNameValuePair("username", ((TextInputLayout) view.findViewById(R.id.usernameEditWrapper)).getEditText().getText().toString()));
+        paramList.add(new BasicNameValuePair("username", ((TextInputLayout) view.findViewById(R.id.usernameEditWrapper)).getEditText().getText().toString().toLowerCase()));
         paramList.add(new BasicNameValuePair("password", ((TextInputLayout) view.findViewById(R.id.passwordEditWrapper)).getEditText().getText().toString()));
         BackendRequest be = new BackendRequest("api-token-auth/", paramList, (MainActivity) getActivity());
         BackendRequest.login(be);
@@ -118,7 +118,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
             String username = usernameInput.getEditText().getText().toString();
             boolean fieldsExist = false;
             if (!username.equals("")) {
-                json.put("username", username);
+                json.put("username", username.toLowerCase());
                 String password = passwordInput.getEditText().getText().toString();
                 String password2 = password2Input.getEditText().getText().toString();
                 if (password.equals(password2) && !password.equals("")) {

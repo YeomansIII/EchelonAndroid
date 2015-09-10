@@ -284,12 +284,16 @@ public class MainActivity extends AppCompatActivity
                 returner = true;
                 break;
             case R.id.drawer_settings:
-                fragmentTransaction.replace(R.id.container, new SettingsFragment(), "SETTINGS_FRAG").commit();
+                fragmentTransaction.replace(R.id.container, new SettingsFragment(), "SETTINGS_FRAG").addToBackStack(null).commit();
                 returner = true;
                 break;
             case R.id.drawer_bug:
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://docs.google.com/forms/d/1xta8IsctqjHZ-o5-NNOgUUIuX9WFjsqvWFFaWnLauLw/viewform?usp=send_form"));
                 startActivity(browserIntent);
+                break;
+            case R.id.drawer_about:
+                fragmentTransaction.replace(R.id.container, new AboutFragment(), "ABPOUT_FRAG").addToBackStack(null).commit();
+                returner = true;
                 break;
         }
         if (returner) {
