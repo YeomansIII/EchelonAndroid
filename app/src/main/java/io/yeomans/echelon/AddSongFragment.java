@@ -20,11 +20,6 @@ public class AddSongFragment extends Fragment {
     TabLayout tabLayout;
     ViewPager viewPager;
     ViewPagerAdapter viewPagerAdapter;
-    QueueFragment queueFragment;
-    boolean isDestroyed = false;
-    private ControlBarFragment controlBar;
-    private boolean leader;
-    private boolean shouldExecuteOnResume;
     private SongSearchFragment songSearchFragment;
     private BrowseSongsFragment browseSongsFragment;
     private SharedPreferences groupSettings;
@@ -96,8 +91,10 @@ public class AddSongFragment extends Fragment {
             ViewPagerAdapter adapter = new ViewPagerAdapter(getChildFragmentManager());
             songSearchFragment = new SongSearchFragment();
             adapter.addFrag(songSearchFragment, "Search");
-            browseSongsFragment = new BrowseSongsFragment();
-            adapter.addFrag(browseSongsFragment, "Browse");
+            if(mainActivity.spotifyAuthenticated) {
+                browseSongsFragment = new BrowseSongsFragment();
+                adapter.addFrag(browseSongsFragment, "Browse");
+            }
             viewPagerAdapter = adapter;
             viewPager.setAdapter(adapter);
         } else {

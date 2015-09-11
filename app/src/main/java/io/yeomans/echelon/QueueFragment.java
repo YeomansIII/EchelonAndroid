@@ -8,15 +8,20 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -126,17 +131,55 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
             //playqueue.clear();
             for (int i = 0; i < playqueue.size(); i++) {
                 //JSONObject curObj = .getJSONObject(i);
-                SpotifySong curSong = playqueue.get(i);
+                final SpotifySong curSong = playqueue.get(i);
 
                 RelativeLayout rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.song_item, null);
                 ImageView albumArtImage = (ImageView) rt.findViewById(R.id.albumArtImage);
                 TextView songTitleText = (TextView) rt.findViewById(R.id.songTitleText);
                 TextView songArtistText = (TextView) rt.findViewById(R.id.songArtistText);
+                RelativeLayout voteControlsLayout = (RelativeLayout) rt.findViewById(R.id.songItemVoterLayout);
+                voteControlsLayout.setVisibility(View.VISIBLE);
+                ImageButton voteUp = (ImageButton) rt.findViewById(R.id.voteSongUpButton);
+                ImageButton voteDown = (ImageButton) rt.findViewById(R.id.voteSongDownButton);
+                TextView rating = (TextView) rt.findViewById(R.id.songRatingText);
+
+                rating.setText("" + curSong.getRating());
+                voteUp.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            v.setOnClickListener(null);
+                            JSONObject json = new JSONObject("{}");
+                            json.put("pk", curSong.getPk());
+                            json.put("vote", 1);
+                            Log.d("SongVote", json.toString());
+                            BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
+                            BackendRequest.updateSong(be);
+                        } catch (JSONException je) {
+                            je.printStackTrace();
+                        }
+                    }
+                });
+                voteDown.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            v.setOnClickListener(null);
+                            JSONObject json = new JSONObject("{}");
+                            json.put("pk", curSong.getPk());
+                            json.put("vote", -1);
+                            BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
+                            BackendRequest.updateSong(be);
+                        } catch (JSONException je) {
+                            je.printStackTrace();
+                        }
+                    }
+                });
 
                 songTitleText.setText(curSong.getTitle());
                 songArtistText.setText(curSong.getArtist());
                 new ImageLoadTask(curSong.getAlbumArtSmall(), albumArtImage).execute();
-                String uri = curSong.getUri();
+                //String uri = curSong.getUri();
                 //mainActivity.playQueue.add(uri);
                 rt.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -157,7 +200,8 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
             TextView tv = new TextView(getActivity().getApplicationContext());
             tv.setText("No songs in queue. Search for a song!");
             tv.setTextColor(Color.BLACK);
-            tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            tv.setGravity(Gravity.CENTER);
+            //tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             songList.addView(tv);
         }
         Log.d("Play", "PlayQueueList End: " + playqueue);

@@ -7,6 +7,7 @@
         <!--<item name="android:windowNoTitle">true</item>-->
         <!--<item name="windowActionBar">false</item>-->
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+        <item name="android:imageButtonStyle">@style/ClearImageButton</item>
     </style>
 
     <style name="ThemeActionBar"
@@ -28,4 +29,7 @@
         <item name="colorControlHighlight">@color/pearlBlueLuster</item>
     </style>
 
+    <style name="ClearImageButton" parent="android:Widget.ImageButton">
+        <item name="android:background">@null</item>
+    </style>
 </resources>

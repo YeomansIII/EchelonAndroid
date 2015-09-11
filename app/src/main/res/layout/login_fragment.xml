@@ -38,8 +38,9 @@
                 android:layout_height="45dp"
                 android:layout_gravity="center_horizontal"
                 android:background="@null"
-                android:drawableLeft="@drawable/account_outline"
+                android:drawableLeft="@drawable/ic_account_outline_black_24dp"
                 android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_account_outline_black_24dp"
                 android:hint="Username"
                 android:inputType="textShortMessage" />
         </android.support.design.widget.TextInputLayout>
@@ -56,8 +57,9 @@
                 android:layout_height="45dp"
                 android:layout_gravity="center_horizontal"
                 android:background="@null"
-                android:drawableLeft="@drawable/lock_outline"
+                android:drawableLeft="@drawable/ic_lock_outline_black_24dp"
                 android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_lock_outline_black_24dp"
                 android:ems="10"
                 android:hint="Password"
                 android:inputType="textPassword" />
@@ -120,8 +122,9 @@
                 android:layout_height="45dp"
                 android:layout_gravity="center_horizontal"
                 android:background="@null"
-                android:drawableLeft="@drawable/account_outline"
+                android:drawableLeft="@drawable/ic_account_outline_black_24dp"
                 android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_account_outline_black_24dp"
                 android:hint="Username"
                 android:inputType="textShortMessage"
                 android:singleLine="true" />
@@ -139,8 +142,9 @@
                 android:layout_height="45dp"
                 android:layout_gravity="center_horizontal"
                 android:background="@null"
-                android:drawableLeft="@drawable/lock_outline"
+                android:drawableLeft="@drawable/ic_lock_outline_black_24dp"
                 android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_lock_outline_black_24dp"
                 android:ems="10"
                 android:hint="Password"
                 android:inputType="textPassword" />
@@ -158,8 +162,9 @@
                 android:layout_height="45dp"
                 android:layout_gravity="center_horizontal"
                 android:background="@null"
-                android:drawableLeft="@drawable/lock_outline"
+                android:drawableLeft="@drawable/ic_lock_outline_black_24dp"
                 android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_lock_outline_black_24dp"
                 android:ems="10"
                 android:hint="Re-enter Password"
                 android:inputType="textPassword" />
@@ -178,8 +183,9 @@
                 android:layout_height="45dp"
                 android:layout_gravity="center_horizontal"
                 android:background="@null"
-                android:drawableLeft="@drawable/email_outline"
+                android:drawableLeft="@drawable/ic_email_outline_black_24dp"
                 android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_email_outline_black_24dp"
                 android:ems="10"
                 android:hint="Email"
                 android:inputType="textEmailAddress" />

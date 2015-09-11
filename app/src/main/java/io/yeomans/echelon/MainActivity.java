@@ -120,6 +120,7 @@ public class MainActivity extends AppCompatActivity
     SharedPreferences pref, groupPref;
     Context context;
     MainActivity mainActivity;
+    MainActivity mainActivityClass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,6 +130,7 @@ public class MainActivity extends AppCompatActivity
 
         context = getApplicationContext();
         mainActivity = this;
+        mainActivityClass = MainActivity.this;
 
         pref = getSharedPreferences(MAIN_PREFS_NAME, 0);
         groupPref = getSharedPreferences(GROUP_PREFS_NAME, 0);

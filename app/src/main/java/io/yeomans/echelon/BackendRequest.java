@@ -1,6 +1,7 @@
 package io.yeomans.echelon;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -390,7 +391,7 @@ public class BackendRequest {
                             JSONArray participantsJson = responseJson.getJSONArray("participants");
                             String jsonArrayString = participantsJson.toString();
                             Log.d("BackendRequest", jsonArrayString);
-                            Log.d("BackendRequest", "Wrote to storage: "+settings2.edit().putString(MainActivity.PREF_GROUP_PARTICIPANTS_JSON, jsonArrayString).commit());
+                            Log.d("BackendRequest", "Wrote to storage: " + settings2.edit().putString(MainActivity.PREF_GROUP_PARTICIPANTS_JSON, jsonArrayString).commit());
                             JSONArray trackQueueJson = responseJson.getJSONArray("track_queue");
                             String spotifyResponse = "";
                             ArrayList<SpotifySong> backStack = activity.backStack;
@@ -436,7 +437,8 @@ public class BackendRequest {
                                                 spotifyTrackJson.getInt("duration_ms"),
                                                 images.getJSONObject(2).getString("url"),
                                                 images.getJSONObject(1).getString("url"),
-                                                images.getJSONObject(0).getString("url")
+                                                images.getJSONObject(0).getString("url"),
+                                                trackJson.getInt("rating")
                                         );
                                         if (ss.isBackStack()) {
                                             backStack.add(ss);
@@ -549,6 +551,11 @@ public class BackendRequest {
 
                 @Override
                 protected void onPostExecute(String msg) {
+                    Log.d("UpdateSongPost", msg);
+//                    AlertDialog.Builder builder = new AlertDialog.Builder(activity.mainActivityClass);
+//                    builder.setTitle("Title");
+//                    builder.setMessage(msg);
+//                    AlertDialog dialog = builder.show();
                 }
             }.execute(be, null, null);
         }
