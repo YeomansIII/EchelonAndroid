@@ -41,6 +41,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -90,8 +91,8 @@ public class MainActivity extends AppCompatActivity
     public boolean mPlayerCherry;
     public boolean playerReady;
     public boolean loggedIn;
-    public ArrayList<SpotifySong> backStack;
-    public ArrayList<SpotifySong> playQueue;
+    public LinkedList<SpotifySong> backStack;
+    public LinkedList<SpotifySong> playQueue;
     private OnPlayerControlCallback mPlayerControlCallback;
 
     //GCM
@@ -139,8 +140,8 @@ public class MainActivity extends AppCompatActivity
 
         loggedIn = pref.getBoolean(PREF_LISTENER_LOGGED_IN, false);
 
-        playQueue = new ArrayList<>();
-        backStack = new ArrayList<>();
+        playQueue = new LinkedList<>();
+        backStack = new LinkedList<>();
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -382,6 +383,7 @@ public class MainActivity extends AppCompatActivity
                 JSONObject json = new JSONObject("{}");
                 json.put("pk", old.getPk());
                 json.put("played", true);
+                json.put("now_playing", false);
                 BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
                 BackendRequest.updateSong(be);
             } catch (JSONException je) {
@@ -390,7 +392,17 @@ public class MainActivity extends AppCompatActivity
             backStack.add(old);
             playQueue.remove(0);
             if (playQueue.size() > 0) {
-                mPlayer.play(playQueue.get(0).getUri());
+                SpotifySong toPlay = playQueue.get(0);
+                mPlayer.play(toPlay.getUri());
+                try {
+                    JSONObject json = new JSONObject("{}");
+                    json.put("pk", toPlay.getPk());
+                    json.put("now_playing", true);
+                    BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
+                    BackendRequest.updateSong(be);
+                } catch (JSONException je) {
+                    je.printStackTrace();
+                }
             } else {
                 mPlayerCherry = true;
                 mPlayerPlaying = false;
@@ -412,7 +424,17 @@ public class MainActivity extends AppCompatActivity
     public void playFirstSong() {
         Log.d("Play", "PlayQueue: " + playQueue);
         if (playQueue.size() > 0) {
-            mPlayer.play(playQueue.get(0).getUri());
+            SpotifySong toPlay = playQueue.get(0);
+            mPlayer.play(toPlay.getUri());
+            try {
+                JSONObject json = new JSONObject("{}");
+                json.put("pk", toPlay.getPk());
+                json.put("now_playing", true);
+                BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
+                BackendRequest.updateSong(be);
+            } catch (JSONException je) {
+                je.printStackTrace();
+            }
             mPlayerCherry = false;
         }
     }

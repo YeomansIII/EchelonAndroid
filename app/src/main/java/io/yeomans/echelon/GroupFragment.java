@@ -28,11 +28,13 @@ public class GroupFragment extends Fragment {
     private ControlBarFragment controlBar;
     private boolean leader;
     private boolean shouldExecuteOnResume;
+    SharedPreferences groupPref;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mainActivity = (MainActivity) getActivity();
+        groupPref = mainActivity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
     }
 
     @Override
@@ -44,7 +46,7 @@ public class GroupFragment extends Fragment {
         groupSettings = getActivity().getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
 
         mainActivity.toolbar.setBackgroundColor(getResources().getColor(R.color.primaryColor));
-        mainActivity.getSupportActionBar().setTitle("Echelon");
+        mainActivity.getSupportActionBar().setTitle(groupPref.getString(MainActivity.PREF_GROUP_OWNER_USERNAME, "error"));
 
         setHasOptionsMenu(true);
 

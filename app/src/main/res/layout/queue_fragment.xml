@@ -23,7 +23,7 @@
                 android:layout_height="fill_parent"
                 android:layout_gravity="center_horizontal"
                 android:orientation="vertical"
-                android:paddingTop="60dp" />
+                android:paddingTop="0dp" />
         </LinearLayout>
     </ScrollView>
 
@@ -40,7 +40,8 @@
         android:textAlignment="center"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@android:color/black"
-        android:textSize="20pt" />
+        android:textSize="20pt"
+        android:visibility="gone"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/groupAddSongButton"

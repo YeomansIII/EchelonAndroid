@@ -4,11 +4,11 @@
     <color name="primaryColorDark">#412F49</color>
     <color name="primaryAccent">#57387B</color>
     <color name="full_red">#ff0000</color>
-    <color name="pearlBlueLuster">#E3E1F6</color>
-    <color name="seaFrost">#94BAC7</color>
-    <color name="heroMode">#57387B</color>
-    <color name="purpleRain">#4A3264</color>
-    <color name="otherSide">#412F49</color>
+    <color name="ech_pearlBlueLuster">#E3E1F6</color>
+    <color name="ech_seaFrost">#94BAC7</color>
+    <color name="ech_heroMode">#57387B</color>
+    <color name="ech_purpleRain">#4A3264</color>
+    <color name="ech_otherSide">#412F49</color>
     <color name="transparent">#FF000000</color>
 
 

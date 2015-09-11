@@ -3,7 +3,7 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryDark">@color/primaryColorDark</item>
-        <item name="colorAccent">@color/heroMode</item>
+        <item name="colorAccent">@color/ech_heroMode</item>
         <!--<item name="android:windowNoTitle">true</item>-->
         <!--<item name="windowActionBar">false</item>-->
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
@@ -25,8 +25,8 @@
     <style name="LoginFragText" parent="@android:style/TextAppearance.Medium">
         <item name="android:textColor">#FFFFFF</item>
         <item name="colorControlNormal">#FFFFFF</item>
-        <item name="colorControlActivated">@color/seaFrost</item>
-        <item name="colorControlHighlight">@color/pearlBlueLuster</item>
+        <item name="colorControlActivated">@color/ech_seaFrost</item>
+        <item name="colorControlHighlight">@color/ech_pearlBlueLuster</item>
     </style>
 
     <style name="ClearImageButton" parent="android:Widget.ImageButton">

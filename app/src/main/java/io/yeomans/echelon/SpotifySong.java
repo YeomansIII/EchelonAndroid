@@ -28,8 +28,9 @@ public class SpotifySong {
     private String albumArtMedium;
     private String albumArtLarge;
     private int rating;
+    private boolean nowPlaying;
 
-    public SpotifySong(int pk, boolean backStack, String songId, String uri, String title, String artist, String album, int lengthMs, String albumArtSmall, String albumArtMedium, String albumArtLarge, int rating) {
+    public SpotifySong(int pk, boolean backStack, String songId, String uri, String title, String artist, String album, int lengthMs, String albumArtSmall, String albumArtMedium, String albumArtLarge, int rating, boolean nowPlaying) {
         this.pk = pk;
         this.backStack = backStack;
         this.songId = songId;
@@ -42,6 +43,7 @@ public class SpotifySong {
         this.albumArtMedium = albumArtMedium;
         this.albumArtLarge = albumArtLarge;
         this.rating = rating;
+        this.nowPlaying = nowPlaying;
     }
 
     public String getSongId() {
@@ -138,6 +140,14 @@ public class SpotifySong {
 
     public void setRating(int rating) {
         this.rating = rating;
+    }
+
+    public boolean isNowPlaying() {
+        return nowPlaying;
+    }
+
+    public void setNowPlaying(boolean nowPlaying) {
+        this.nowPlaying = nowPlaying;
     }
 
     private void fillSongData() {

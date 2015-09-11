@@ -36,6 +36,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Created by jason on 6/30/15.
@@ -394,8 +395,8 @@ public class BackendRequest {
                             Log.d("BackendRequest", "Wrote to storage: " + settings2.edit().putString(MainActivity.PREF_GROUP_PARTICIPANTS_JSON, jsonArrayString).commit());
                             JSONArray trackQueueJson = responseJson.getJSONArray("track_queue");
                             String spotifyResponse = "";
-                            ArrayList<SpotifySong> backStack = activity.backStack;
-                            ArrayList<SpotifySong> playqueue = activity.playQueue;
+                            LinkedList<SpotifySong> backStack = activity.backStack;
+                            LinkedList<SpotifySong> playqueue = activity.playQueue;
                             backStack.clear();
                             playqueue.clear();
                             int startAt = -1;
@@ -438,10 +439,13 @@ public class BackendRequest {
                                                 images.getJSONObject(2).getString("url"),
                                                 images.getJSONObject(1).getString("url"),
                                                 images.getJSONObject(0).getString("url"),
-                                                trackJson.getInt("rating")
+                                                trackJson.getInt("rating"),
+                                                trackJson.getBoolean("now_playing")
                                         );
                                         if (ss.isBackStack()) {
                                             backStack.add(ss);
+                                        } else if (ss.isNowPlaying()) {
+                                            playqueue.addFirst(ss);
                                         } else {
                                             playqueue.add(ss);
                                         }

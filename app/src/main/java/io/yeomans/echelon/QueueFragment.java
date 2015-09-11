@@ -24,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Created by jason on 6/26/15.
@@ -116,7 +117,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
 
         //SharedPreferences pref = getActivity().getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
         //String queue_json = pref.getString("group_current_queue_json", "");
-        ArrayList<SpotifySong> playqueue = mainActivity.playQueue;
+        LinkedList<SpotifySong> playqueue = mainActivity.playQueue;
 
         Log.d("Play", "PlayQueueList: " + playqueue);
 
@@ -132,49 +133,56 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
             for (int i = 0; i < playqueue.size(); i++) {
                 //JSONObject curObj = .getJSONObject(i);
                 final SpotifySong curSong = playqueue.get(i);
-
-                RelativeLayout rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.song_item, null);
+                RelativeLayout rt;
+                if (curSong.isNowPlaying()) {
+                    rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.now_playing_item, null);
+                } else {
+                    rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.song_item, null);
+                }
                 ImageView albumArtImage = (ImageView) rt.findViewById(R.id.albumArtImage);
                 TextView songTitleText = (TextView) rt.findViewById(R.id.songTitleText);
                 TextView songArtistText = (TextView) rt.findViewById(R.id.songArtistText);
                 RelativeLayout voteControlsLayout = (RelativeLayout) rt.findViewById(R.id.songItemVoterLayout);
-                voteControlsLayout.setVisibility(View.VISIBLE);
-                ImageButton voteUp = (ImageButton) rt.findViewById(R.id.voteSongUpButton);
-                ImageButton voteDown = (ImageButton) rt.findViewById(R.id.voteSongDownButton);
-                TextView rating = (TextView) rt.findViewById(R.id.songRatingText);
 
-                rating.setText("" + curSong.getRating());
-                voteUp.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        try {
-                            v.setOnClickListener(null);
-                            JSONObject json = new JSONObject("{}");
-                            json.put("pk", curSong.getPk());
-                            json.put("vote", 1);
-                            Log.d("SongVote", json.toString());
-                            BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
-                            BackendRequest.updateSong(be);
-                        } catch (JSONException je) {
-                            je.printStackTrace();
+                if (!curSong.isNowPlaying()) {
+                    voteControlsLayout.setVisibility(View.VISIBLE);
+                    ImageButton voteUp = (ImageButton) rt.findViewById(R.id.voteSongUpButton);
+                    ImageButton voteDown = (ImageButton) rt.findViewById(R.id.voteSongDownButton);
+                    TextView rating = (TextView) rt.findViewById(R.id.songRatingText);
+
+                    rating.setText("" + curSong.getRating());
+                    voteUp.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            try {
+                                v.setOnClickListener(null);
+                                JSONObject json = new JSONObject("{}");
+                                json.put("pk", curSong.getPk());
+                                json.put("vote", 1);
+                                Log.d("SongVote", json.toString());
+                                BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
+                                BackendRequest.updateSong(be);
+                            } catch (JSONException je) {
+                                je.printStackTrace();
+                            }
                         }
-                    }
-                });
-                voteDown.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        try {
-                            v.setOnClickListener(null);
-                            JSONObject json = new JSONObject("{}");
-                            json.put("pk", curSong.getPk());
-                            json.put("vote", -1);
-                            BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
-                            BackendRequest.updateSong(be);
-                        } catch (JSONException je) {
-                            je.printStackTrace();
+                    });
+                    voteDown.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            try {
+                                v.setOnClickListener(null);
+                                JSONObject json = new JSONObject("{}");
+                                json.put("pk", curSong.getPk());
+                                json.put("vote", -1);
+                                BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
+                                BackendRequest.updateSong(be);
+                            } catch (JSONException je) {
+                                je.printStackTrace();
+                            }
                         }
-                    }
-                });
+                    });
+                }
 
                 songTitleText.setText(curSong.getTitle());
                 songArtistText.setText(curSong.getArtist());
