@@ -82,6 +82,19 @@ public class MainActivity extends AppCompatActivity
     public static final String PREF_LISTENER_EMAIL = "listener_email";
     public static final String PREF_LISTENER_GCM_ID = "listener_gcm_id";
 
+    //SPOTIFY USER PREF
+    public static final String PREF_SPOTIFY_AUTHENTICATED = "spotify_authenticated";
+    public static final String PREF_SPOTIFY_AUTH_TOKEN = "spotify_auth_token";
+    public static final String PREF_SPOTIFY_UID = "spotify_uid";
+    public static final String PREF_SPOTIFY_DISPLAY_NAME = "spotify_display_name";
+    public static final String PREF_SPOTIFY_EMAIL = "spotify_email";
+    public static final String PREF_SPOTIFY_COUNTRY = "spotify_country";
+    public static final String PREF_SPOTIFY_EXT_URL = "spotify_ext_url";
+    public static final String PREF_SPOTIFY_PRODUCT = "spotify_product";
+    public static final String PREF_SPOTIFY_TYPE = "spotify_type";
+    public static final String PREF_SPOTIFY_URI = "spotify_uri";
+    public static final String PREF_SPOTIFY_IMAGE_URL = "spotify_image_url";
+
     //GROUP PREF
     public static final String PREF_GROUP_PK = "group_pk";
     public static final String PREF_GROUP_OWNER_PK = "group_owner_pk";
@@ -94,7 +107,6 @@ public class MainActivity extends AppCompatActivity
     public static final int REQUEST_CODE = 9001;
 
     public boolean spotifyAuthenticated;
-    public static final String PREF_SPOTIFY_AUTHENTICATED = "spotify_authenticated";
     public AuthenticationResponse authResponse;
     public String spotifyAuthToken;
 
@@ -109,7 +121,7 @@ public class MainActivity extends AppCompatActivity
 
     //GCM
     public static final String EXTRA_MESSAGE = "message";
-    public static final String PROPERTY_REG_ID = "listener_gcm_id";
+    public static final String PROPERTY_REG_ID = "device_gcm_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
@@ -130,7 +142,7 @@ public class MainActivity extends AppCompatActivity
 
     //FIREBASE
     Firebase myFirebaseRef;
-
+    public static final String PREF_FIREBASE_UID = "firebase_uid";
 
     //COMMON
     SharedPreferences pref, groupPref;
@@ -230,7 +242,7 @@ public class MainActivity extends AppCompatActivity
         // Initializing Drawer Layout and ActionBarToggle
         //drawerLayout.setVisibility(View.VISIBLE);
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-        ((TextView) findViewById(R.id.navHeaderUsernameText)).setText(pref.getString(PREF_LISTENER_USERNAME, "error"));
+        ((TextView) findViewById(R.id.navHeaderUsernameText)).setText(pref.getString(PREF_SPOTIFY_DISPLAY_NAME, "error"));
 
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
 
@@ -336,10 +348,13 @@ public class MainActivity extends AppCompatActivity
             authResponse = AuthenticationClient.getResponse(resultCode, intent);
             if (authResponse.getType() == AuthenticationResponse.Type.TOKEN) {
                 spotifyAuthenticated = true;
-                pref.edit().putBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, true).apply();
                 spotifyAuthToken = authResponse.getAccessToken();
+                pref.edit()
+                        .putBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, true)
+                        .putString(MainActivity.PREF_SPOTIFY_AUTH_TOKEN, spotifyAuthToken)
+                        .apply();
 
-                BackendRequest be = new BackendRequest("GET",this);
+                BackendRequest be = new BackendRequest("GET", this);
                 BackendRequest.getSpotifyMeAuth(be);
 //                Config playerConfig = new Config(this, spotifyAuthToken, CLIENT_ID);
 //                mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
@@ -487,7 +502,7 @@ public class MainActivity extends AppCompatActivity
     public void authenticateSpotify() {
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(MainActivity.CLIENT_ID,
                 AuthenticationResponse.Type.TOKEN, MainActivity.REDIRECT_URI);
-        builder.setScopes(new String[]{"user-read-private", "streaming"});
+        builder.setScopes(new String[]{"user-read-private", "streaming", "user-read-email"});
         AuthenticationRequest request = builder.build();
         AuthenticationClient.openLoginActivity(this, MainActivity.REQUEST_CODE, request);
     }

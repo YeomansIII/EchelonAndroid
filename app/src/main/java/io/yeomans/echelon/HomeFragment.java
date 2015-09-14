@@ -14,8 +14,14 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.client.Firebase;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by jason on 7/1/15.
@@ -69,9 +75,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
             GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
             if (groupFragment == null || groupFragment.isDestroyed) {
-                if (mainPref.getBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false)) {
-                    BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/activate-my-group/", (MainActivity) getActivity());
-                    BackendRequest.activateJoinGroup(be);
+                if (mainPref.getBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false) && mainPref.getString(MainActivity.PREF_SPOTIFY_PRODUCT, "").equalsIgnoreCase("premium")) {
+                    Firebase refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups");
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("name", "testname");
+                    refQueueGroups.push().setValue(map);
                 } else {
                     Toast.makeText(getActivity().getApplicationContext(), "Please login to your Spotify Premium account under settings", Toast.LENGTH_LONG).show();
                 }

@@ -15,8 +15,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import com.firebase.client.AuthData;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.apache.http.Header;
@@ -39,7 +41,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * Created by jason on 6/30/15.
@@ -640,10 +644,23 @@ public class BackendRequest {
                     Log.d("GetSpotifyMe", msg);
                     try {
                         JSONObject spotify = new JSONObject(msg);
+
+                        SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putString(MainActivity.PREF_SPOTIFY_UID, spotify.getString("id"));
+                        editor.putString(MainActivity.PREF_SPOTIFY_DISPLAY_NAME, spotify.getString("display_name"));
+                        editor.putString(MainActivity.PREF_SPOTIFY_EMAIL, spotify.getString("email"));
+                        editor.putString(MainActivity.PREF_SPOTIFY_EXT_URL, spotify.getJSONObject("external_urls").getString("spotify"));
+                        editor.putString(MainActivity.PREF_SPOTIFY_COUNTRY, spotify.getString("country"));
+                        editor.putString(MainActivity.PREF_SPOTIFY_IMAGE_URL, spotify.getJSONArray("images").getJSONObject(0).getString("url"));
+                        editor.putString(MainActivity.PREF_SPOTIFY_PRODUCT, spotify.getString("product"));
+                        editor.putString(MainActivity.PREF_SPOTIFY_TYPE, spotify.getString("type"));
+                        editor.putString(MainActivity.PREF_SPOTIFY_URI, spotify.getString("uri"));
+                        editor.apply();
+
                         JSONObject tokenAuth = new JSONObject();
-                        tokenAuth.put("uid", spotify.getString("id"));
-                        tokenAuth.put("access_token",activity.spotifyAuthToken);
-                        //tokenAuth.put("email", spotify.getString("email"));
+                        tokenAuth.put("uid", spotify.getString("id") + "_spotify");
+                        tokenAuth.put("access_token", activity.spotifyAuthToken);
                         BackendRequest bee = new BackendRequest("POST", "http://api.echelonapp.io:8081/spotify-auth/", tokenAuth.toString(), activity);
                         BackendRequest.getFirebaseSpotifyToken(bee);
                     } catch (JSONException je) {
@@ -691,6 +708,44 @@ public class BackendRequest {
                             FragmentManager fragmentManager = activity.getSupportFragmentManager();
                             fragmentManager.beginTransaction().replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
                             activity.setUpNavDrawerAndActionBar();
+                            String fUid = authData.getUid();
+                            SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
+                            pref.edit().putString(MainActivity.PREF_FIREBASE_UID, fUid).commit();
+                            Firebase user = activity.myFirebaseRef.child("users").child(fUid);
+
+                            user.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    Log.d("GetFirebaseSpotifyToken", "DATA CHANGED");
+                                    if (dataSnapshot.getValue() == null) {
+                                        Log.d("GetFirebaseSpotifyToken", "New User, creating in DB");
+                                        SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
+                                        Map<String, Object> userInfo = new HashMap<>();
+                                        userInfo.put("id", pref.getString(MainActivity.PREF_SPOTIFY_UID, null));
+                                        userInfo.put("display_name", pref.getString(MainActivity.PREF_SPOTIFY_DISPLAY_NAME, null));
+                                        userInfo.put("email", pref.getString(MainActivity.PREF_SPOTIFY_EMAIL, null));
+                                        userInfo.put("country", pref.getString(MainActivity.PREF_SPOTIFY_COUNTRY, null));
+                                        userInfo.put("ext_url", pref.getString(MainActivity.PREF_SPOTIFY_EXT_URL, null));
+                                        userInfo.put("image_url", pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, null));
+                                        userInfo.put("product", pref.getString(MainActivity.PREF_SPOTIFY_PRODUCT, null));
+                                        userInfo.put("type", pref.getString(MainActivity.PREF_SPOTIFY_TYPE, null));
+                                        userInfo.put("uri", pref.getString(MainActivity.PREF_SPOTIFY_URI, null));
+
+                                        String uid = pref.getString(MainActivity.PREF_FIREBASE_UID, null);
+
+                                        if (uid != null) {
+                                            Firebase user = new Firebase("https://flickering-heat-6442.firebaseio.com/users/" + uid);
+                                            user.setValue(userInfo);
+                                            user.removeEventListener(this);
+                                        }
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(FirebaseError firebaseError) {
+
+                                }
+                            });
                         }
                     });
 //                    AlertDialog.Builder builder = new AlertDialog.Builder(activity.mainActivityClass);
