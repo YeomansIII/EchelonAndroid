@@ -26,45 +26,6 @@
             android:text="Login to Echelon"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/usernameEditWrapper"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp">
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_gravity="center_horizontal"
-                android:background="@null"
-                android:drawableLeft="@drawable/ic_account_outline_black_24dp"
-                android:drawablePadding="10dp"
-                android:drawableStart="@drawable/ic_account_outline_black_24dp"
-                android:hint="Username"
-                android:inputType="textShortMessage" />
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/passwordEditWrapper"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp">
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_gravity="center_horizontal"
-                android:background="@null"
-                android:drawableLeft="@drawable/ic_lock_outline_black_24dp"
-                android:drawablePadding="10dp"
-                android:drawableStart="@drawable/ic_lock_outline_black_24dp"
-                android:ems="10"
-                android:hint="Password"
-                android:inputType="textPassword" />
-        </android.support.design.widget.TextInputLayout>
-
 
         <TextView
             android:id="@+id/loginErrorText"
@@ -73,11 +34,11 @@
             android:textColor="@color/full_red" />
 
         <io.yeomans.echelon.ButtonRectangle
-            android:id="@+id/loginButton"
+            android:id="@+id/spotifyLoginButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="Login" />
+            android:text="Login With Spotify" />
 
         <io.yeomans.echelon.ButtonFlat
             android:id="@+id/createNewAccountButton"
@@ -90,7 +51,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:paddingTop="20dp"
-            android:text="Create New Account" />
+            android:text="Skip Login (Limited)" />
     </LinearLayout>
 
     <LinearLayout

@@ -75,6 +75,11 @@ android {
 //            }
         }
     }
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE-FIREBASE.txt'
+        exclude 'META-INF/NOTICE'
+    }
 }
 
 
@@ -100,4 +105,5 @@ dependencies {
     compile 'com.android.support:support-v4:22.2.1'
     compile 'com.android.support:design:22.2.1'
     compile 'com.google.android.gms:play-services-gcm:7.5.0'
+    compile 'com.firebase:firebase-client-android:2.3.1+'
 }

@@ -14,6 +14,9 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
+import com.firebase.client.AuthData;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.apache.http.Header;
@@ -604,6 +607,96 @@ public class BackendRequest {
                         fragmentTransaction.replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
                         groupFragment.leaveGroup();
                     }
+                }
+            }.execute(be, null, null);
+        }
+    }
+
+    public static void getSpotifyMeAuth(BackendRequest be) {
+        if (be.getMethod().equalsIgnoreCase("GET")) {
+            final MainActivity activity = be.getMainActivity();
+            new AsyncTask<BackendRequest, Void, String>() {
+                @Override
+                protected String doInBackground(BackendRequest... params) {
+                    try {
+                        String spotifyTracksUrl = "https://api.spotify.com/v1/me";
+                        HttpClient client = new DefaultHttpClient();
+                        HttpGet get = new HttpGet(spotifyTracksUrl);
+                        get.addHeader("Authorization", "Bearer " + activity.spotifyAuthToken);
+                        Log.d("GetSpotifyMe", get.getURI().toString());
+                        HttpResponse responseGet = client.execute(get);
+                        HttpEntity resEntityGet = responseGet.getEntity();
+                        if (resEntityGet != null) {
+                            return EntityUtils.toString(resEntityGet);
+                        }
+                    } catch (Exception je) {
+                        je.printStackTrace();
+                    }
+                    return "{\"error\":\"error\"}";
+                }
+
+                @Override
+                protected void onPostExecute(String msg) {
+                    Log.d("GetSpotifyMe", msg);
+                    try {
+                        JSONObject spotify = new JSONObject(msg);
+                        JSONObject tokenAuth = new JSONObject();
+                        tokenAuth.put("uid", spotify.getString("id"));
+                        tokenAuth.put("access_token",activity.spotifyAuthToken);
+                        //tokenAuth.put("email", spotify.getString("email"));
+                        BackendRequest bee = new BackendRequest("POST", "http://api.echelonapp.io:8081/spotify-auth/", tokenAuth.toString(), activity);
+                        BackendRequest.getFirebaseSpotifyToken(bee);
+                    } catch (JSONException je) {
+                        je.printStackTrace();
+                    }
+                }
+            }.execute(be, null, null);
+        }
+    }
+
+    public static void getFirebaseSpotifyToken(BackendRequest be) {
+        if (be.getMethod().equalsIgnoreCase("POST")) {
+            final MainActivity activity = be.getMainActivity();
+            new AsyncTask<BackendRequest, Void, String>() {
+                @Override
+                protected String doInBackground(BackendRequest... params) {
+                    try {
+                        BackendRequest be = params[0];
+                        HttpClient client = new DefaultHttpClient();
+                        HttpPost post = new HttpPost(be.getUrl());
+                        post.setEntity(new StringEntity(be.getJsonEntity()));
+                        HttpResponse responseGet = client.execute(post);
+                        HttpEntity resEntityGet = responseGet.getEntity();
+                        if (resEntityGet != null) {
+                            return EntityUtils.toString(resEntityGet);
+                        }
+                    } catch (IOException ie) {
+                        ie.printStackTrace();
+                    }
+                    return "{\"error\":\"error\"}";
+                }
+
+                @Override
+                protected void onPostExecute(String msg) {
+                    Log.d("GetFirebaseSpotifyToken", msg);
+                    activity.myFirebaseRef.authWithCustomToken(msg, new Firebase.AuthResultHandler() {
+                        @Override
+                        public void onAuthenticationError(FirebaseError error) {
+                            Log.wtf("GetFirebaseSpotifyToken", "Login Failed! " + error.getMessage());
+                        }
+
+                        @Override
+                        public void onAuthenticated(AuthData authData) {
+                            Log.d("GetFirebaseSpotifyToken", "Login Succeeded!");
+                            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+                            fragmentManager.beginTransaction().replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
+                            activity.setUpNavDrawerAndActionBar();
+                        }
+                    });
+//                    AlertDialog.Builder builder = new AlertDialog.Builder(activity.mainActivityClass);
+//                    builder.setTitle("Title");
+//                    builder.setMessage(msg);
+//                    AlertDialog dialog = builder.show();
                 }
             }.execute(be, null, null);
         }

@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.firebase.client.Firebase;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -36,13 +37,24 @@ import com.spotify.sdk.android.player.PlayerNotificationCallback;
 import com.spotify.sdk.android.player.PlayerState;
 import com.spotify.sdk.android.player.Spotify;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.fabric.sdk.android.Fabric;
@@ -116,6 +128,9 @@ public class MainActivity extends AppCompatActivity
     String regid;
     AtomicInteger msgId = new AtomicInteger();
 
+    //FIREBASE
+    Firebase myFirebaseRef;
+
 
     //COMMON
     SharedPreferences pref, groupPref;
@@ -126,8 +141,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         Fabric.with(this, new Crashlytics());
+        Firebase.setAndroidContext(this);
+
         setContentView(R.layout.activity_main);
+
+        myFirebaseRef = new Firebase("https://flickering-heat-6442.firebaseio.com/");
+        myFirebaseRef.child("message").setValue("Do you have data? You'll love Firebase.");
 
         context = getApplicationContext();
         mainActivity = this;
@@ -317,23 +338,26 @@ public class MainActivity extends AppCompatActivity
                 spotifyAuthenticated = true;
                 pref.edit().putBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, true).apply();
                 spotifyAuthToken = authResponse.getAccessToken();
-                Config playerConfig = new Config(this, spotifyAuthToken, CLIENT_ID);
-                mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
-                    @Override
-                    public void onInitialized(Player player) {
-                        mPlayer.addConnectionStateCallback(MainActivity.this);
-                        mPlayer.addPlayerNotificationCallback(MainActivity.this);
-                        playerReady = true;
-                        mPlayerPlaying = false;
-                        mPlayerCherry = true;
-                        Log.d("Player", "Player Ready");
-                    }
 
-                    @Override
-                    public void onError(Throwable throwable) {
-                        Log.e("MainActivity", "Could not initialize player: " + throwable.getMessage());
-                    }
-                });
+                BackendRequest be = new BackendRequest("GET",this);
+                BackendRequest.getSpotifyMeAuth(be);
+//                Config playerConfig = new Config(this, spotifyAuthToken, CLIENT_ID);
+//                mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
+//                    @Override
+//                    public void onInitialized(Player player) {
+//                        mPlayer.addConnectionStateCallback(MainActivity.this);
+//                        mPlayer.addPlayerNotificationCallback(MainActivity.this);
+//                        playerReady = true;
+//                        mPlayerPlaying = false;
+//                        mPlayerCherry = true;
+//                        Log.d("Player", "Player Ready");
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable throwable) {
+//                        Log.e("MainActivity", "Could not initialize player: " + throwable.getMessage());
+//                    }
+//                });
             }
         }
     }
