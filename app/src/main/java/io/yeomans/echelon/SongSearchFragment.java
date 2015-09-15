@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,13 +37,13 @@ public class SongSearchFragment extends Fragment implements View.OnClickListener
 
     private View view;
     private ArrayList<RelativeLayout> songListArr;
+    MainActivity mainActivity;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setHasOptionsMenu(true);
-
-
+        mainActivity = (MainActivity) getActivity();
     }
 
     @Override
@@ -115,18 +116,14 @@ public class SongSearchFragment extends Fragment implements View.OnClickListener
                         rt.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                try {
-                                    for (RelativeLayout view : songListArr) {
-                                        view.setOnClickListener(null);
-                                    }
-                                    view.setBackgroundColor(Color.DKGRAY);
-                                    JSONObject queueJson = new JSONObject("{}");
-                                    queueJson.put("spotify_id", (String) v.getTag());
-                                    BackendRequest be = new BackendRequest("PUT","apiv1/queuegroups/queue-song/",queueJson.toString(),(MainActivity)songSearchFrag.getActivity());
-                                    BackendRequest.queueNewSong(be);
-                                } catch (JSONException je) {
-                                    je.printStackTrace();
+                                for (RelativeLayout view : songListArr) {
+                                    view.setOnClickListener(null);
                                 }
+                                view.setBackgroundColor(Color.DKGRAY);
+                                FirebaseCommon.addSong((String) v.getTag(), mainActivity);
+                                FragmentManager fm = mainActivity.getSupportFragmentManager();
+                                GroupFragment gf = (GroupFragment) fm.findFragmentByTag("GROUP_FRAG");
+                                fm.beginTransaction().replace(R.id.container, gf).commit();
                             }
                         });
                         songListArr.add(rt);

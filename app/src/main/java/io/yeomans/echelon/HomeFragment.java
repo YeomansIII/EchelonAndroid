@@ -76,10 +76,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
             if (groupFragment == null || groupFragment.isDestroyed) {
                 if (mainPref.getBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false) && mainPref.getString(MainActivity.PREF_SPOTIFY_PRODUCT, "").equalsIgnoreCase("premium")) {
-                    Firebase refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups");
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("name", "testname");
-                    refQueueGroups.push().setValue(map);
+//                    Firebase refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups");
+//                    Map<String, Object> map = new HashMap<>();
+//                    map.put("name", "testname");
+//                    refQueueGroups.push().setValue(map);
+                    fragmentManager.beginTransaction().replace(R.id.container, new CreateGroupFragment(), "CREATE_GROUP_FRAG").addToBackStack(null).commit();
                 } else {
                     Toast.makeText(getActivity().getApplicationContext(), "Please login to your Spotify Premium account under settings", Toast.LENGTH_LONG).show();
                 }
@@ -105,6 +106,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             //pref.edit().remove("token").putBoolean("logged_in", false).commit();
             pref.edit().clear().commit();
             pref2.edit().clear().commit();
+            mainActivity.myFirebaseRef.unauth();
             Fragment fragment = new LoginFragment();
             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

@@ -43,7 +43,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 container, false);
 
         view.findViewById(R.id.spotifyLoginButton).setOnClickListener(this);
-        view.findViewById(R.id.createAccountButton).setOnClickListener(this);
 
         mainActivity.toolbar.setVisibility(View.GONE);
         mainActivity.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);

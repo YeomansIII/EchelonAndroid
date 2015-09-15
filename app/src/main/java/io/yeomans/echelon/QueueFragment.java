@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -20,11 +21,18 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by jason on 6/26/15.
@@ -41,17 +49,19 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
     private ArrayList<RelativeLayout> songListArr;
     private MainActivity mainActivity;
     private ControlBarFragment controlBar;
+    Firebase queuegroupRef;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setHasOptionsMenu(true);
+        groupSettings = getActivity().getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
 
         mainActivity = (MainActivity) getActivity();
         isDestroyed = false;
         shouldExecuteOnResume = false;
 
-
+        queuegroupRef = mainActivity.myFirebaseRef.child("queuegroups").child(groupSettings.getString(MainActivity.PREF_GROUP_NAME, ""));
     }
 
     @Override
@@ -60,17 +70,45 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.queue_fragment,
                 container, false);
 
-        ///////
-        groupSettings = getActivity().getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
-        ///////
+        //////////////
         ((TextView) view.findViewById(R.id.groupIdText)).setText(groupSettings.getString(MainActivity.PREF_GROUP_OWNER_USERNAME, "error"));
 
         this.view = view;
-//        BackendRequest be = new BackendRequest("GET", mainActivity);
-//        BackendRequest.refreshGroupQueue(be);
 
         view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
-        //controlBar.getView().findViewById(R.id.groupAddSongButton).setVisibility(View.VISIBLE);
+
+        queuegroupRef.child("tracks").addValueEventListener(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("MyFirebase", "Track data changed!");
+                Firebase queuetrackRef = mainActivity.myFirebaseRef.child("queuetracks");
+                final LinkedList<SpotifySong> playQueue = mainActivity.playQueue;
+                playQueue.clear();
+                ArrayList<String> arrId = new ArrayList<>();
+                for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
+                    queuetrackRef.child((String) dataSnapshot1.getValue()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            Log.d("MyFirebase", "Creating SpotifySong with Track Data");
+                            //playQueue.add(dataSnapshot.getValue(SpotifySong.class));
+                        }
+
+                        @Override
+                        public void onCancelled(FirebaseError firebaseError) {
+
+                        }
+                    });
+                }
+                refreshQueueList();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+
+        });
 
         return view;
     }
@@ -91,14 +129,6 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
-        //if(shouldExecuteOnResume) {
-        BackendRequest be = new BackendRequest("GET", mainActivity);
-        BackendRequest.refreshGroupQueue(be);
-        //} else {
-        //    shouldExecuteOnResume = true;
-        //}
-        //Log.d("Group","Group onResume()");
-        //refreshQueueList();
     }
 
     @Override

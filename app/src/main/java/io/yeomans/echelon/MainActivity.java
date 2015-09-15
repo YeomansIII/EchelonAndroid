@@ -19,6 +19,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -97,7 +98,9 @@ public class MainActivity extends AppCompatActivity
 
     //GROUP PREF
     public static final String PREF_GROUP_PK = "group_pk";
+    public static final String PREF_GROUP_NAME = "group_name";
     public static final String PREF_GROUP_OWNER_PK = "group_owner_pk";
+    public static final String PREF_GROUP_LEADER_UID = "group_leader_uid";
     public static final String PREF_GROUP_OWNER_USERNAME = "group_owner_username";
     public static final String PREF_GROUP_PARTICIPANTS_JSON = "group_participants_json";
 
@@ -143,6 +146,7 @@ public class MainActivity extends AppCompatActivity
     //FIREBASE
     Firebase myFirebaseRef;
     public static final String PREF_FIREBASE_UID = "firebase_uid";
+    public static final String FIREBASE_URL = "https://flickering-heat-6442.firebaseio.com/";
 
     //COMMON
     SharedPreferences pref, groupPref;
@@ -159,7 +163,7 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
-        myFirebaseRef = new Firebase("https://flickering-heat-6442.firebaseio.com/");
+        myFirebaseRef = new Firebase(FIREBASE_URL);
         myFirebaseRef.child("message").setValue("Do you have data? You'll love Firebase.");
 
         context = getApplicationContext();
@@ -243,6 +247,9 @@ public class MainActivity extends AppCompatActivity
         //drawerLayout.setVisibility(View.VISIBLE);
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         ((TextView) findViewById(R.id.navHeaderUsernameText)).setText(pref.getString(PREF_SPOTIFY_DISPLAY_NAME, "error"));
+        ImageView profileImage = (ImageView) findViewById(R.id.navHeaderProfileImage);
+        profileImage.setImageResource(R.drawable.ic_account_black_48dp);
+        new ImageLoadTask(pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, ""), profileImage).execute();
 
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
 
