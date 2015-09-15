@@ -2,7 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:id="@+id/">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="0dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="40dp"
+        android:text="Create a Group"
+        android:textSize="25sp" />
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/createGroupNameEditWrapper"
@@ -16,13 +27,70 @@
             android:layout_height="45dp"
             android:layout_gravity="center_horizontal"
             android:background="@null"
-            android:drawableLeft="@drawable/ic_queue_music_black_36dp"
+            android:drawableLeft="@drawable/ic_library_music_black_24dp"
             android:drawablePadding="10dp"
-            android:drawableStart="@drawable/ic_email_outline_black_24dp"
+            android:drawableStart="@drawable/ic_library_music_black_24dp"
             android:ems="10"
             android:hint="Group Name"
             android:inputType="text" />
     </android.support.design.widget.TextInputLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Privacy"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:textSize="20sp" />
+
+        <RadioButton
+            android:id="@+id/radioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Public"
+            android:layout_below="@+id/textView6"
+            android:layout_alignLeft="@+id/textView6"
+            android:layout_alignStart="@+id/textView6"
+            android:checked="false" />
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Password"
+            android:id="@+id/radioButton2"
+            android:checked="false"
+            android:layout_below="@+id/radioButton"
+            android:layout_alignLeft="@+id/radioButton"
+            android:layout_alignStart="@+id/radioButton" />
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Friends"
+            android:id="@+id/radioButton3"
+            android:checked="false"
+            android:layout_below="@+id/radioButton2"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Invite Only"
+            android:id="@+id/radioButton4"
+            android:layout_below="@+id/radioButton3"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:checked="false" />
+    </RelativeLayout>
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/createGroupPasswordEditWrapper"
@@ -36,9 +104,9 @@
             android:layout_height="45dp"
             android:layout_gravity="center_horizontal"
             android:background="@null"
-            android:drawableLeft="@drawable/ic_email_outline_black_24dp"
+            android:drawableLeft="@drawable/ic_lock_outline_black_24dp"
             android:drawablePadding="10dp"
-            android:drawableStart="@drawable/ic_email_outline_black_24dp"
+            android:drawableStart="@drawable/ic_lock_outline_black_24dp"
             android:ems="10"
             android:hint="Group Password"
             android:inputType="text" />
