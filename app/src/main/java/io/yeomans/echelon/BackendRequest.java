@@ -435,7 +435,6 @@ public class BackendRequest {
                                         JSONObject album = spotifyTrackJson.getJSONObject("album");
                                         JSONArray images = album.getJSONArray("images");
                                         SpotifySong ss = new SpotifySong(
-                                                trackJson.getInt("pk"),
                                                 isBackStack,
                                                 spotifyTrackJson.getString("id"),
                                                 spotifyTrackJson.getString("uri"),
@@ -661,7 +660,7 @@ public class BackendRequest {
                         JSONObject tokenAuth = new JSONObject();
                         tokenAuth.put("uid", spotify.getString("id") + "_spotify");
                         tokenAuth.put("access_token", activity.spotifyAuthToken);
-                        BackendRequest bee = new BackendRequest("POST", "http://api.echelonapp.io:8081/spotify-auth/", tokenAuth.toString(), activity);
+                        BackendRequest bee = new BackendRequest("POST", MainActivity.ECHELONADO_URL + "spotify-auth/", tokenAuth.toString(), activity);
                         BackendRequest.getFirebaseSpotifyToken(bee);
                     } catch (JSONException je) {
                         je.printStackTrace();
@@ -734,7 +733,7 @@ public class BackendRequest {
                                         String uid = pref.getString(MainActivity.PREF_FIREBASE_UID, null);
 
                                         if (uid != null) {
-                                            Firebase user = new Firebase("https://flickering-heat-6442.firebaseio.com/users/" + uid);
+                                            Firebase user = new Firebase(MainActivity.FIREBASE_URL + "users/" + uid);
                                             user.setValue(userInfo);
                                             user.removeEventListener(this);
                                         }

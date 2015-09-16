@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +28,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
@@ -67,72 +69,16 @@ public class SongSearchFragment extends Fragment implements View.OnClickListener
     }
 
     public void searchSongs(String query) {
-        final SongSearchFragment songSearchFrag = this;
-        new AsyncTask<String, Void, String>() {
-            @Override
-            protected String doInBackground(String... params) {
-                try {
-                    String query = params[0];
-                    HttpClient client = new DefaultHttpClient();
-                    String spotifyTracksUrl = "https://api.spotify.com/v1/search?q=" + URLEncoder.encode(query, "UTF-8") + "&type=track";
-
-                    HttpGet get2 = new HttpGet(spotifyTracksUrl);
-                    Log.d("SearchSongs", get2.getURI().toString());
-                    HttpResponse responseGet2 = client.execute(get2);
-                    HttpEntity resEntityGet2 = responseGet2.getEntity();
-                    if (resEntityGet2 != null) {
-                        String spotifyResponse = EntityUtils.toString(resEntityGet2);
-                        return spotifyResponse;
-                    }
-                } catch (IOException ie) {
-                    ie.printStackTrace();
-                }
-                return "{\"error\":\"error\"}";
-            }
-
-            @Override
-            protected void onPostExecute(String msg) {
-                Log.d("SearchSongs", "" + msg);
-
-                try {
-                    JSONObject json = new JSONObject(msg).getJSONObject("tracks");
-                    JSONArray items = json.getJSONArray("items");
-                    Log.d("Search Song", items.toString());
-                    LinearLayout songList = (LinearLayout) view.findViewById(R.id.searchSongListLayout);
-                    songList.removeAllViews();
-                    songListArr = new ArrayList<>();
-                    for (int i = 0; i < items.length() - 1; i++) {
-                        JSONObject curObj = items.getJSONObject(i);
-
-                        RelativeLayout rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.song_item, null);
-                        ImageView albumArtImage = (ImageView) rt.findViewById(R.id.albumArtImage);
-                        TextView songTitleText = (TextView) rt.findViewById(R.id.songTitleText);
-                        TextView songArtistText = (TextView) rt.findViewById(R.id.songArtistText);
-
-                        songTitleText.setText(curObj.getString("name"));
-                        songArtistText.setText(curObj.getJSONArray("artists").getJSONObject(0).getString("name"));
-                        new ImageLoadTask(curObj.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"), albumArtImage).execute();
-                        rt.setTag(curObj.getString("id"));
-                        rt.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                for (RelativeLayout view : songListArr) {
-                                    view.setOnClickListener(null);
-                                }
-                                view.setBackgroundColor(Color.DKGRAY);
-                                FirebaseCommon.addSong((String) v.getTag(), mainActivity);
-                                FragmentManager fm = mainActivity.getSupportFragmentManager();
-                                GroupFragment gf = (GroupFragment) fm.findFragmentByTag("GROUP_FRAG");
-                                fm.beginTransaction().replace(R.id.container, gf).commit();
-                            }
-                        });
-                        songListArr.add(rt);
-                        songList.addView(rt);
-                    }
-                } catch (JSONException je) {
-                    je.printStackTrace();
-                }
-            }
-        }.execute(query, null, null);
+        try {
+            String spotifyTracksUrl = "https://api.spotify.com/v1/search?q=" + URLEncoder.encode(query, "UTF-8") + "&type=track";
+            FragmentTransaction ft = mainActivity.getSupportFragmentManager().beginTransaction();
+            ListSongFragment lsf = new ListSongFragment();
+            Bundle bundle = new Bundle();
+            bundle.putString("get_url", spotifyTracksUrl);
+            lsf.setArguments(bundle);
+            ft.replace(R.id.container, lsf, "SONG_LIST_FRAG").addToBackStack(null).commit();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
 }

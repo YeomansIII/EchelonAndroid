@@ -44,20 +44,24 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
     public boolean isDestroyed;
     private boolean shouldExecuteOnResume;
     private SharedPreferences groupSettings;
+    private SharedPreferences mainSettings;
 
     private View view;
     private ArrayList<RelativeLayout> songListArr;
     private MainActivity mainActivity;
     private ControlBarFragment controlBar;
     Firebase queuegroupRef;
+    LinkedList<SpotifySong> playqueue;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setHasOptionsMenu(true);
         groupSettings = getActivity().getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
+        mainSettings = getActivity().getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
 
         mainActivity = (MainActivity) getActivity();
+        playqueue = mainActivity.playQueue;
         isDestroyed = false;
         shouldExecuteOnResume = false;
 
@@ -82,23 +86,10 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d("MyFirebase", "Track data changed!");
-                Firebase queuetrackRef = mainActivity.myFirebaseRef.child("queuetracks");
-                final LinkedList<SpotifySong> playQueue = mainActivity.playQueue;
-                playQueue.clear();
-                ArrayList<String> arrId = new ArrayList<>();
+                playqueue.clear();
                 for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
-                    queuetrackRef.child((String) dataSnapshot1.getValue()).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            Log.d("MyFirebase", "Creating SpotifySong with Track Data");
-                            //playQueue.add(dataSnapshot.getValue(SpotifySong.class));
-                        }
-
-                        @Override
-                        public void onCancelled(FirebaseError firebaseError) {
-
-                        }
-                    });
+                    Log.d("MyFirebase", "Creating SpotifySong with Track Data");
+                    playqueue.add(dataSnapshot1.getValue(SpotifySong.class));
                 }
                 refreshQueueList();
             }
@@ -108,6 +99,32 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
 
             }
 
+        });
+        queuegroupRef.child("tracks").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                Log.d("Tracks", "Child Changed!!");
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
         });
 
         return view;
@@ -147,7 +164,6 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
 
         //SharedPreferences pref = getActivity().getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
         //String queue_json = pref.getString("group_current_queue_json", "");
-        LinkedList<SpotifySong> playqueue = mainActivity.playQueue;
 
         Log.d("Play", "PlayQueueList: " + playqueue);
 
@@ -180,36 +196,22 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
                     ImageButton voteDown = (ImageButton) rt.findViewById(R.id.voteSongDownButton);
                     TextView rating = (TextView) rt.findViewById(R.id.songRatingText);
 
-                    rating.setText("" + curSong.getRating());
-                    voteUp.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            try {
+                    //Check if user has voted up or down
+                    if (curSong.getVotedUp().containsKey(mainSettings.getString(MainActivity.PREF_FIREBASE_UID, null))) {
+                        rating.setText("" + curSong.getRating());
+                        voteUp.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
                                 v.setOnClickListener(null);
-                                JSONObject json = new JSONObject("{}");
-                                json.put("pk", curSong.getPk());
-                                json.put("vote", 1);
-                                Log.d("SongVote", json.toString());
-                                BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
-                                BackendRequest.updateSong(be);
-                            } catch (JSONException je) {
-                                je.printStackTrace();
+                                FirebaseCommon.rankSong(curSong.getKey(), 1, mainActivity);
                             }
-                        }
-                    });
+                        });
+                    }
                     voteDown.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            try {
-                                v.setOnClickListener(null);
-                                JSONObject json = new JSONObject("{}");
-                                json.put("pk", curSong.getPk());
-                                json.put("vote", -1);
-                                BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
-                                BackendRequest.updateSong(be);
-                            } catch (JSONException je) {
-                                je.printStackTrace();
-                            }
+                            v.setOnClickListener(null);
+                            FirebaseCommon.rankSong(curSong.getKey(), -1, mainActivity);
                         }
                     });
                 }

@@ -1,16 +1,24 @@
 package io.yeomans.echelon;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -31,28 +39,17 @@ import java.util.ArrayList;
 public class FirebaseCommon {
 
     static void addSong(String songId, MainActivity mainActivity) {
-        SharedPreferences groupPrefs = mainActivity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
-        Firebase ref = mainActivity.myFirebaseRef;
-        ref.child("queuegroups").child(groupPrefs.getString(MainActivity.PREF_GROUP_NAME, "")).child("tracks").push().setValue(songId);
-    }
-
-    static public void getListOfSpotifySongs(ArrayList<String> idList, MainActivity main) {
-        final MainActivity mainActivity = main;
-        new AsyncTask<ArrayList, Void, String>() {
+        final MainActivity main = mainActivity;
+        new AsyncTask<String, Void, String>() {
             @Override
-            protected String doInBackground(ArrayList... params) {
-                ArrayList<String> songIdList = params[0];
+            protected String doInBackground(String... params) {
+                String songId = params[0];
                 try {
                     HttpClient client = new DefaultHttpClient();
-                    String spotifyTracksUrl = "https://api.spotify.com/v1/tracks/?ids=";
-                    for (String id : songIdList) {
-                        spotifyTracksUrl += id + ",";
-                    }
-                    spotifyTracksUrl = spotifyTracksUrl.replaceAll(",$", "");
-
+                    String spotifyTracksUrl = "https://api.spotify.com/v1/tracks/?ids=" + songId;
                     HttpGet get2 = new HttpGet(spotifyTracksUrl);
-                    Log.d("SearchSongs", get2.getURI().toString());
-                    get2.addHeader("Authorization", "Bearer " + mainActivity.spotifyAuthToken);
+                    Log.d("AddSong", get2.getURI().toString());
+                    get2.addHeader("Authorization", "Bearer " + main.spotifyAuthToken);
                     HttpResponse responseGet2 = client.execute(get2);
                     HttpEntity resEntityGet2 = responseGet2.getEntity();
                     if (resEntityGet2 != null) {
@@ -86,11 +83,47 @@ public class FirebaseCommon {
                                 images.getJSONObject(1).getString("url"),
                                 images.getJSONObject(0).getString("url")
                         );
+                        SharedPreferences groupPrefs = main.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
+                        Firebase ref = new Firebase(MainActivity.FIREBASE_URL);
+                        Firebase push = ref.child("queuegroups").child(groupPrefs.getString(MainActivity.PREF_GROUP_NAME, "")).child("tracks").push();
+                        push.setValue(ss);
+                        push.child("key").setValue(push.getKey());
+                        FragmentManager fragmentManager = main.getSupportFragmentManager();
+                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                        GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+                        if (groupFragment != null && !groupFragment.isVisible()) {
+                            View view = main.getCurrentFocus();
+                            if (view != null) {
+                                InputMethodManager imm = (InputMethodManager) main.getSystemService(
+                                        Context.INPUT_METHOD_SERVICE);
+                                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                            }
+                            fragmentTransaction.replace(R.id.container, groupFragment).commit();
+                        }
                     }
                 } catch (JSONException je) {
                     je.printStackTrace();
                 }
             }
-        }.execute(idList, null, null);
+        }.execute(songId, null, null);
+    }
+
+    static public void rankSong(String key, final int upDown, MainActivity mainActivity) {
+        SharedPreferences prefs = mainActivity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
+        SharedPreferences groupPrefs = mainActivity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
+        final String firePath = MainActivity.FIREBASE_URL
+                + "/queuegroups/"
+                + groupPrefs.getString(MainActivity.PREF_GROUP_NAME, null) +
+                "/tracks/" + key;
+        Firebase ref = new Firebase(firePath);
+
+        if (upDown > 0) {
+            ref.child("votedUp").child(prefs.getString(MainActivity.PREF_FIREBASE_UID, null)).setValue(true);
+        } else if (upDown < 0) {
+            ref.child("votedDown").child(prefs.getString(MainActivity.PREF_FIREBASE_UID, null)).setValue(true);
+        } else {
+            ref.child("votedUp").child(prefs.getString(MainActivity.PREF_FIREBASE_UID, null)).removeValue();
+            ref.child("votedDown").child(prefs.getString(MainActivity.PREF_FIREBASE_UID, null)).removeValue();
+        }
     }
 }

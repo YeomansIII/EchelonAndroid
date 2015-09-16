@@ -122,22 +122,24 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
 
                         songTitleText.setText(curObj.getString("name"));
                         new ImageLoadTask(curObj.getJSONArray("images").getJSONObject(0).getString("url"), albumArtImage).execute();
-                        rt.setTag(R.string.list_id, curObj.getString("id"));
-                        rt.setTag(R.string.owner_id, curObj.getJSONObject("owner").getString("id"));
+                        String url = "https://api.spotify.com/v1/users/"
+                                + curObj.getJSONObject("owner").getString("id")
+                                + "/playlists/"
+                                + curObj.getString("id");
+                        rt.setTag(R.string.get_url, url);
                         rt.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 FragmentTransaction ft = mainActivity.getSupportFragmentManager().beginTransaction();
                                 ListSongFragment lsf = new ListSongFragment();
                                 Bundle bundle = new Bundle();
-                                bundle.putString("list_id", v.getTag(R.string.list_id).toString());
-                                bundle.putString("owner_id", v.getTag(R.string.owner_id).toString());
+                                bundle.putString("get_url", v.getTag(R.string.get_url).toString());
                                 lsf.setArguments(bundle);
                                 ft.replace(R.id.container, lsf, "SONG_LIST_FRAG").addToBackStack(null).commit();
                             }
                         });
                         playlistListArr.add(rt);
-                        if(colLeft) {
+                        if (colLeft) {
                             playlistListLeft.addView(rt);
                             colLeft = false;
                         } else {

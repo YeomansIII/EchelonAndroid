@@ -19,6 +19,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -147,6 +148,7 @@ public class MainActivity extends AppCompatActivity
     Firebase myFirebaseRef;
     public static final String PREF_FIREBASE_UID = "firebase_uid";
     public static final String FIREBASE_URL = "https://flickering-heat-6442.firebaseio.com/";
+    public static final String ECHELONADO_URL = "https://api.echelonapp.io:8081/";
 
     //COMMON
     SharedPreferences pref, groupPref;
@@ -164,7 +166,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         myFirebaseRef = new Firebase(FIREBASE_URL);
-        myFirebaseRef.child("message").setValue("Do you have data? You'll love Firebase.");
+        //myFirebaseRef.child("message").setValue("Do you have data? You'll love Firebase.");
 
         context = getApplicationContext();
         mainActivity = this;
@@ -306,18 +308,13 @@ public class MainActivity extends AppCompatActivity
             case R.id.drawer_group:
                 GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
                 if (groupFragment != null && !groupFragment.isVisible()) {
-                    List<Fragment> listFrag = fragmentManager.getFragments();
-                    Fragment currentFrag = null;
-                    for (Fragment in : listFrag) {
-                        if (in.isVisible()) {
-                            currentFrag = in;
-                        }
+                    View view = getCurrentFocus();
+                    if (view != null) {
+                        InputMethodManager imm = (InputMethodManager) getSystemService(
+                                Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                     }
-                    if (currentFrag != null) {
-                        fragmentTransaction.remove(currentFrag);
-                    }
-                    fragmentTransaction.addToBackStack(null);
-                    fragmentTransaction.add(R.id.container, groupFragment).commit();
+                    fragmentTransaction.replace(R.id.container, groupFragment).commit();
                 } else if (groupFragment == null) {
                     Toast.makeText(getApplicationContext(), "Please create or join a group first", Toast.LENGTH_SHORT).show();
 //                    fragmentManager.beginTransaction()
@@ -363,25 +360,28 @@ public class MainActivity extends AppCompatActivity
 
                 BackendRequest be = new BackendRequest("GET", this);
                 BackendRequest.getSpotifyMeAuth(be);
-//                Config playerConfig = new Config(this, spotifyAuthToken, CLIENT_ID);
-//                mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
-//                    @Override
-//                    public void onInitialized(Player player) {
-//                        mPlayer.addConnectionStateCallback(MainActivity.this);
-//                        mPlayer.addPlayerNotificationCallback(MainActivity.this);
-//                        playerReady = true;
-//                        mPlayerPlaying = false;
-//                        mPlayerCherry = true;
-//                        Log.d("Player", "Player Ready");
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable throwable) {
-//                        Log.e("MainActivity", "Could not initialize player: " + throwable.getMessage());
-//                    }
-//                });
             }
         }
+    }
+
+    public void configPlayer() {
+        Config playerConfig = new Config(this, spotifyAuthToken, CLIENT_ID);
+        mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
+            @Override
+            public void onInitialized(Player player) {
+                mPlayer.addConnectionStateCallback(MainActivity.this);
+                mPlayer.addPlayerNotificationCallback(MainActivity.this);
+                playerReady = true;
+                mPlayerPlaying = false;
+                mPlayerCherry = true;
+                Log.d("Player", "Player Ready");
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                Log.e("MainActivity", "Could not initialize player: " + throwable.getMessage());
+            }
+        });
     }
 
     @Override
@@ -427,7 +427,6 @@ public class MainActivity extends AppCompatActivity
             old.setBackStack(true);
             try {
                 JSONObject json = new JSONObject("{}");
-                json.put("pk", old.getPk());
                 json.put("played", true);
                 json.put("now_playing", false);
                 BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
@@ -442,7 +441,6 @@ public class MainActivity extends AppCompatActivity
                 mPlayer.play(toPlay.getUri());
                 try {
                     JSONObject json = new JSONObject("{}");
-                    json.put("pk", toPlay.getPk());
                     json.put("now_playing", true);
                     BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
                     BackendRequest.updateSong(be);
@@ -472,15 +470,6 @@ public class MainActivity extends AppCompatActivity
         if (playQueue.size() > 0) {
             SpotifySong toPlay = playQueue.get(0);
             mPlayer.play(toPlay.getUri());
-            try {
-                JSONObject json = new JSONObject("{}");
-                json.put("pk", toPlay.getPk());
-                json.put("now_playing", true);
-                BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
-                BackendRequest.updateSong(be);
-            } catch (JSONException je) {
-                je.printStackTrace();
-            }
             mPlayerCherry = false;
         }
     }

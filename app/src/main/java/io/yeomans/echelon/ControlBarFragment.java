@@ -40,7 +40,7 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
         View view = inflater.inflate(R.layout.control_bar_fragment,
                 container, false);
 
-       // view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
+        // view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
         view.findViewById(R.id.controlPlayButton).setOnClickListener(this);
 
         return view;
@@ -67,16 +67,13 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
     public void onClick(View v) {
         Log.d("Control", "click");
         if (v == getView().findViewById(R.id.controlPlayButton)) {
-            if (mainActivity.playerReady) {
-
-                //Log.d("Control", "playlist from ControlFrag: " + mCallback.playQueue);
-                if (mainActivity.mPlayerPlaying) {
-                    mainActivity.onPauseControlSelected();
-                    //playing = false;
-                } else {
-                    mainActivity.onPlayControlSelected();
-                    //playing = true;
-                }
+            //Log.d("Control", "playlist from ControlFrag: " + mCallback.playQueue);
+            if (mainActivity.mPlayerPlaying) {
+                mainActivity.onPauseControlSelected();
+                //playing = false;
+            } else {
+                mainActivity.onPlayControlSelected();
+                //playing = true;
             }
         }
 //        else if (v == getView().findViewById(R.id.groupAddSongButton)) {

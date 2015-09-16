@@ -35,7 +35,7 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
 
     private View view;
     private ArrayList<RelativeLayout> songListArr;
-    String listId, ownerId;
+    String getUrl;
     MainActivity mainActivity;
 
     @Override
@@ -43,9 +43,8 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         //setHasOptionsMenu(true);
         mainActivity = (MainActivity) getActivity();
-        listId = getArguments().getString("list_id");
-        ownerId = getArguments().getString("owner_id");
-
+        getUrl = getArguments().getString("get_url");
+        //ownerId = getArguments().getString("owner_id");
     }
 
     @Override
@@ -71,7 +70,7 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
             protected String doInBackground(Void... params) {
                 try {
                     HttpClient client = new DefaultHttpClient();
-                    String spotifyTracksUrl = "https://api.spotify.com/v1/users/" + ownerId + "/playlists/" + listId;
+                    String spotifyTracksUrl = getUrl;
 
                     HttpGet get2 = new HttpGet(spotifyTracksUrl);
                     Log.d("SearchSongs", get2.getURI().toString());
@@ -89,7 +88,7 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
 
             @Override
             protected void onPostExecute(String msg) {
-                Log.d("SearchSongs", "" + msg);
+                Log.d("ListSongs", "" + msg);
 
                 try {
                     JSONObject json = new JSONObject(msg).getJSONObject("tracks");
@@ -99,7 +98,12 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
                     songList.removeAllViews();
                     songListArr = new ArrayList<>();
                     for (int i = 0; i < items.length() - 1; i++) {
-                        JSONObject curObj = items.getJSONObject(i).getJSONObject("track");
+                        JSONObject curObj;
+                        try {
+                            curObj = items.getJSONObject(i).getJSONObject("track");
+                        } catch (JSONException je) {
+                            curObj = items.getJSONObject(i);
+                        }
 
                         RelativeLayout rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.song_item, null);
                         ImageView albumArtImage = (ImageView) rt.findViewById(R.id.albumArtImage);
@@ -113,18 +117,11 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
                         rt.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                try {
-                                    for (RelativeLayout view : songListArr) {
-                                        view.setOnClickListener(null);
-                                    }
-                                    view.setBackgroundColor(Color.DKGRAY);
-                                    JSONObject queueJson = new JSONObject("{}");
-                                    queueJson.put("spotify_id", (String) v.getTag());
-                                    BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/queue-song/", queueJson.toString(), (MainActivity) songSearchFrag.getActivity());
-                                    BackendRequest.queueNewSong(be);
-                                } catch (JSONException je) {
-                                    je.printStackTrace();
+                                for (RelativeLayout view : songListArr) {
+                                    view.setOnClickListener(null);
                                 }
+                                view.setBackgroundColor(Color.DKGRAY);
+                                FirebaseCommon.addSong((String) v.getTag(), mainActivity);
                             }
                         });
                         songListArr.add(rt);

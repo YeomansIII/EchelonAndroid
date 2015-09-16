@@ -10,13 +10,16 @@ import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by jason on 6/26/15.
  */
 public class SpotifySong {
 
-    private int pk;
+    private String key;
     private boolean backStack;
     private String songId;
     private String uri;
@@ -29,13 +32,29 @@ public class SpotifySong {
     private String albumArtLarge;
     private int rating;
     private boolean nowPlaying;
+    private Map<String, Object> votedUp;
+    private Map<String, Object> votedDown;
 
     public SpotifySong() {
 
     }
 
     public SpotifySong(String songId, String uri, String title, String artist, String album, int lengthMs, String albumArtSmall, String albumArtMedium, String albumArtLarge) {
-        this.pk = pk;
+        this.backStack = false;
+        this.songId = songId;
+        this.uri = uri;
+        this.title = title;
+        this.artist = artist;
+        this.album = album;
+        this.lengthMs = lengthMs;
+        this.albumArtSmall = albumArtSmall;
+        this.albumArtMedium = albumArtMedium;
+        this.albumArtLarge = albumArtLarge;
+        this.rating = 0;
+        this.nowPlaying = false;
+    }
+
+    public SpotifySong(boolean backStack, String songId, String uri, String title, String artist, String album, int lengthMs, String albumArtSmall, String albumArtMedium, String albumArtLarge, int rating, boolean nowPlaying) {
         this.backStack = backStack;
         this.songId = songId;
         this.uri = uri;
@@ -50,20 +69,12 @@ public class SpotifySong {
         this.nowPlaying = nowPlaying;
     }
 
-    public SpotifySong(int pk, boolean backStack, String songId, String uri, String title, String artist, String album, int lengthMs, String albumArtSmall, String albumArtMedium, String albumArtLarge, int rating, boolean nowPlaying) {
-        this.pk = pk;
-        this.backStack = backStack;
-        this.songId = songId;
-        this.uri = uri;
-        this.title = title;
-        this.artist = artist;
-        this.album = album;
-        this.lengthMs = lengthMs;
-        this.albumArtSmall = albumArtSmall;
-        this.albumArtMedium = albumArtMedium;
-        this.albumArtLarge = albumArtLarge;
-        this.rating = rating;
-        this.nowPlaying = nowPlaying;
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getSongId() {
@@ -146,14 +157,6 @@ public class SpotifySong {
         this.backStack = backStack;
     }
 
-    public int getPk() {
-        return pk;
-    }
-
-    public void setPk(int pk) {
-        this.pk = pk;
-    }
-
     public int getRating() {
         return rating;
     }
@@ -168,6 +171,22 @@ public class SpotifySong {
 
     public void setNowPlaying(boolean nowPlaying) {
         this.nowPlaying = nowPlaying;
+    }
+
+    public Map<String, Object> getVotedUp() {
+        return votedUp;
+    }
+
+    public void setVotedUp(Map<String, Object> votedUp) {
+        this.votedUp = votedUp;
+    }
+
+    public Map<String, Object> getVotedDown() {
+        return votedDown;
+    }
+
+    public void setVotedDown(Map<String, Object> votedDown) {
+        this.votedDown = votedDown;
     }
 
     private void fillSongData() {
