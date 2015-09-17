@@ -17,18 +17,12 @@
 #}
 -keep class com.spotify.sdk.android.** { *; }
 ### Json SERIALIZER SETTINGS
--dontwarn org.w3c.dom.bootstrap.DOMImplementationRegistry
 -keep class com.firebase.** { *; }
 -keep class org.apache.** { *; }
 -keepnames class com.fasterxml.jackson.** { *; }
 -keepnames class javax.servlet.** { *; }
 -keepnames class org.ietf.jgss.** { *; }
+-dontwarn org.apache.**
 -dontwarn org.w3c.dom.**
--dontwarn org.joda.time.**
--dontwarn org.shaded.apache.**
--dontwarn org.ietf.jgss.**
--keep public class io.yeomans.echelon.SpotifySong.** {
-  public void set*(***);
-  public *** get*();
-}
--keepattributes Signature,*Annotation*,EnclosingMethod
+-keep public class io.yeomans.echelon.SpotifySong.** { *; }
+-keepattributes Signature
