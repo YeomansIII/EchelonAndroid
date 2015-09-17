@@ -81,6 +81,5 @@
                 android:layout_weight="2"
                 android:src="@drawable/ic_chevron_down_black_36dp" />
         </LinearLayout>
-
     </RelativeLayout>
 </RelativeLayout>
