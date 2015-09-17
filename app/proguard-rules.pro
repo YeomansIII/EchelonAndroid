@@ -24,5 +24,8 @@
 -keepnames class org.ietf.jgss.** { *; }
 -dontwarn org.apache.**
 -dontwarn org.w3c.dom.**
+-keep class io.yeomans.echelon.SpotifySong.** { *; }
+-keep class io.yeomans.echelon.SpotifySong { *; }
+-keepnames class io.yeomans.echelon.SpotifySong.** { *; }
 -keepnames class io.yeomans.echelon.SpotifySong { *; }
 -keepattributes Signature
