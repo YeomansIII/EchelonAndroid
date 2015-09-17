@@ -17,9 +17,6 @@
 #}
 -keep class com.spotify.sdk.android.** { *; }
 ### Json SERIALIZER SETTINGS
--libraryjars libs/jackson-annotations-2.0.0.jar
--libraryjars libs/jackson-core-2.0.0.jar
-
 -dontskipnonpubliclibraryclassmembers
 
 -keepattributes *Annotation*,EnclosingMethod
