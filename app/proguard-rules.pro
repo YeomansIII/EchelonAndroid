@@ -27,3 +27,4 @@
 -dontwarn org.joda.time.**
 -dontwarn org.shaded.apache.**
 -dontwarn org.ietf.jgss.**
+-keepattributes Signature,*Annotation*,EnclosingMethod
