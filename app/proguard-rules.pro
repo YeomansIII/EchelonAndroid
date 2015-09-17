@@ -16,3 +16,8 @@
 #   public *;
 #}
 -keep class com.spotify.sdk.android.** { *; }
+### Json SERIALIZER SETTINGS
+-keepclassmembers,allowobfuscation class * {
+    @org.codehaus.jackson.annotate.* <fields>;
+    @org.codehaus.jackson.annotate.* <init>(...);
+}
