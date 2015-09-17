@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.ServerValue;
 import com.firebase.client.ValueEventListener;
 
 import org.apache.http.HttpEntity;
@@ -32,6 +33,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by jason on 9/15/15.
@@ -72,22 +75,22 @@ public class FirebaseCommon {
                         JSONObject spotifyTrackJson = items.getJSONObject(p);
                         JSONObject album = spotifyTrackJson.getJSONObject("album");
                         JSONArray images = album.getJSONArray("images");
-                        SpotifySong ss = new SpotifySong(
-                                spotifyTrackJson.getString("id"),
-                                spotifyTrackJson.getString("uri"),
-                                spotifyTrackJson.getString("name"),
-                                spotifyTrackJson.getJSONArray("artists").getJSONObject(0).getString("name"),
-                                album.getString("name"),
-                                spotifyTrackJson.getInt("duration_ms"),
-                                images.getJSONObject(2).getString("url"),
-                                images.getJSONObject(1).getString("url"),
-                                images.getJSONObject(0).getString("url")
-                        );
                         SharedPreferences groupPrefs = main.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
                         Firebase ref = new Firebase(MainActivity.FIREBASE_URL);
                         Firebase push = ref.child("queuegroups").child(groupPrefs.getString(MainActivity.PREF_GROUP_NAME, "")).child("tracks").push();
-                        push.setValue(ss);
-                        push.child("key").setValue(push.getKey());
+                        Map<String, Object> toAdd = new HashMap<>();
+                        toAdd.put("key", push.getKey());
+                        toAdd.put("added", ServerValue.TIMESTAMP);
+                        toAdd.put("songId", spotifyTrackJson.getString("id"));
+                        toAdd.put("uri", spotifyTrackJson.getString("uri"));
+                        toAdd.put("title", spotifyTrackJson.getString("name"));
+                        toAdd.put("artist", spotifyTrackJson.getJSONArray("artists").getJSONObject(0).getString("name"));
+                        toAdd.put("album", album.getString("name"));
+                        toAdd.put("lengthMs", spotifyTrackJson.getInt("duration_ms"));
+                        toAdd.put("albumArtSmall", images.getJSONObject(2).getString("url"));
+                        toAdd.put("albumArtSmall", images.getJSONObject(1).getString("url"));
+                        toAdd.put("albumArtSmall", images.getJSONObject(0).getString("url"));
+                        push.setValue(toAdd);
                         FragmentManager fragmentManager = main.getSupportFragmentManager();
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                         GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");

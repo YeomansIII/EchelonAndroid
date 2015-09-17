@@ -112,7 +112,8 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
 
                         songTitleText.setText(curObj.getString("name"));
                         songArtistText.setText(curObj.getJSONArray("artists").getJSONObject(0).getString("name"));
-                        new ImageLoadTask(curObj.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"), albumArtImage).execute();
+                        //new ImageLoadTask(curObj.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"), albumArtImage).execute();
+                        mainActivity.imgLoader.DisplayImage(curObj.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"), albumArtImage);
                         rt.setTag(curObj.getString("id"));
                         rt.setOnClickListener(new View.OnClickListener() {
                             @Override

@@ -155,6 +155,7 @@ public class MainActivity extends AppCompatActivity
     Context context;
     MainActivity mainActivity;
     MainActivity mainActivityClass;
+    ImageLoader imgLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,6 +172,7 @@ public class MainActivity extends AppCompatActivity
         context = getApplicationContext();
         mainActivity = this;
         mainActivityClass = MainActivity.this;
+        imgLoader = new ImageLoader(this);
 
         pref = getSharedPreferences(MAIN_PREFS_NAME, 0);
         groupPref = getSharedPreferences(GROUP_PREFS_NAME, 0);
@@ -251,7 +253,8 @@ public class MainActivity extends AppCompatActivity
         ((TextView) findViewById(R.id.navHeaderUsernameText)).setText(pref.getString(PREF_SPOTIFY_DISPLAY_NAME, "error"));
         ImageView profileImage = (ImageView) findViewById(R.id.navHeaderProfileImage);
         profileImage.setImageResource(R.drawable.ic_account_black_48dp);
-        new ImageLoadTask(pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, ""), profileImage).execute();
+        //new ImageLoadTask(pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, ""), profileImage).execute();
+        imgLoader.DisplayImage(pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, ""), profileImage);
 
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
 
@@ -425,28 +428,23 @@ public class MainActivity extends AppCompatActivity
         if (eventType == EventType.TRACK_END) {
             SpotifySong old = playQueue.get(0);
             old.setBackStack(true);
-            try {
-                JSONObject json = new JSONObject("{}");
-                json.put("played", true);
-                json.put("now_playing", false);
-                BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
-                BackendRequest.updateSong(be);
-            } catch (JSONException je) {
-                je.printStackTrace();
-            }
+            myFirebaseRef.child("queuegroups")
+                    .child(groupPref.getString(MainActivity.PREF_GROUP_NAME, null))
+                    .child("tracks")
+                    .child(old.getKey())
+                    .child("nowPlaying")
+                    .setValue(false);
             backStack.add(old);
             playQueue.remove(0);
             if (playQueue.size() > 0) {
                 SpotifySong toPlay = playQueue.get(0);
                 mPlayer.play(toPlay.getUri());
-                try {
-                    JSONObject json = new JSONObject("{}");
-                    json.put("now_playing", true);
-                    BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/update-song/", json.toString(), mainActivity);
-                    BackendRequest.updateSong(be);
-                } catch (JSONException je) {
-                    je.printStackTrace();
-                }
+                myFirebaseRef.child("queuegroups")
+                        .child(groupPref.getString(MainActivity.PREF_GROUP_NAME, null))
+                        .child("tracks")
+                        .child(toPlay.getKey())
+                        .child("nowPlaying")
+                        .setValue(true);
             } else {
                 mPlayerCherry = true;
                 mPlayerPlaying = false;
@@ -471,6 +469,12 @@ public class MainActivity extends AppCompatActivity
             SpotifySong toPlay = playQueue.get(0);
             mPlayer.play(toPlay.getUri());
             mPlayerCherry = false;
+            myFirebaseRef.child("queuegroups")
+                    .child(groupPref.getString(MainActivity.PREF_GROUP_NAME, null))
+                    .child("tracks")
+                    .child(toPlay.getKey())
+                    .child("nowPlaying")
+                    .setValue(true);
         }
     }
 

@@ -710,6 +710,7 @@ public class BackendRequest {
                             String fUid = authData.getUid();
                             SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
                             pref.edit().putString(MainActivity.PREF_FIREBASE_UID, fUid).commit();
+                            Log.d("GetFirebaseSpotifyToken", fUid);
                             Firebase user = activity.myFirebaseRef.child("users").child(fUid);
 
                             user.addValueEventListener(new ValueEventListener() {

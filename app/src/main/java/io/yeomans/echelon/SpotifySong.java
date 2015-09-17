@@ -10,16 +10,15 @@ import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created by jason on 6/26/15.
  */
-public class SpotifySong {
+public class SpotifySong implements Comparable<SpotifySong> {
 
     private String key;
+    private Long added;
     private boolean backStack;
     private String songId;
     private String uri;
@@ -39,7 +38,9 @@ public class SpotifySong {
 
     }
 
-    public SpotifySong(String songId, String uri, String title, String artist, String album, int lengthMs, String albumArtSmall, String albumArtMedium, String albumArtLarge) {
+    public SpotifySong(String key, Long added, String songId, String uri, String title, String artist, String album, int lengthMs, String albumArtSmall, String albumArtMedium, String albumArtLarge) {
+        this.key = key;
+        this.added = added;
         this.backStack = false;
         this.songId = songId;
         this.uri = uri;
@@ -75,6 +76,14 @@ public class SpotifySong {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public Long getAdded() {
+        return added;
+    }
+
+    public void setAdded(Long added) {
+        this.added = added;
     }
 
     public String getSongId() {
@@ -229,5 +238,28 @@ public class SpotifySong {
                 }
             }
         }.execute("https://api.spotify.com/v1/tracks/" + songId, null, null);
+    }
+
+    @Override
+    public int compareTo(SpotifySong ssong) {
+        int srating = 0;
+        if (ssong.getVotedUp() != null) {
+            srating += ssong.getVotedUp().size();
+        }
+        if (ssong.getVotedDown() != null) {
+            srating -= ssong.getVotedDown().size();
+        }
+        int arating = 0;
+        if (this.getVotedUp() != null) {
+            arating += this.getVotedUp().size();
+        }
+        if (this.getVotedDown() != null) {
+            arating -= this.getVotedDown().size();
+        }
+        int result = ((Integer) srating).compareTo(arating);
+        if (result == 0) {
+            result = this.getAdded().compareTo(ssong.getAdded());
+        }
+        return result;
     }
 }

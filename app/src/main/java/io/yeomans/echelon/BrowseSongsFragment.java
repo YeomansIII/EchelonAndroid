@@ -121,7 +121,8 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
                         TextView songTitleText = (TextView) rt.findViewById(R.id.playlistTitleText);
 
                         songTitleText.setText(curObj.getString("name"));
-                        new ImageLoadTask(curObj.getJSONArray("images").getJSONObject(0).getString("url"), albumArtImage).execute();
+                        //new ImageLoadTask(curObj.getJSONArray("images").getJSONObject(0).getString("url"), albumArtImage).execute();
+                        mainActivity.imgLoader.DisplayImage(curObj.getJSONArray("images").getJSONObject(0).getString("url"), albumArtImage);
                         String url = "https://api.spotify.com/v1/users/"
                                 + curObj.getJSONObject("owner").getString("id")
                                 + "/playlists/"

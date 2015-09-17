@@ -31,8 +31,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by jason on 6/26/15.
@@ -87,9 +90,19 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d("MyFirebase", "Track data changed!");
                 playqueue.clear();
+                SpotifySong nowPlayingSS = null;
                 for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
-                    Log.d("MyFirebase", "Creating SpotifySong with Track Data");
-                    playqueue.add(dataSnapshot1.getValue(SpotifySong.class));
+                    SpotifySong ss = dataSnapshot1.getValue(SpotifySong.class);
+                    if (!ss.isNowPlaying()) {
+                        playqueue.add(ss);
+                    } else {
+                        nowPlayingSS = ss;
+                    }
+                    //Log.d("MyFirebase", "Song added: " + playqueue.getLast().getAdded());
+                }
+                Collections.sort(playqueue);
+                if (nowPlayingSS != null) {
+                    playqueue.addFirst(nowPlayingSS);
                 }
                 refreshQueueList();
             }
@@ -194,31 +207,65 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
                     voteControlsLayout.setVisibility(View.VISIBLE);
                     ImageButton voteUp = (ImageButton) rt.findViewById(R.id.voteSongUpButton);
                     ImageButton voteDown = (ImageButton) rt.findViewById(R.id.voteSongDownButton);
-                    TextView rating = (TextView) rt.findViewById(R.id.songRatingText);
+                    TextView ratingText = (TextView) rt.findViewById(R.id.songRatingText);
 
+                    String fUid = mainSettings.getString(MainActivity.PREF_FIREBASE_UID, null);
+                    Log.d("RefreshList", fUid);
                     //Check if user has voted up or down
-                    if (curSong.getVotedUp().containsKey(mainSettings.getString(MainActivity.PREF_FIREBASE_UID, null))) {
-                        rating.setText("" + curSong.getRating());
+                    Map<String, Object> votedUp = curSong.getVotedUp();
+                    if (votedUp == null || !votedUp.containsKey(fUid)) {
                         voteUp.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 v.setOnClickListener(null);
+                                FirebaseCommon.rankSong(curSong.getKey(), 0, mainActivity);
                                 FirebaseCommon.rankSong(curSong.getKey(), 1, mainActivity);
                             }
                         });
+                    } else {
+                        voteUp.setImageResource(R.drawable.ic_chevron_up_gold_48dp);
+                        voteUp.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                v.setOnClickListener(null);
+                                FirebaseCommon.rankSong(curSong.getKey(), 0, mainActivity);
+                            }
+                        });
                     }
-                    voteDown.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            v.setOnClickListener(null);
-                            FirebaseCommon.rankSong(curSong.getKey(), -1, mainActivity);
-                        }
-                    });
+                    Map<String, Object> votedDown = curSong.getVotedDown();
+                    if (votedDown == null || !votedDown.containsKey(fUid)) {
+                        voteDown.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                v.setOnClickListener(null);
+                                FirebaseCommon.rankSong(curSong.getKey(), 0, mainActivity);
+                                FirebaseCommon.rankSong(curSong.getKey(), -1, mainActivity);
+                            }
+                        });
+                    } else {
+                        voteDown.setImageResource(R.drawable.ic_chevron_down_gold_48dp);
+                        voteDown.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                v.setOnClickListener(null);
+                                FirebaseCommon.rankSong(curSong.getKey(), 0, mainActivity);
+                            }
+                        });
+                    }
+                    int rating = 0;
+                    if (votedUp != null) {
+                        rating += votedUp.size();
+                    }
+                    if (votedDown != null) {
+                        rating -= votedDown.size();
+                    }
+                    ratingText.setText("" + rating);
                 }
 
                 songTitleText.setText(curSong.getTitle());
                 songArtistText.setText(curSong.getArtist());
-                new ImageLoadTask(curSong.getAlbumArtSmall(), albumArtImage).execute();
+                //new ImageLoadTask(curSong.getAlbumArtSmall(), albumArtImage).execute();
+                mainActivity.imgLoader.DisplayImage(curSong.getAlbumArtSmall(), albumArtImage);
                 //String uri = curSong.getUri();
                 //mainActivity.playQueue.add(uri);
                 rt.setOnClickListener(new View.OnClickListener() {
