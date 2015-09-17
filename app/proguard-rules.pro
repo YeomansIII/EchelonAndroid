@@ -31,3 +31,4 @@
   public void set*(***);
   public *** get*();
 }
+-keepattributes Signature,*Annotation*,EnclosingMethod
