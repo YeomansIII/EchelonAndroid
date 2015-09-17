@@ -27,7 +27,7 @@
 -dontwarn org.joda.time.**
 -dontwarn org.shaded.apache.**
 -dontwarn org.ietf.jgss.**
--keep public class SpotifySong.** {
+-keep public class io.yeomans.echelon.SpotifySong.** {
   public void set*(***);
   public *** get*();
 }
