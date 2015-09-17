@@ -17,17 +17,7 @@
 #}
 -keep class com.spotify.sdk.android.** { *; }
 ### Json SERIALIZER SETTINGS
--dontskipnonpubliclibraryclassmembers
+-libraryjars lib/jackson-annotations-2.2.3.jar
+-libraryjars lib/jackson-core-2.2.3.jar
 
--keepattributes *Annotation*,EnclosingMethod
-
--keepnames class org.codehaus.jackson.** { *; }
-
--dontwarn javax.xml.**
--dontwarn javax.xml.stream.events.**
--dontwarn com.fasterxml.jackson.databind.**
-
--keep public class SpotifySong.** {
-  public void set*(***);
-  public *** get*();
-}
+-dontwarn org.w3c.dom.bootstrap.DOMImplementationRegistry
