@@ -17,7 +17,20 @@
 #}
 -keep class com.spotify.sdk.android.** { *; }
 ### Json SERIALIZER SETTINGS
--keepclassmembers,allowobfuscation class * {
-    @org.codehaus.jackson.annotate.* <fields>;
-    @org.codehaus.jackson.annotate.* <init>(...);
+-libraryjars libs/jackson-annotations-2.0.0.jar
+-libraryjars libs/jackson-core-2.0.0.jar
+
+-dontskipnonpubliclibraryclassmembers
+
+-keepattributes *Annotation*,EnclosingMethod
+
+-keepnames class org.codehaus.jackson.** { *; }
+
+-dontwarn javax.xml.**
+-dontwarn javax.xml.stream.events.**
+-dontwarn com.fasterxml.jackson.databind.**
+
+-keep public class SpotifySong.** {
+  public void set*(***);
+  public *** get*();
 }
