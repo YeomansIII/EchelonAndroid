@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity
 
         //String token = pref.getString(PREF_ECHELON_API_TOKEN, null);
 
-        loggedIn = pref.getBoolean(PREF_LISTENER_LOGGED_IN, false);
+        loggedIn = pref.getBoolean(PREF_SPOTIFY_AUTHENTICATED, false);
 
         playQueue = new LinkedList<>();
         backStack = new LinkedList<>();
@@ -205,22 +205,19 @@ public class MainActivity extends AppCompatActivity
                 authenticateSpotify();
             }
             setUpNavDrawerAndActionBar();
-            String usernameJoin = groupPref.getString(MainActivity.PREF_GROUP_OWNER_USERNAME, null);
-            Log.d("Main", "Part of group: " + usernameJoin);
-            if (usernameJoin != null && usernameJoin.equals(pref.getString(PREF_LISTENER_USERNAME, ""))) {
-                Log.d("Main", "In group. Leader");
-                BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/activate-my-group/", this);
-                BackendRequest.activateJoinGroup(be);
-            } else if (usernameJoin != null) {
-                try {
-                    Log.d("Main", "In group.");
-                    JSONObject json = new JSONObject("{}");
-                    json.put("username_join", usernameJoin);
-                    BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/join-group/", json.toString(), this);
-                    BackendRequest.activateJoinGroup(be);
-                } catch (JSONException je) {
-                    je.printStackTrace();
+            if (groupPref.getString(MainActivity.PREF_GROUP_NAME, null) != null) {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                Fragment fragment = new GroupFragment();
+                Bundle bundle = new Bundle();
+                if (groupPref.getString(MainActivity.PREF_GROUP_LEADER_UID, "").equals(pref.getString(MainActivity.PREF_FIREBASE_UID, "."))) {
+                    bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
+                } else {
+                    bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
                 }
+                fragment.setArguments(bundle);
+                fragmentManager.beginTransaction()
+                        .replace(R.id.container, fragment, "GROUP_FRAG")
+                        .commit();
             } else {
                 setContentViewHome();
             }
@@ -280,8 +277,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     public boolean onLeaveGroupClick(MenuItem item) {
-        BackendRequest be = new BackendRequest("GET", "apiv1/queuegroups/reset-group/", mainActivity);
-        BackendRequest.resetGroup(be);
+        groupPref.edit().clear().apply();
+        ((ControlBarFragment) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")).unReady();
+        setContentViewHome();
         return true;
     }
 
@@ -310,15 +308,28 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.drawer_group:
                 GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-                if (groupFragment != null && !groupFragment.isVisible()) {
+                String gName = groupPref.getString(MainActivity.PREF_GROUP_NAME, null);
+                if (groupFragment != null && groupFragment.isVisible()) {
+                    Log.d("Nav", "You are already at the group!");
+                } else if (gName != null) {
                     View view = getCurrentFocus();
                     if (view != null) {
                         InputMethodManager imm = (InputMethodManager) getSystemService(
                                 Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                     }
-                    fragmentTransaction.replace(R.id.container, groupFragment).commit();
-                } else if (groupFragment == null) {
+                    Fragment fragment = new GroupFragment();
+                    Bundle bundle = new Bundle();
+                    if (groupPref.getString(MainActivity.PREF_GROUP_LEADER_UID, "").equals(pref.getString(MainActivity.PREF_FIREBASE_UID, "."))) {
+                        bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
+                    } else {
+                        bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
+                    }
+                    fragment.setArguments(bundle);
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.container, fragment, "GROUP_FRAG")
+                            .commit();
+                } else {
                     Toast.makeText(getApplicationContext(), "Please create or join a group first", Toast.LENGTH_SHORT).show();
 //                    fragmentManager.beginTransaction()
 //                            .add(R.id.container, new queueFragment(), "GROUP_FRAG")
@@ -361,8 +372,10 @@ public class MainActivity extends AppCompatActivity
                         .putString(MainActivity.PREF_SPOTIFY_AUTH_TOKEN, spotifyAuthToken)
                         .apply();
 
-                BackendRequest be = new BackendRequest("GET", this);
-                BackendRequest.getSpotifyMeAuth(be);
+                if (myFirebaseRef.getAuth() == null) {
+                    BackendRequest be = new BackendRequest("GET", this);
+                    BackendRequest.getSpotifyMeAuth(be);
+                }
             }
         }
     }
@@ -428,12 +441,14 @@ public class MainActivity extends AppCompatActivity
         if (eventType == EventType.TRACK_END) {
             SpotifySong old = playQueue.get(0);
             old.setBackStack(true);
+            Map<String, Object> oldMap = new HashMap<>();
+            oldMap.put("nowPlaying", false);
+            oldMap.put("played", true);
             myFirebaseRef.child("queuegroups")
                     .child(groupPref.getString(MainActivity.PREF_GROUP_NAME, null))
                     .child("tracks")
                     .child(old.getKey())
-                    .child("nowPlaying")
-                    .setValue(false);
+                    .updateChildren(oldMap);
             backStack.add(old);
             playQueue.remove(0);
             if (playQueue.size() > 0) {
@@ -497,6 +512,17 @@ public class MainActivity extends AppCompatActivity
     protected void onDestroy() {
         Spotify.destroyPlayer(this);
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment groupFragment = fragmentManager.findFragmentByTag("GROUP_FRAG");
+        if (groupFragment != null && groupFragment.isVisible()) {
+            fragmentManager.beginTransaction().replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     public void authenticateSpotify() {
@@ -629,9 +655,6 @@ public class MainActivity extends AppCompatActivity
             Log.d("GCM", "gcm_intent received in group activity");
             // Extract data included in the Intent
             String action = intent.getStringExtra("action");
-
-            BackendRequest be = new BackendRequest("GET", mainActivity);
-            BackendRequest.refreshGroupQueue(be);
             //do other stuff here
         }
     };

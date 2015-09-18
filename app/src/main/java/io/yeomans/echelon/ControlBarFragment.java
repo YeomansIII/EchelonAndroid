@@ -63,6 +63,12 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
         getView().setVisibility(View.VISIBLE);
     }
 
+    public void unReady() {
+        if (getView() != null) {
+            getView().setVisibility(View.GONE);
+        }
+    }
+
     @Override
     public void onClick(View v) {
         Log.d("Control", "click");

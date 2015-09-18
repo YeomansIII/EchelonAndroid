@@ -30,7 +30,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     private View view;
     private MainActivity mainActivity;
-    private SharedPreferences mainPref;
+    private SharedPreferences mainPref, groupPref;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,6 +38,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         mainActivity = (MainActivity) getActivity();
         mainPref = mainActivity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
+        groupPref = mainActivity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
     }
 
     @Override
@@ -47,7 +48,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 container, false);
         view.findViewById(R.id.createGroupButton).setOnClickListener(this);
         view.findViewById(R.id.joinGroupButton).setOnClickListener(this);
-        view.findViewById(R.id.joinGroupIdButton).setOnClickListener(this);
         view.findViewById(R.id.logoutButton).setOnClickListener(this);
         //view.findViewById(R.id.spotifyLoginButton).setOnClickListener(this);
 
@@ -73,8 +73,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             boolean leader = true;
             Log.d("Button", "Create Button");
             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-            if (groupFragment == null || groupFragment.isDestroyed) {
+            if (groupPref.getString(MainActivity.PREF_GROUP_NAME, null) == null) {
                 if (mainPref.getBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false) && mainPref.getString(MainActivity.PREF_SPOTIFY_PRODUCT, "").equalsIgnoreCase("premium")) {
 //                    Firebase refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups");
 //                    Map<String, Object> map = new HashMap<>();
@@ -89,44 +88,27 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             }
         } else if (v == view.findViewById(R.id.joinGroupButton)) {
             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-            if (groupFragment == null) {
+            if (groupPref.getString(MainActivity.PREF_GROUP_NAME, null) == null) {
                 Log.d("Button", "Join Group Button");
-                getActivity().findViewById(R.id.homeLogoImage).setVisibility(View.GONE);
-                getActivity().findViewById(R.id.homeButtonsLayout).setVisibility(View.GONE);
-                getActivity().findViewById(R.id.joinGroupIdLayout).setVisibility(View.VISIBLE);
+                fragmentManager.beginTransaction().replace(R.id.container, new JoinGroupFragment(), "JOIN_GROUP_FRAG").addToBackStack(null).commit();
             } else {
                 Toast.makeText(getActivity().getApplicationContext(), "You are already in a group", Toast.LENGTH_SHORT).show();
             }
         } else if (v == view.findViewById(R.id.logoutButton)) {
             Log.d("Button", "Logout Button");
             SharedPreferences pref = getActivity().getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
-            SharedPreferences pref2 = getActivity().getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
+            SharedPreferences pref2 = getActivity().getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
 
             //pref.edit().remove("token").putBoolean("logged_in", false).commit();
-            pref.edit().clear().commit();
-            pref2.edit().clear().commit();
+            pref.edit().clear().apply();
+            pref2.edit().clear().apply();
             mainActivity.myFirebaseRef.unauth();
-            Fragment fragment = new LoginFragment();
             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.container, fragment);
-            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.commit();
-        } else if (v == view.findViewById(R.id.joinGroupIdButton)) {
-            Log.d("Button", "Join Button");
-            JSONObject json = new JSONObject();
-            String usernameJoin = ((TextView) getActivity().findViewById(R.id.joinGroupIdEdit)).getText().toString();
-            try {
-                json.put("username_join", usernameJoin);
-                BackendRequest be = new BackendRequest("PUT", "apiv1/queuegroups/join-group/", json.toString(), (MainActivity) getActivity());
-                BackendRequest.activateJoinGroup(be);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
+            ((ControlBarFragment) fragmentManager.findFragmentByTag("CONTROL_FRAG")).unReady();
+            fragmentManager.beginTransaction().replace(R.id.container, new LoginFragment()).addToBackStack(null).commit();
 //        } else if (v == view.findViewById(R.id.spotifyLoginButton)) {
 //            mainActivity.authenticateSpotify();
 //        }
+        }
     }
 }

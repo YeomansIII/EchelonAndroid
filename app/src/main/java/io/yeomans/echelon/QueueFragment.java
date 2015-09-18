@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.renderscript.Sampler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -55,6 +56,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
     private ControlBarFragment controlBar;
     Firebase queuegroupRef;
     LinkedList<SpotifySong> playqueue;
+    ValueEventListener trackListChangeListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,23 +71,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
         shouldExecuteOnResume = false;
 
         queuegroupRef = mainActivity.myFirebaseRef.child("queuegroups").child(groupSettings.getString(MainActivity.PREF_GROUP_NAME, ""));
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.queue_fragment,
-                container, false);
-
-        //////////////
-        ((TextView) view.findViewById(R.id.groupIdText)).setText(groupSettings.getString(MainActivity.PREF_GROUP_OWNER_USERNAME, "error"));
-
-        this.view = view;
-
-        view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
-
-        queuegroupRef.child("tracks").addValueEventListener(new ValueEventListener() {
-
+        trackListChangeListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d("MyFirebase", "Track data changed!");
@@ -93,9 +79,9 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
                 SpotifySong nowPlayingSS = null;
                 for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
                     SpotifySong ss = dataSnapshot1.getValue(SpotifySong.class);
-                    if (!ss.isNowPlaying()) {
+                    if (!ss.isNowPlaying() && !ss.isPlayed()) {
                         playqueue.add(ss);
-                    } else {
+                    } else if (ss.isNowPlaying()) {
                         nowPlayingSS = ss;
                     }
                     //Log.d("MyFirebase", "Song added: " + playqueue.getLast().getAdded());
@@ -112,34 +98,23 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
 
             }
 
-        });
-        queuegroupRef.child("tracks").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+        };
+    }
 
-            }
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.queue_fragment,
+                container, false);
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Log.d("Tracks", "Child Changed!!");
-            }
+        //////////////
+        ((TextView) view.findViewById(R.id.groupIdText)).setText(groupSettings.getString(MainActivity.PREF_GROUP_OWNER_USERNAME, "error"));
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
+        this.view = view;
 
-            }
+        view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
 
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
-
+        queuegroupRef.child("tracks").addValueEventListener(trackListChangeListener);
         return view;
     }
 
@@ -164,7 +139,8 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        getView().findViewById(R.id.groupAddSongButton).setVisibility(View.GONE);
+        queuegroupRef.child("tracks").removeEventListener(trackListChangeListener);
+        //getView().findViewById(R.id.groupAddSongButton).setVisibility(View.GONE);
     }
 
     @Override

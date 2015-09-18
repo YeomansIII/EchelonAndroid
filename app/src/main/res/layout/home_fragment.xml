@@ -57,36 +57,4 @@
         <!--android:id="@+id/spotifyLoginButton" />-->
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/joinGroupIdLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/joinGroupIdText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Group ID"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
-        <EditText
-            android:id="@+id/joinGroupIdEdit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/joinGroupIdError"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/full_red" />
-
-        <Button
-            android:id="@+id/joinGroupIdButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Join" />
-    </LinearLayout>
-
 </RelativeLayout>

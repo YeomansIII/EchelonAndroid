@@ -19,6 +19,7 @@ public class SpotifySong implements Comparable<SpotifySong> {
 
     private String key;
     private Long added;
+    private boolean played;
     private boolean backStack;
     private String songId;
     private String uri;
@@ -84,6 +85,14 @@ public class SpotifySong implements Comparable<SpotifySong> {
 
     public void setAdded(Long added) {
         this.added = added;
+    }
+
+    public boolean isPlayed() {
+        return played;
+    }
+
+    public void setPlayed(boolean played) {
+        this.played = played;
     }
 
     public String getSongId() {

@@ -1,6 +1,7 @@
 package io.yeomans.echelon;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -12,13 +13,17 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.firebase.client.ServerValue;
+import com.firebase.client.ValueEventListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,7 +40,7 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
     private MainActivity mainActivity;
     private SharedPreferences mainPref;
     private RadioButton rbPublic, rbPassword, rbFriends, rbInvite;
-    private TextInputLayout createGroupPasswordEditWrapper;
+    private TextInputLayout createGroupNameEditWrapper, createGroupPasswordEditWrapper;
     String selectedPrivacy;
 
     @Override
@@ -61,6 +66,7 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
         rbFriends = (RadioButton) view.findViewById(R.id.createGroupPrivacyFriendsRadio);
         rbInvite = (RadioButton) view.findViewById(R.id.createGroupPrivacyInviteRadio);
 
+        createGroupNameEditWrapper = (TextInputLayout) view.findViewById(R.id.createGroupNameEditWrapper);
         createGroupPasswordEditWrapper = (TextInputLayout) view.findViewById(R.id.createGroupPasswordEditWrapper);
 
         rbPublic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -128,34 +134,54 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
     @Override
     public void onClick(View v) {
         if (v == view.findViewById(R.id.createGroupCreateButton)) {
-            TextInputLayout groupName = (TextInputLayout) view.findViewById(R.id.createGroupNameEditWrapper);
-            TextInputLayout groupPass = (TextInputLayout) view.findViewById(R.id.createGroupPasswordEditWrapper);
-            String name = groupName.getEditText().getText().toString();
-            Firebase refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups");
-            Map<String, Object> map = new HashMap<>();
-            map.put("name", name);
-            map.put("created", ServerValue.TIMESTAMP);
-            map.put("leader", mainPref.getString(MainActivity.PREF_FIREBASE_UID, null));
-            map.put("privacy", selectedPrivacy);
-            if (selectedPrivacy.equals("password")) {
-                map.put("password", groupPass.getEditText().getText().toString());
-            }
-            refQueueGroups.child(name).setValue(map);
-
+            String name = createGroupNameEditWrapper.getEditText().getText().toString();
             String fUid = mainPref.getString(MainActivity.PREF_FIREBASE_UID, null);
+            Firebase refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups/" + name);
+            refQueueGroups.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.getValue() != null) {
+                        createGroupNameEditWrapper.setErrorEnabled(true);
+                        createGroupNameEditWrapper.setError("That group name is already taken, try another one");
+                    } else {
+                        String name2 = createGroupNameEditWrapper.getEditText().getText().toString();
+                        String fUid2 = mainPref.getString(MainActivity.PREF_FIREBASE_UID, null);
+                        Firebase ref = mainActivity.myFirebaseRef.child("queuegroups");
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("name", name2);
+                        map.put("created", ServerValue.TIMESTAMP);
+                        map.put("leader", fUid2);
+                        map.put("privacy", selectedPrivacy);
+//                        if (selectedPrivacy.equals("password")) {
+//                            map.put("password", createGroupPasswordEditWrapper.getEditText().getText().toString());
+//                        }
+                        ref.child(name2).setValue(map);
+                        ref.child(name2).child("participants").child(fUid2).setValue(true);
 
-            SharedPreferences groupSettings = mainActivity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
-            groupSettings.edit().putString(MainActivity.PREF_GROUP_NAME, name).putString(MainActivity.PREF_GROUP_LEADER_UID, fUid).apply();
+                        SharedPreferences groupSettings = mainActivity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
+                        groupSettings.edit().putString(MainActivity.PREF_GROUP_NAME, name2).putString(MainActivity.PREF_GROUP_LEADER_UID, fUid2).apply();
+                        View view = mainActivity.getCurrentFocus();
+                        if (view != null) {
+                            InputMethodManager imm = (InputMethodManager) mainActivity.getSystemService(
+                                    Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                        }
+                        Fragment fragment = new GroupFragment();
+                        Bundle bundle = new Bundle();
+                        bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
+                        fragment.setArguments(bundle);
+                        FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+                        fragmentManager.beginTransaction()
+                                .replace(R.id.container, fragment, "GROUP_FRAG")
+                                .commit();
+                    }
+                }
 
-            Fragment fragment = new GroupFragment();
-            Bundle bundle = new Bundle();
-            bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
-            fragment.setArguments(bundle);
-            FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container, fragment, "GROUP_FRAG")
-                    .addToBackStack(null)
-                    .commitAllowingStateLoss();
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+
+                }
+            });
         }
     }
 }
