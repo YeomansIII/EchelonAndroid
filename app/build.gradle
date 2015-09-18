@@ -21,10 +21,10 @@ apply plugin: 'io.fabric'
 //    return "${versionMajor}.${versionMinor}.${versionPatch}";
 //}
 
-def buildTime() {
-    def df = new SimpleDateFormat("yyMMddhhmm")
-    return df.format(new Date())
-}
+//def buildTime() {
+//    def df = new SimpleDateFormat("yyMMddhhmm")
+//    return df.format(new Date())
+//}
 
 //def genVersionName() {
 //    return buildNumber() + "." + buildTime();
@@ -42,9 +42,8 @@ android {
         applicationId "io.yeomans.echelon"
         minSdkVersion 16
         targetSdkVersion 21
-        //versionCode 9
-        versionCode 16
-        versionName "0.1.6"
+        versionCode 17
+        versionName "0.2.0"
         archivesBaseName = "Echelon-$versionName-$versionCode"
     }
     signingConfigs {
