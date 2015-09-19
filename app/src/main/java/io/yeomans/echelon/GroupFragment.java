@@ -66,7 +66,7 @@ public class GroupFragment extends Fragment {
             if (leader) {
                 controlBar.ready(true);
                 if (!mainActivity.playerReady) {
-                    mainActivity.configPlayer();
+                    //mainActivity.configPlayer();
                 }
             } else {
                 Log.d("Group", "Not leader");

@@ -173,6 +173,7 @@ public class MainActivity extends AppCompatActivity
         mainActivity = this;
         mainActivityClass = MainActivity.this;
         imgLoader = new ImageLoader(this);
+        mPlayerCherry = true;
 
         pref = getSharedPreferences(MAIN_PREFS_NAME, 0);
         groupPref = getSharedPreferences(GROUP_PREFS_NAME, 0);
@@ -251,7 +252,10 @@ public class MainActivity extends AppCompatActivity
         ImageView profileImage = (ImageView) findViewById(R.id.navHeaderProfileImage);
         profileImage.setImageResource(R.drawable.ic_account_black_48dp);
         //new ImageLoadTask(pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, ""), profileImage).execute();
-        imgLoader.DisplayImage(pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, ""), profileImage);
+        String profImgUrl = pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, "");
+        if (profImgUrl != null) {
+            imgLoader.DisplayImage(profImgUrl, profileImage);
+        }
 
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
 
@@ -391,6 +395,7 @@ public class MainActivity extends AppCompatActivity
                 mPlayerPlaying = false;
                 mPlayerCherry = true;
                 Log.d("Player", "Player Ready");
+                playFirstSong();
             }
 
             @Override
@@ -680,7 +685,8 @@ public class MainActivity extends AppCompatActivity
 
     public boolean onPlayControlSelected() {
         if (!mPlayerPlaying && mPlayerCherry) {
-            playFirstSong();
+            configPlayer();
+            //playFirstSong();
             return true;
         } else if (!mPlayerPlaying) {
             mPlayer.resume();
