@@ -170,6 +170,7 @@ public class MainActivity extends AppCompatActivity
         mainActivity = this;
         mainActivityClass = MainActivity.this;
         imgLoader = new ImageLoader(this);
+        mPlayerCherry = true;
 
         pref = getSharedPreferences(MAIN_PREFS_NAME, 0);
         groupPref = getSharedPreferences(GROUP_PREFS_NAME, 0);
@@ -405,6 +406,7 @@ public class MainActivity extends AppCompatActivity
                 mPlayerPlaying = false;
                 mPlayerCherry = true;
                 Log.d("Player", "Player Ready");
+                playFirstSong();
             }
 
             @Override
@@ -694,7 +696,8 @@ public class MainActivity extends AppCompatActivity
 
     public boolean onPlayControlSelected() {
         if (!mPlayerPlaying && mPlayerCherry) {
-            playFirstSong();
+            configPlayer();
+            //playFirstSong();
             return true;
         } else if (!mPlayerPlaying) {
             mPlayer.resume();

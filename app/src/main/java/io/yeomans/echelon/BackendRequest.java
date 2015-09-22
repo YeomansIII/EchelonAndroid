@@ -180,7 +180,9 @@ public class BackendRequest {
                         editor.putString(MainActivity.PREF_SPOTIFY_EMAIL, spotify.getString("email"));
                         editor.putString(MainActivity.PREF_SPOTIFY_EXT_URL, spotify.getJSONObject("external_urls").getString("spotify"));
                         editor.putString(MainActivity.PREF_SPOTIFY_COUNTRY, spotify.getString("country"));
-                        editor.putString(MainActivity.PREF_SPOTIFY_IMAGE_URL, spotify.getJSONArray("images").getJSONObject(0).getString("url"));
+                        if (spotify.getJSONArray("images").length() > 0) {
+                            editor.putString(MainActivity.PREF_SPOTIFY_IMAGE_URL, spotify.getJSONArray("images").getJSONObject(0).getString("url"));
+                        }
                         editor.putString(MainActivity.PREF_SPOTIFY_PRODUCT, spotify.getString("product"));
                         editor.putString(MainActivity.PREF_SPOTIFY_TYPE, spotify.getString("type"));
                         editor.putString(MainActivity.PREF_SPOTIFY_URI, spotify.getString("uri"));
