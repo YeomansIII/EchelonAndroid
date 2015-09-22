@@ -25,7 +25,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -75,14 +78,8 @@ public class MainActivity extends AppCompatActivity
     public static final String GROUP_PREFS_NAME = "group_pref";
 
     //USER PREF
-    public static final String PREF_ECHELON_API_TOKEN = "echelon_api_token";
-    public static final String PREF_LISTENER_LOGGED_IN = "listener_logged_in";
-    public static final String PREF_LISTENER_PK = "listener_pk";
-    public static final String PREF_LISTENER_OWNER_OF = "listener_owner_of";
-    public static final String PREF_LISTENER_USER_PK = "listener_user_pk";
-    public static final String PREF_LISTENER_USERNAME = "listener_username";
-    public static final String PREF_LISTENER_EMAIL = "listener_email";
-    public static final String PREF_LISTENER_GCM_ID = "listener_gcm_id";
+    public static final String PREF_USER_DISPLAY_NAME = "user_display_name";
+    public static final String PREF_USER_IMAGE_URL = "user_image_url";
 
     //SPOTIFY USER PREF
     public static final String PREF_SPOTIFY_AUTHENTICATED = "spotify_authenticated";
@@ -247,12 +244,29 @@ public class MainActivity extends AppCompatActivity
         // Initializing Drawer Layout and ActionBarToggle
         //drawerLayout.setVisibility(View.VISIBLE);
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-        ((TextView) findViewById(R.id.navHeaderUsernameText)).setText(pref.getString(PREF_SPOTIFY_DISPLAY_NAME, "error"));
-        ImageView profileImage = (ImageView) findViewById(R.id.navHeaderProfileImage);
-        profileImage.setImageResource(R.drawable.ic_account_black_48dp);
-        //new ImageLoadTask(pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, ""), profileImage).execute();
-        imgLoader.DisplayImage(pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, ""), profileImage);
+        myFirebaseRef.child("users").child(myFirebaseRef.getAuth().getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String displayName = (String) dataSnapshot.child("display_name").getValue();
+                if (displayName != null && !displayName.equals("null")) {
+                    ((TextView) findViewById(R.id.navHeaderUsernameText)).setText(displayName);
+                } else {
+                    ((TextView) findViewById(R.id.navHeaderUsernameText)).setText((String) dataSnapshot.child("id").getValue());
+                }
+                ImageView profileImage = (ImageView) findViewById(R.id.navHeaderProfileImage);
+                profileImage.setImageResource(R.drawable.ic_account_white_48dp);
+                String imgUrl = (String) dataSnapshot.child("image_url").getValue();
+                if (imgUrl != null) {
+                    imgLoader.DisplayImage(imgUrl, profileImage);
+                }
+            }
 
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+        //new ImageLoadTask(pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, ""), profileImage).execute();
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
 
             @Override
@@ -372,10 +386,10 @@ public class MainActivity extends AppCompatActivity
                         .putString(MainActivity.PREF_SPOTIFY_AUTH_TOKEN, spotifyAuthToken)
                         .apply();
 
-                if (myFirebaseRef.getAuth() == null) {
-                    BackendRequest be = new BackendRequest("GET", this);
-                    BackendRequest.getSpotifyMeAuth(be);
-                }
+                //if (myFirebaseRef.getAuth() == null) {
+                BackendRequest be = new BackendRequest("GET", this);
+                BackendRequest.getSpotifyMeAuth(be);
+                //}
             }
         }
     }

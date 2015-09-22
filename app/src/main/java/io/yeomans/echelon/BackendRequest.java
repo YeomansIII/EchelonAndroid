@@ -246,9 +246,9 @@ public class BackendRequest {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     Log.d("GetFirebaseSpotifyToken", "DATA CHANGED");
+                                    SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
                                     if (dataSnapshot.getValue() == null) {
                                         Log.d("GetFirebaseSpotifyToken", "New User, creating in DB");
-                                        SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
                                         Map<String, Object> userInfo = new HashMap<>();
                                         userInfo.put("id", pref.getString(MainActivity.PREF_SPOTIFY_UID, null));
                                         userInfo.put("display_name", pref.getString(MainActivity.PREF_SPOTIFY_DISPLAY_NAME, null));
@@ -265,7 +265,6 @@ public class BackendRequest {
                                         if (uid != null) {
                                             Firebase user = new Firebase(MainActivity.FIREBASE_URL + "users/" + uid);
                                             user.setValue(userInfo);
-                                            user.removeEventListener(this);
                                         }
                                     }
                                 }
