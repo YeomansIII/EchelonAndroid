@@ -278,7 +278,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
             GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             if (groupFragment != null && groupFragment.isVisible()) {
-                fragmentTransaction.replace(R.id.container, new AddSongFragment(), "ADD_SONG_FRAG").addToBackStack(null).commit();
+                fragmentTransaction.setCustomAnimations(R.anim.slide_in_up, R.anim.fade_out).replace(R.id.container, new AddSongFragment(), "ADD_SONG_FRAG").addToBackStack(null).commit();
             }
         }
     }

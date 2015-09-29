@@ -113,18 +113,18 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 //                        loginParamList.add(new BasicNameValuePair("password", password));
 //                    } else {
 //                        emailInput.setErrorEnabled(true);
-//                        emailInput.setError("Please enter a valid email address");
+//                        emailInput.setError("Please slide_in_left a valid email address");
 //                    }
 //                } else if (!password.equals(password2) && !password.equals("")) {
 //                    password2Input.setErrorEnabled(true);
 //                    password2Input.setError("Passwords must match");
 //                } else {
 //                    passwordInput.setErrorEnabled(true);
-//                    passwordInput.setError("Please enter a password");
+//                    passwordInput.setError("Please slide_in_left a password");
 //                }
 //            } else {
 //                usernameInput.setErrorEnabled(true);
-//                usernameInput.setError("Please enter a username");
+//                usernameInput.setError("Please slide_in_left a username");
 //            }
 //            if (!fieldsExist) {
 //                ((TextView) view.findViewById(R.id.createAccountErrorText)).setText("Make sure all information is correct and try again");
