@@ -3,6 +3,7 @@ package io.yeomans.echelon;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
@@ -229,14 +230,17 @@ public class BackendRequest {
                     activity.myFirebaseRef.authWithCustomToken(msg, new Firebase.AuthResultHandler() {
                         @Override
                         public void onAuthenticationError(FirebaseError error) {
-                            Log.wtf("GetFirebaseSpotifyToken", "Login Failed! " + error.getMessage());
+                            Log.d("GetFirebaseSpotifyToken", "Login Failed! " + error.getMessage());
                         }
 
                         @Override
                         public void onAuthenticated(AuthData authData) {
                             Log.d("GetFirebaseSpotifyToken", "Login Succeeded!");
                             FragmentManager fragmentManager = activity.getSupportFragmentManager();
-                            fragmentManager.beginTransaction().replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
+                            Fragment groupFragment = fragmentManager.findFragmentByTag("GROUP_FRAGMENT");
+                            if (groupFragment == null || !groupFragment.isVisible()) {
+                                fragmentManager.beginTransaction().replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
+                            }
                             activity.setUpNavDrawerAndActionBar();
                             String fUid = authData.getUid();
                             SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
