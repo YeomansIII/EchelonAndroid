@@ -41,7 +41,7 @@
             android:text="Login With Spotify" />
 
         <io.yeomans.echelon.ButtonFlat
-            android:id="@+id/createNewAccountButton"
+            android:id="@+id/anonymousLoginButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"

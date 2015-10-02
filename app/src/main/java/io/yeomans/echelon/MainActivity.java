@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.firebase.client.AuthData;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -78,8 +79,8 @@ public class MainActivity extends AppCompatActivity
     public static final String GROUP_PREFS_NAME = "group_pref";
 
     //USER PREF
+    public static final String PREF_USER_AUTH_TYPE = "user_auth_type";
     public static final String PREF_USER_DISPLAY_NAME = "user_display_name";
-    public static final String PREF_USER_IMAGE_URL = "user_image_url";
 
     //SPOTIFY USER PREF
     public static final String PREF_SPOTIFY_AUTHENTICATED = "spotify_authenticated";
@@ -291,10 +292,36 @@ public class MainActivity extends AppCompatActivity
         actionBarDrawerToggle.syncState();
     }
 
+    public void logout() {
+        SharedPreferences pref = getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
+        SharedPreferences pref2 = getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
+
+        //pref.edit().remove("token").putBoolean("logged_in", false).commit();
+        pref.edit().clear().apply();
+        pref2.edit().clear().apply();
+        myFirebaseRef.unauth();
+        spotifyLogout();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        ((ControlBarFragment) fragmentManager.findFragmentByTag("CONTROL_FRAG")).unReady();
+        fragmentManager.beginTransaction().replace(R.id.container, new LoginFragment()).addToBackStack(null).commit();
+    }
+
     public boolean onLeaveGroupClick(MenuItem item) {
-        groupPref.edit().clear().apply();
-        ((ControlBarFragment) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")).unReady();
-        setContentViewHome();
+        Firebase thisGroupRef = myFirebaseRef.child("queuegroups/" + groupPref.getString(MainActivity.PREF_GROUP_NAME, null));
+        String uid = pref.getString(MainActivity.PREF_FIREBASE_UID, null);
+        if (uid != null) {
+            if (groupPref.getString(MainActivity.PREF_GROUP_LEADER_UID, "").equals(uid)) {
+                thisGroupRef.setValue(null);
+            } else {
+                thisGroupRef.child("participants/" + uid).setValue(null);
+            }
+            groupPref.edit().clear().apply();
+            ((ControlBarFragment) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")).unReady();
+            setContentViewHome();
+        } else {
+            Toast.makeText(getApplicationContext(), "Error, not identified, please log in", Toast.LENGTH_SHORT).show();
+            logout();
+        }
         return true;
     }
 
@@ -350,6 +377,10 @@ public class MainActivity extends AppCompatActivity
 //                            .add(R.id.container, new queueFragment(), "GROUP_FRAG")
 //                            .commit();
                 }
+                returner = true;
+                break;
+            case R.id.drawer_account:
+                fragmentTransaction.replace(R.id.container, new AccountFragment(), "ACCOUNT_FRAG").addToBackStack(null).commit();
                 returner = true;
                 break;
             case R.id.drawer_settings:
@@ -542,11 +573,32 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void authenticateSpotify() {
+        Log.d("Authentication", "Authenticating Anonymously with Spotify");
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(MainActivity.CLIENT_ID,
                 AuthenticationResponse.Type.TOKEN, MainActivity.REDIRECT_URI);
         builder.setScopes(new String[]{"user-read-private", "streaming", "user-read-email"});
         AuthenticationRequest request = builder.build();
         AuthenticationClient.openLoginActivity(this, MainActivity.REQUEST_CODE, request);
+    }
+
+    public void authenticateAnonymously() {
+        Log.d("Authentication", "Authenticating Anonymously");
+        myFirebaseRef.authAnonymously(new Firebase.AuthResultHandler() {
+            @Override
+            public void onAuthenticated(AuthData authData) {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                Fragment groupFragment = fragmentManager.findFragmentByTag("GROUP_FRAGMENT");
+                if (groupFragment == null || !groupFragment.isVisible()) {
+                    fragmentManager.beginTransaction().replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
+                }
+                setUpNavDrawerAndActionBar();
+            }
+
+            @Override
+            public void onAuthenticationError(FirebaseError firebaseError) {
+                Toast.makeText(getApplicationContext(), "Error authenticating", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**

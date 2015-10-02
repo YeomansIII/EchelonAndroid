@@ -9,6 +9,10 @@
             android:icon="@drawable/ic_queue_music_grey_36dp"
             android:title="Group" />
         <item
+            android:id="@+id/drawer_account"
+            android:icon="@drawable/ic_account_grey600_36dp"
+            android:title="Account" />
+        <item
             android:id="@+id/drawer_settings"
             android:icon="@drawable/ic_settings_grey600_36dp"
             android:title="Settings" />

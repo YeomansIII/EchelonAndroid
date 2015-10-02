@@ -13,6 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.FirebaseError;
+
 /**
  * Created by jason on 8/10/15.
  */
@@ -29,6 +33,7 @@ public class GroupFragment extends Fragment {
     private boolean leader;
     private boolean shouldExecuteOnResume;
     SharedPreferences groupPref;
+    ChildEventListener groupWatchListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
