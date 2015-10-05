@@ -236,17 +236,19 @@ public class BackendRequest {
                         @Override
                         public void onAuthenticated(AuthData authData) {
                             Log.d("GetFirebaseSpotifyToken", "Login Succeeded!");
+                            String fUid = authData.getUid();
+                            Firebase user = activity.myFirebaseRef.child("users/" + fUid);
+                            user.child("online").onDisconnect().setValue(false);
+                            user.child("online").setValue(true);
+                            SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
+                            pref.edit().putString(MainActivity.PREF_FIREBASE_UID, fUid).putString(MainActivity.PREF_USER_AUTH_TYPE, "spotify").commit();
                             FragmentManager fragmentManager = activity.getSupportFragmentManager();
                             Fragment groupFragment = fragmentManager.findFragmentByTag("GROUP_FRAGMENT");
                             if (groupFragment == null || !groupFragment.isVisible()) {
                                 fragmentManager.beginTransaction().replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
                             }
                             activity.setUpNavDrawerAndActionBar();
-                            String fUid = authData.getUid();
-                            SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
-                            pref.edit().putString(MainActivity.PREF_FIREBASE_UID, fUid).commit();
                             Log.d("GetFirebaseSpotifyToken", fUid);
-                            Firebase user = activity.myFirebaseRef.child("users").child(fUid);
 
                             user.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
@@ -272,6 +274,19 @@ public class BackendRequest {
                                             Firebase user = new Firebase(MainActivity.FIREBASE_URL + "users/" + uid);
                                             user.setValue(userInfo);
                                         }
+                                    } else {
+                                        SharedPreferences.Editor prefEdit = pref.edit();
+                                        if (dataSnapshot.hasChild("display_name")) {
+                                            prefEdit.putString(MainActivity.PREF_USER_DISPLAY_NAME, (String) dataSnapshot.child("display_name").getValue());
+                                        }
+                                        if (dataSnapshot.hasChild("ext_url")) {
+                                            prefEdit.putString(MainActivity.PREF_USER_EXT_URL, (String) dataSnapshot.child("ext_url").getValue());
+                                        }
+                                        if (dataSnapshot.hasChild("image_url")) {
+                                            prefEdit.putString(MainActivity.PREF_USER_IMAGE_URL, (String) dataSnapshot.child("image_url").getValue());
+                                        }
+                                        prefEdit.apply();
+                                        activity.checkGroup();
                                     }
                                 }
 

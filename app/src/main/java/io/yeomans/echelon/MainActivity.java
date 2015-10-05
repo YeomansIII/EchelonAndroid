@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -43,23 +44,9 @@ import com.spotify.sdk.android.player.PlayerNotificationCallback;
 import com.spotify.sdk.android.player.PlayerState;
 import com.spotify.sdk.android.player.Spotify;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -81,6 +68,8 @@ public class MainActivity extends AppCompatActivity
     //USER PREF
     public static final String PREF_USER_AUTH_TYPE = "user_auth_type";
     public static final String PREF_USER_DISPLAY_NAME = "user_display_name";
+    public static final String PREF_USER_EXT_URL = "user_ext_url";
+    public static final String PREF_USER_IMAGE_URL = "user_image_url";
 
     //SPOTIFY USER PREF
     public static final String PREF_SPOTIFY_AUTHENTICATED = "spotify_authenticated";
@@ -178,7 +167,39 @@ public class MainActivity extends AppCompatActivity
 
         //String token = pref.getString(PREF_ECHELON_API_TOKEN, null);
 
-        loggedIn = pref.getBoolean(PREF_SPOTIFY_AUTHENTICATED, false);
+
+        if (myFirebaseRef.getAuth() == null) {
+            loggedIn = false;
+        } else {
+            loggedIn = true;
+            Firebase userRef = myFirebaseRef.child("users/" + myFirebaseRef.getAuth().getUid());
+            userRef.child("online").onDisconnect().setValue(false);
+            userRef.child("online").setValue(true);
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    SharedPreferences.Editor edit = pref.edit();
+                    if (dataSnapshot.hasChild("display_name")) {
+                        edit.putString(MainActivity.PREF_USER_DISPLAY_NAME, (String) dataSnapshot.child("display_name").getValue());
+                    }
+                    if (dataSnapshot.hasChild("ext_url")) {
+                        edit.putString(MainActivity.PREF_USER_EXT_URL, (String) dataSnapshot.child("ext_url").getValue());
+                    }
+                    if (dataSnapshot.hasChild("image_url")) {
+                        edit.putString(MainActivity.PREF_USER_IMAGE_URL, (String) dataSnapshot.child("image_url").getValue());
+                    }
+                    edit.apply();
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                    Toast.makeText(getApplicationContext(), "Error accessing the database", Toast.LENGTH_SHORT).show();
+                }
+            });
+            if (pref.getBoolean(PREF_SPOTIFY_AUTHENTICATED, false)) {
+                authenticateSpotify();
+            }
+        }
 
         playQueue = new LinkedList<>();
         backStack = new LinkedList<>();
@@ -200,26 +221,27 @@ public class MainActivity extends AppCompatActivity
         if (!loggedIn) {
             setContentViewLogin();
         } else {
-            if (pref.getBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false)) {
-                authenticateSpotify();
-            }
+//            if (pref.getBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false)) {
+//                authenticateSpotify();
+//            }
+//            setUpNavDrawerAndActionBar();
+//            if (groupPref.getString(MainActivity.PREF_GROUP_NAME, null) != null) {
+//                FragmentManager fragmentManager = getSupportFragmentManager();
+//                Fragment fragment = new GroupFragment();
+//                Bundle bundle = new Bundle();
+//                if (groupPref.getString(MainActivity.PREF_GROUP_LEADER_UID, "").equals(pref.getString(MainActivity.PREF_FIREBASE_UID, "."))) {
+//                    bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
+//                } else {
+//                    bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
+//                }
+//                fragment.setArguments(bundle);
+//                fragmentManager.beginTransaction()
+//                        .replace(R.id.container, fragment, "GROUP_FRAG")
+//                        .commit();
+//            } else {
+            setContentViewHome();
             setUpNavDrawerAndActionBar();
-            if (groupPref.getString(MainActivity.PREF_GROUP_NAME, null) != null) {
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                Fragment fragment = new GroupFragment();
-                Bundle bundle = new Bundle();
-                if (groupPref.getString(MainActivity.PREF_GROUP_LEADER_UID, "").equals(pref.getString(MainActivity.PREF_FIREBASE_UID, "."))) {
-                    bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
-                } else {
-                    bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
-                }
-                fragment.setArguments(bundle);
-                fragmentManager.beginTransaction()
-                        .replace(R.id.container, fragment, "GROUP_FRAG")
-                        .commit();
-            } else {
-                setContentViewHome();
-            }
+            checkGroup();
         }
 
         setOnPlayerControlCallback(((OnPlayerControlCallback) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")));
@@ -252,6 +274,7 @@ public class MainActivity extends AppCompatActivity
                 String displayName = (String) dataSnapshot.child("display_name").getValue();
                 if (displayName != null && !displayName.equals("null")) {
                     ((TextView) findViewById(R.id.navHeaderUsernameText)).setText(displayName);
+                    pref.edit().putString(MainActivity.PREF_USER_DISPLAY_NAME, displayName).apply();
                 } else {
                     ((TextView) findViewById(R.id.navHeaderUsernameText)).setText((String) dataSnapshot.child("id").getValue());
                 }
@@ -292,14 +315,67 @@ public class MainActivity extends AppCompatActivity
         actionBarDrawerToggle.syncState();
     }
 
+    public void checkGroup() {
+        myFirebaseRef.child("users/" + pref.getString(MainActivity.PREF_FIREBASE_UID, null) + "/cur_group")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.getValue() != null) {
+                            myFirebaseRef.child("queuegroups/" + dataSnapshot.getValue()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    if (dataSnapshot.getValue() != null) {
+                                        groupPref.edit()
+                                                .putString(MainActivity.PREF_GROUP_NAME,
+                                                        (String) dataSnapshot.child("name").getValue())
+                                                .putString(MainActivity.PREF_GROUP_LEADER_UID,
+                                                        (String) dataSnapshot.child("leader").getValue()).apply();
+                                        FragmentTransaction fragmentTransaction = mainActivity.getSupportFragmentManager().beginTransaction();
+                                        DialogFragment dialogFragment = null;
+                                        if (pref.getString(MainActivity.PREF_FIREBASE_UID, "").equals(dataSnapshot.child("leader").getValue())) {
+                                            dialogFragment = new CurrentGroupLeaderDialogFragment();
+                                            //dialogFragment.show(getSupportFragmentManager(), "CURRENT_GROUP_LEADER_DIALOG");
+                                        } else {
+                                            dialogFragment = new CurrentGroupDialogFragment();
+                                            //dialogFragment.show(getSupportFragmentManager(), "CURRENT_GROUP_DIALOG");
+                                        }
+                                        //dialogFragment.show(fragmentTransaction, "CURRENT_GROUP_DIALOG");
+                                        fragmentTransaction.add(dialogFragment, null).commitAllowingStateLoss();
+                                        //fragmentTransaction.commitAllowingStateLoss();
+                                    } else {
+                                        myFirebaseRef.child("users/" + pref.getString(MainActivity.PREF_FIREBASE_UID, null) + "/cur_group").removeValue();
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(FirebaseError firebaseError) {
+
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+
+                    }
+                });
+    }
+
     public void logout() {
         SharedPreferences pref = getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
         SharedPreferences pref2 = getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
 
         //pref.edit().remove("token").putBoolean("logged_in", false).commit();
+        Firebase thisUserRef = myFirebaseRef.child("users/" + pref.getString(MainActivity.PREF_FIREBASE_UID, null));
+        if (pref.getString(MainActivity.PREF_USER_AUTH_TYPE, "").equals("anonymous")) {
+            thisUserRef.removeValue();
+        } else {
+            thisUserRef.child("online").setValue(false);
+        }
+        myFirebaseRef.unauth();
         pref.edit().clear().apply();
         pref2.edit().clear().apply();
-        myFirebaseRef.unauth();
         spotifyLogout();
         FragmentManager fragmentManager = getSupportFragmentManager();
         ((ControlBarFragment) fragmentManager.findFragmentByTag("CONTROL_FRAG")).unReady();
@@ -311,10 +387,11 @@ public class MainActivity extends AppCompatActivity
         String uid = pref.getString(MainActivity.PREF_FIREBASE_UID, null);
         if (uid != null) {
             if (groupPref.getString(MainActivity.PREF_GROUP_LEADER_UID, "").equals(uid)) {
-                thisGroupRef.setValue(null);
+                thisGroupRef.removeValue();
             } else {
-                thisGroupRef.child("participants/" + uid).setValue(null);
+                thisGroupRef.child("participants/" + uid).removeValue();
             }
+            myFirebaseRef.child("users/" + uid + "/cur_group").removeValue();
             groupPref.edit().clear().apply();
             ((ControlBarFragment) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")).unReady();
             setContentViewHome();
@@ -365,7 +442,7 @@ public class MainActivity extends AppCompatActivity
                     if (groupPref.getString(MainActivity.PREF_GROUP_LEADER_UID, "").equals(pref.getString(MainActivity.PREF_FIREBASE_UID, "."))) {
                         bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
                     } else {
-                        bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
+                        bundle.putStringArray("extra_stuff", new String[]{"" + false, "" + false});
                     }
                     fragment.setArguments(bundle);
                     fragmentManager.beginTransaction()
@@ -586,6 +663,14 @@ public class MainActivity extends AppCompatActivity
         myFirebaseRef.authAnonymously(new Firebase.AuthResultHandler() {
             @Override
             public void onAuthenticated(AuthData authData) {
+                Firebase thisUserRef = myFirebaseRef.child("users/" + authData.getUid());
+                thisUserRef.child("online").onDisconnect().setValue(false);
+                thisUserRef.child("online").setValue(true);
+                thisUserRef.child("display_name").setValue("Anonymous");
+                pref.edit().putString(MainActivity.PREF_FIREBASE_UID, authData.getUid())
+                        .putString(MainActivity.PREF_USER_AUTH_TYPE, "anonymous")
+                        .putString(MainActivity.PREF_USER_DISPLAY_NAME, "Anonymous")
+                        .apply();
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 Fragment groupFragment = fragmentManager.findFragmentByTag("GROUP_FRAGMENT");
                 if (groupFragment == null || !groupFragment.isVisible()) {

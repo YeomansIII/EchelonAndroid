@@ -30,18 +30,18 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         mainActivity.toolbar.setBackgroundColor(getResources().getColor(R.color.primaryColor));
         mainActivity.getSupportActionBar().setTitle("Settings");
 
-        view.findViewById(R.id.settingsSpotifyLogin).setOnClickListener(this);
-        view.findViewById(R.id.settingsSpotifyLogout).setOnClickListener(this);
+//        view.findViewById(R.id.settingsSpotifyLogin).setOnClickListener(this);
+//        view.findViewById(R.id.settingsSpotifyLogout).setOnClickListener(this);
 
         return view;
     }
 
     @Override
     public void onClick(View v) {
-        if (v == getView().findViewById(R.id.settingsSpotifyLogin)) {
-            mainActivity.authenticateSpotify();
-        } else if (v == getView().findViewById(R.id.settingsSpotifyLogout)) {
-            mainActivity.spotifyLogout();
-        }
+//        if (v == getView().findViewById(R.id.settingsSpotifyLogin)) {
+//            mainActivity.authenticateSpotify();
+//        } else if (v == getView().findViewById(R.id.settingsSpotifyLogout)) {
+//            mainActivity.spotifyLogout();
+//        }
     }
 }

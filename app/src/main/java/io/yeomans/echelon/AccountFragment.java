@@ -33,6 +33,9 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     //private RadioButton rbPublic, rbPassword, rbFriends, rbInvite;
     private TextInputLayout accountDisplayNameEditWrapper;
     //String selectedPrivacy;
+    private Firebase thisUserRef;
+    private String uid;
+    private String accountType;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -41,6 +44,9 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         mainActivity = (MainActivity) getActivity();
         mainPref = mainActivity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
         groupPref = mainActivity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
+        uid = mainPref.getString(MainActivity.PREF_FIREBASE_UID, null);
+        accountType = mainPref.getString(MainActivity.PREF_USER_AUTH_TYPE, "none");
+        thisUserRef = mainActivity.myFirebaseRef.child("users/" + uid);
     }
 
     @Override
@@ -53,9 +59,11 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
 
         mainActivity.toolbar.setBackgroundColor(getResources().getColor(R.color.primaryColor));
         mainActivity.getSupportActionBar().setTitle("Account");
-        String uid = mainPref.getString(MainActivity.PREF_FIREBASE_UID, null);
         if (uid != null) {
-            final Firebase thisUserRef = mainActivity.myFirebaseRef.child("users/" + uid);
+            if (accountType.equals("anonymous")) {
+                view.findViewById(R.id.accountEmailStaticText).setVisibility(View.GONE);
+                view.findViewById(R.id.accountEmailText).setVisibility(View.GONE);
+            }
 
             accountDisplayNameEditWrapper = (TextInputLayout) view.findViewById(R.id.accountDisplayNameEditWrapper);
             view.findViewById(R.id.accountLogoutButton).setOnClickListener(this);
@@ -71,22 +79,24 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
                         if (dataSnapshot.hasChild("display_name")) {
                             accountDisplayNameEditWrapper.getEditText().setText((String) dataSnapshot.child("display_name").getValue());
                         }
-                        accountDisplayNameEditWrapper.getEditText().addTextChangedListener(new TextWatcher() {
-                            @Override
-                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                            }
-
-                            @Override
-                            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                            }
-
-                            @Override
-                            public void afterTextChanged(Editable s) {
-                                thisUserRef.child("display_name").setValue(s.toString());
-                            }
-                        });
+                    } else {
+                        ((TextView) view.findViewById(R.id.accountIdText)).setText(mainPref.getString(MainActivity.PREF_FIREBASE_UID, "error"));
                     }
+                    accountDisplayNameEditWrapper.getEditText().addTextChangedListener(new TextWatcher() {
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                        }
+
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        }
+
+                        @Override
+                        public void afterTextChanged(Editable s) {
+                            thisUserRef.child("display_name").setValue(s.toString());
+                        }
+                    });
                 }
 
                 @Override

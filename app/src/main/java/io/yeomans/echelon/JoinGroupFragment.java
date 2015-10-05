@@ -84,8 +84,14 @@ public class JoinGroupFragment extends Fragment implements View.OnClickListener 
                         String name2 = joinGroupNameEditWrapper.getEditText().getText().toString();
                         String fUid2 = mainPref.getString(MainActivity.PREF_FIREBASE_UID, null);
                         String leaderUid = (String) dataSnapshot.child("leader").getValue();
+                        mainActivity.myFirebaseRef.child("users/" + fUid2 + "/cur_group").setValue(name2);
                         Firebase ref = mainActivity.myFirebaseRef.child("queuegroups/" + name2);
-                        ref.child("participants").child(fUid2).setValue(true);
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("active", true);
+                        map.put("displayName", mainPref.getString(MainActivity.PREF_USER_DISPLAY_NAME, null));
+                        map.put("extUrl", mainPref.getString(MainActivity.PREF_USER_EXT_URL, null));
+                        map.put("imageUrl", mainPref.getString(MainActivity.PREF_USER_IMAGE_URL, null));
+                        ref.child("participants/" + fUid2).setValue(map);
                         groupPref.edit().putString(MainActivity.PREF_GROUP_NAME, name2).putString(MainActivity.PREF_GROUP_LEADER_UID, leaderUid).apply();
 
                         View view = mainActivity.getCurrentFocus();

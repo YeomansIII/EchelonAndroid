@@ -74,7 +74,9 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
 
                     HttpGet get2 = new HttpGet(spotifyTracksUrl);
                     Log.d("SearchSongs", get2.getURI().toString());
-                    get2.addHeader("Authorization", "Bearer " + mainActivity.spotifyAuthToken);
+                    if (mainActivity.spotifyAuthToken != null) {
+                        get2.addHeader("Authorization", "Bearer " + mainActivity.spotifyAuthToken);
+                    }
                     HttpResponse responseGet2 = client.execute(get2);
                     HttpEntity resEntityGet2 = responseGet2.getEntity();
                     if (resEntityGet2 != null) {

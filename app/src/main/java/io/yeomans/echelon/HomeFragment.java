@@ -46,7 +46,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.home_fragment,
                 container, false);
-        view.findViewById(R.id.createGroupButton).setOnClickListener(this);
+        View createButton = view.findViewById(R.id.createGroupButton);
+        if (mainPref.getString(MainActivity.PREF_USER_AUTH_TYPE, "").equals("spotify") && mainPref.getBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false) && mainPref.getString(MainActivity.PREF_SPOTIFY_PRODUCT, "").equals("premium")) {
+            createButton.setOnClickListener(this);
+        } else {
+            createButton.setVisibility(View.GONE);
+        }
         view.findViewById(R.id.joinGroupButton).setOnClickListener(this);
         view.findViewById(R.id.logoutButton).setOnClickListener(this);
         //view.findViewById(R.id.spotifyLoginButton).setOnClickListener(this);

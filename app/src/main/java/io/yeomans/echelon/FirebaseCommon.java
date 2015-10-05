@@ -42,7 +42,9 @@ public class FirebaseCommon {
                     String spotifyTracksUrl = "https://api.spotify.com/v1/tracks/?ids=" + songId;
                     HttpGet get2 = new HttpGet(spotifyTracksUrl);
                     Log.d("AddSong", get2.getURI().toString());
-                    get2.addHeader("Authorization", "Bearer " + main.spotifyAuthToken);
+                    if (main.spotifyAuthToken != null) {
+                        get2.addHeader("Authorization", "Bearer " + main.spotifyAuthToken);
+                    }
                     HttpResponse responseGet2 = client.execute(get2);
                     HttpEntity resEntityGet2 = responseGet2.getEntity();
                     if (resEntityGet2 != null) {
