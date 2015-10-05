@@ -238,8 +238,6 @@ public class BackendRequest {
                             Log.d("GetFirebaseSpotifyToken", "Login Succeeded!");
                             String fUid = authData.getUid();
                             Firebase user = activity.myFirebaseRef.child("users/" + fUid);
-                            user.child("online").onDisconnect().setValue(false);
-                            user.child("online").setValue(true);
                             SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
                             pref.edit().putString(MainActivity.PREF_FIREBASE_UID, fUid).putString(MainActivity.PREF_USER_AUTH_TYPE, "spotify").commit();
                             FragmentManager fragmentManager = activity.getSupportFragmentManager();
@@ -255,6 +253,8 @@ public class BackendRequest {
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     Log.d("GetFirebaseSpotifyToken", "DATA CHANGED");
                                     SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
+                                    String uid = pref.getString(MainActivity.PREF_FIREBASE_UID, null);
+                                    Firebase user = new Firebase(MainActivity.FIREBASE_URL + "users/" + uid);
                                     if (dataSnapshot.getValue() == null) {
                                         Log.d("GetFirebaseSpotifyToken", "New User, creating in DB");
                                         Map<String, Object> userInfo = new HashMap<>();
@@ -268,10 +268,7 @@ public class BackendRequest {
                                         userInfo.put("type", pref.getString(MainActivity.PREF_SPOTIFY_TYPE, null));
                                         userInfo.put("uri", pref.getString(MainActivity.PREF_SPOTIFY_URI, null));
 
-                                        String uid = pref.getString(MainActivity.PREF_FIREBASE_UID, null);
-
                                         if (uid != null) {
-                                            Firebase user = new Firebase(MainActivity.FIREBASE_URL + "users/" + uid);
                                             user.setValue(userInfo);
                                         }
                                     } else {
@@ -288,6 +285,8 @@ public class BackendRequest {
                                         prefEdit.apply();
                                         activity.checkGroup();
                                     }
+                                    user.child("online").onDisconnect().setValue(false);
+                                    user.child("online").setValue(true);
                                 }
 
                                 @Override
