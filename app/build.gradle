@@ -42,7 +42,7 @@ android {
         applicationId "io.yeomans.echelon"
         minSdkVersion 16
         targetSdkVersion 21
-        versionCode 18
+        versionCode 19
         versionName "0.2beta-1"
         archivesBaseName = "Echelon-$versionName-$versionCode"
     }
