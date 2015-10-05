@@ -28,4 +28,8 @@
 -keep class io.yeomans.echelon.SpotifySong { *; }
 -keepnames class io.yeomans.echelon.SpotifySong.** { *; }
 -keepnames class io.yeomans.echelon.SpotifySong { *; }
+-keep class io.yeomans.echelon.Participant.** { *; }
+-keep class io.yeomans.echelon.Participant { *; }
+-keepnames class io.yeomans.echelon.Participant.** { *; }
+-keepnames class io.yeomans.echelon.Participant { *; }
 -keepattributes Signature
