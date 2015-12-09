@@ -1,34 +1,27 @@
 package io.yeomans.echelon;
 
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TableLayout;
 import android.widget.TextView;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.URLEncoder;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 /**
@@ -78,21 +71,34 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
         new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... params) {
+                String response = "";
+                URL url;
+                HttpURLConnection urlConnection = null;
                 try {
-                    HttpClient client = new DefaultHttpClient();
                     String spotifyTracksUrl = "https://api.spotify.com/v1/browse/featured-playlists?limit=6";
+                    url = new URL(spotifyTracksUrl);
 
-                    HttpGet get2 = new HttpGet(spotifyTracksUrl);
-                    Log.d("GettingPlaylists", get2.getURI().toString());
-                    get2.addHeader("Authorization", "Bearer " + mainActivity.spotifyAuthToken);
-                    HttpResponse responseGet2 = client.execute(get2);
-                    HttpEntity resEntityGet2 = responseGet2.getEntity();
-                    if (resEntityGet2 != null) {
-                        String spotifyResponse = EntityUtils.toString(resEntityGet2);
-                        return spotifyResponse;
+                    urlConnection = (HttpURLConnection) url
+                            .openConnection();
+                    if (mainActivity.spotifyAuthToken != null) {
+                        urlConnection.setRequestProperty("Authorization", "Bearer " + mainActivity.spotifyAuthToken);
                     }
-                } catch (IOException ie) {
-                    ie.printStackTrace();
+                    BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line);
+                    }
+                    br.close();
+                    return sb.toString();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        urlConnection.disconnect();
+                    } catch (Exception e) {
+                        e.printStackTrace(); //If you want further info on failure...
+                    }
                 }
                 return "{\"error\":\"error\"}";
             }

@@ -13,21 +13,15 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,8 +38,6 @@ public class BackendRequest {
 
     private String url;
     private String method;
-    private Header[] headers;
-    private ArrayList<NameValuePair> paramaters;
     private String jsonEntity;
     private MainActivity mainActivity;
     private Context mainContext;
@@ -68,65 +60,16 @@ public class BackendRequest {
         this.mainActivity = mainActivity;
     }
 
-    public BackendRequest(String url, Header[] headers, MainActivity mainActivity) {
-        this.method = "GET";
-        this.url = url;
-        this.headers = headers;
-        this.mainActivity = mainActivity;
-    }
-
-    public BackendRequest(String method, String url, Header[] headers, MainActivity mainActivity) {
-        this.method = method;
-        this.url = url;
-        this.headers = headers;
-        this.mainActivity = mainActivity;
-    }
-
-    public BackendRequest(String url, ArrayList<NameValuePair> paramaters, MainActivity mainActivity) {
-        this.method = "POST";
-        this.url = url;
-        this.paramaters = paramaters;
-        this.mainActivity = mainActivity;
-    }
-
     public String getUrl() {
         return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 
     public String getMethod() {
         return method;
     }
 
-    public void setMethod(String method) {
-        this.method = method;
-    }
-
-    public Header[] getHeaders() {
-        return headers;
-    }
-
-    public void setHeaders(Header[] headers) {
-        this.headers = headers;
-    }
-
-    public ArrayList<NameValuePair> getParamaters() {
-        return paramaters;
-    }
-
-    public void setParamaters(ArrayList<NameValuePair> paramaters) {
-        this.paramaters = paramaters;
-    }
-
     public String getJsonEntity() {
         return jsonEntity;
-    }
-
-    public void setJsonEntity(String jsonEntity) {
-        this.jsonEntity = jsonEntity;
     }
 
     public MainActivity getMainActivity() {
@@ -137,33 +80,37 @@ public class BackendRequest {
         this.mainActivity = mainActivity;
     }
 
-    public Context getMainContext() {
-        return mainContext;
-    }
-
-    public void setMainContext(Context mainContext) {
-        this.mainContext = mainContext;
-    }
-
     public static void getSpotifyMeAuth(BackendRequest be) {
         if (be.getMethod().equalsIgnoreCase("GET")) {
             final MainActivity activity = be.getMainActivity();
             new AsyncTask<BackendRequest, Void, String>() {
                 @Override
                 protected String doInBackground(BackendRequest... params) {
+                    String response = "";
+                    URL url;
+                    HttpURLConnection urlConnection = null;
                     try {
-                        String spotifyTracksUrl = "https://api.spotify.com/v1/me";
-                        HttpClient client = new DefaultHttpClient();
-                        HttpGet get = new HttpGet(spotifyTracksUrl);
-                        get.addHeader("Authorization", "Bearer " + activity.spotifyAuthToken);
-                        Log.d("GetSpotifyMe", get.getURI().toString());
-                        HttpResponse responseGet = client.execute(get);
-                        HttpEntity resEntityGet = responseGet.getEntity();
-                        if (resEntityGet != null) {
-                            return EntityUtils.toString(resEntityGet);
+                        url = new URL("https://api.spotify.com/v1/me");
+
+                        urlConnection = (HttpURLConnection) url
+                                .openConnection();
+                        urlConnection.setRequestProperty("Authorization", "Bearer " + activity.spotifyAuthToken);
+                        BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            sb.append(line);
                         }
-                    } catch (Exception je) {
-                        je.printStackTrace();
+                        br.close();
+                        return sb.toString();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        try {
+                            urlConnection.disconnect();
+                        } catch (Exception e) {
+                            e.printStackTrace(); //If you want further info on failure...
+                        }
                     }
                     return "{\"error\":\"error\"}";
                 }
@@ -208,18 +155,39 @@ public class BackendRequest {
             new AsyncTask<BackendRequest, Void, String>() {
                 @Override
                 protected String doInBackground(BackendRequest... params) {
+                    BackendRequest be = params[0];
+                    String response = "";
+                    URL url;
+                    HttpURLConnection urlConnection = null;
                     try {
-                        BackendRequest be = params[0];
-                        HttpClient client = new DefaultHttpClient();
-                        HttpPost post = new HttpPost(be.getUrl());
-                        post.setEntity(new StringEntity(be.getJsonEntity()));
-                        HttpResponse responseGet = client.execute(post);
-                        HttpEntity resEntityGet = responseGet.getEntity();
-                        if (resEntityGet != null) {
-                            return EntityUtils.toString(resEntityGet);
+                        url = new URL(be.getUrl());
+                        urlConnection = (HttpURLConnection) url.openConnection();
+                        urlConnection.setDoOutput(true);
+                        urlConnection.setDoInput(true);
+                        urlConnection.setUseCaches(false);
+                        urlConnection.setRequestMethod("POST");
+                        urlConnection.setRequestProperty("content-type", "application/json");
+                        DataOutputStream request = new DataOutputStream(urlConnection.getOutputStream());
+                        request.writeBytes(be.getJsonEntity());
+                        request.flush();
+                        request.close();
+
+                        BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            sb.append(line);
                         }
-                    } catch (IOException ie) {
-                        ie.printStackTrace();
+                        br.close();
+                        return sb.toString();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        try {
+                            urlConnection.disconnect();
+                        } catch (Exception e) {
+                            e.printStackTrace(); //If you want further info on failure...
+                        }
                     }
                     return "{\"error\":\"error\"}";
                 }

@@ -12,17 +12,15 @@ import android.view.inputmethod.InputMethodManager;
 import com.firebase.client.Firebase;
 import com.firebase.client.ServerValue;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,21 +35,34 @@ public class FirebaseCommon {
             @Override
             protected String doInBackground(String... params) {
                 String songId = params[0];
+                String response = "";
+                URL url;
+                HttpURLConnection urlConnection = null;
                 try {
-                    HttpClient client = new DefaultHttpClient();
                     String spotifyTracksUrl = "https://api.spotify.com/v1/tracks/?ids=" + songId;
-                    HttpGet get2 = new HttpGet(spotifyTracksUrl);
-                    Log.d("AddSong", get2.getURI().toString());
+                    url = new URL(spotifyTracksUrl);
+
+                    urlConnection = (HttpURLConnection) url
+                            .openConnection();
                     if (main.spotifyAuthToken != null) {
-                        get2.addHeader("Authorization", "Bearer " + main.spotifyAuthToken);
+                        urlConnection.setRequestProperty("Authorization", "Bearer " + main.spotifyAuthToken);
                     }
-                    HttpResponse responseGet2 = client.execute(get2);
-                    HttpEntity resEntityGet2 = responseGet2.getEntity();
-                    if (resEntityGet2 != null) {
-                        return EntityUtils.toString(resEntityGet2);
+                    BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line);
                     }
-                } catch (IOException ie) {
-                    ie.printStackTrace();
+                    br.close();
+                    return sb.toString();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        urlConnection.disconnect();
+                    } catch (Exception e) {
+                        e.printStackTrace(); //If you want further info on failure...
+                    }
                 }
                 return "{\"error\":\"error\"}";
             }

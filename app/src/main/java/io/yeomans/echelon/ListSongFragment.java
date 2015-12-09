@@ -3,29 +3,22 @@ package io.yeomans.echelon;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.URLEncoder;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 /**
@@ -64,26 +57,39 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
     }
 
     public void listSongs() {
-        final ListSongFragment songSearchFrag = this;
+        //final ListSongFragment songSearchFrag = this;
         new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... params) {
+                String response = "";
+                URL url;
+                HttpURLConnection urlConnection = null;
                 try {
-                    HttpClient client = new DefaultHttpClient();
+                    Log.d("ListSong", "Getting Songs");
                     String spotifyTracksUrl = getUrl;
+                    url = new URL(spotifyTracksUrl);
 
-                    HttpGet get2 = new HttpGet(spotifyTracksUrl);
-                    Log.d("SearchSongs", get2.getURI().toString());
+                    urlConnection = (HttpURLConnection) url
+                            .openConnection();
                     if (mainActivity.spotifyAuthToken != null) {
-                        get2.addHeader("Authorization", "Bearer " + mainActivity.spotifyAuthToken);
+                        urlConnection.setRequestProperty("Authorization", "Bearer " + mainActivity.spotifyAuthToken);
                     }
-                    HttpResponse responseGet2 = client.execute(get2);
-                    HttpEntity resEntityGet2 = responseGet2.getEntity();
-                    if (resEntityGet2 != null) {
-                        return EntityUtils.toString(resEntityGet2);
+                    BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line);
                     }
-                } catch (IOException ie) {
-                    ie.printStackTrace();
+                    br.close();
+                    return sb.toString();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        urlConnection.disconnect();
+                    } catch (Exception e) {
+                        e.printStackTrace(); //If you want further info on failure...
+                    }
                 }
                 return "{\"error\":\"error\"}";
             }
@@ -96,7 +102,7 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
                     JSONObject json = new JSONObject(msg).getJSONObject("tracks");
                     JSONArray items = json.getJSONArray("items");
                     Log.d("Search Song", items.toString());
-                    LinearLayout songList = (LinearLayout) view.findViewById(R.id.listSongListLayout);
+                    LinearLayout songList = (LinearLayout) view.findViewById(R.id.listSongListLayout);;
                     songList.removeAllViews();
                     songListArr = new ArrayList<>();
                     for (int i = 0; i < items.length() - 1; i++) {
@@ -107,28 +113,25 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
                             curObj = items.getJSONObject(i);
                         }
 
-                        RelativeLayout rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.song_item, null);
-                        ImageView albumArtImage = (ImageView) rt.findViewById(R.id.albumArtImage);
-                        TextView songTitleText = (TextView) rt.findViewById(R.id.songTitleText);
-                        TextView songArtistText = (TextView) rt.findViewById(R.id.songArtistText);
+                        SongItemView siv = new SongItemView(getContext(),
+                                curObj.getString("name"),
+                                curObj.getJSONArray("artists").getJSONObject(0).getString("name"),
+                                curObj.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"),
+                                curObj.getString("id"),
+                                new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        for (RelativeLayout view : songListArr) {
+                                            view.setOnClickListener(null);
+                                        }
+                                        view.setBackgroundColor(Color.DKGRAY);
+                                        FirebaseCommon.addSong((String) v.getTag(), mainActivity);
+                                    }
+                                });
 
-                        songTitleText.setText(curObj.getString("name"));
-                        songArtistText.setText(curObj.getJSONArray("artists").getJSONObject(0).getString("name"));
-                        //new ImageLoadTask(curObj.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"), albumArtImage).execute();
-                        mainActivity.imgLoader.DisplayImage(curObj.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"), albumArtImage);
-                        rt.setTag(curObj.getString("id"));
-                        rt.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                for (RelativeLayout view : songListArr) {
-                                    view.setOnClickListener(null);
-                                }
-                                view.setBackgroundColor(Color.DKGRAY);
-                                FirebaseCommon.addSong((String) v.getTag(), mainActivity);
-                            }
-                        });
-                        songListArr.add(rt);
-                        songList.addView(rt);
+                        //mainActivity.imgLoader.DisplayImage(curObj.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"), albumArtImage);
+                        songListArr.add(siv);
+                        songList.addView(siv);
                     }
                 } catch (JSONException je) {
                     je.printStackTrace();

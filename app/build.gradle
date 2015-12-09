@@ -35,13 +35,13 @@ apply plugin: 'io.fabric'
 //}
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
 
     defaultConfig {
         applicationId "io.yeomans.echelon"
         minSdkVersion 16
-        targetSdkVersion 21
+        targetSdkVersion 23
         versionCode 19
         versionName "0.2beta-1"
         archivesBaseName = "Echelon-$versionName-$versionCode"
@@ -94,15 +94,15 @@ repositories {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     // This library handles authentication and authorization
-    compile 'com.spotify.sdk:spotify-auth:1.0.0-beta10@aar'
+    compile 'com.spotify.sdk:spotify-auth:1.0.0-beta12@aar'
     // This library handles music playback
-    compile 'com.spotify.sdk:spotify-player:1.0.0-beta10@aar'
+    compile 'com.spotify.sdk:spotify-player:1.0.0-beta12@aar'
     compile('com.crashlytics.sdk.android:crashlytics:2.4.0@aar') {
         transitive = true;
     }
-    compile 'com.android.support:appcompat-v7:22.2.1'
-    compile 'com.android.support:support-v4:22.2.1'
-    compile 'com.android.support:design:22.2.1'
-    compile 'com.google.android.gms:play-services-gcm:7.5.0'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:support-v4:23.1.1'
+    compile 'com.android.support:design:23.1.1'
+    compile 'com.google.android.gms:play-services-gcm:8.3.0'
     compile 'com.firebase:firebase-client-android:2.3.1+'
 }

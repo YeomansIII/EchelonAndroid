@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity
     Context context;
     MainActivity mainActivity;
     MainActivity mainActivityClass;
-    ImageLoader imgLoader;
+    public static ImageLoader imgLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -376,7 +376,8 @@ public class MainActivity extends AppCompatActivity
         myFirebaseRef.unauth();
         pref.edit().clear().apply();
         pref2.edit().clear().apply();
-        spotifyLogout();
+        AuthenticationClient.clearCookies(getApplicationContext());
+        //spotifyLogout();
         FragmentManager fragmentManager = getSupportFragmentManager();
         ((ControlBarFragment) fragmentManager.findFragmentByTag("CONTROL_FRAG")).unReady();
         fragmentManager.beginTransaction().replace(R.id.container, new LoginFragment()).addToBackStack(null).commit();
@@ -487,18 +488,33 @@ public class MainActivity extends AppCompatActivity
         // Check if result comes from the correct activity
         if (requestCode == REQUEST_CODE) {
             authResponse = AuthenticationClient.getResponse(resultCode, intent);
-            if (authResponse.getType() == AuthenticationResponse.Type.TOKEN) {
-                spotifyAuthenticated = true;
-                spotifyAuthToken = authResponse.getAccessToken();
-                pref.edit()
-                        .putBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, true)
-                        .putString(MainActivity.PREF_SPOTIFY_AUTH_TOKEN, spotifyAuthToken)
-                        .apply();
+            switch (authResponse.getType()) {
+                // Response was successful and contains auth token
+                case TOKEN:
+                    spotifyAuthenticated = true;
+                    spotifyAuthToken = authResponse.getAccessToken();
+                    pref.edit()
+                            .putBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, true)
+                            .putString(MainActivity.PREF_SPOTIFY_AUTH_TOKEN, spotifyAuthToken)
+                            .apply();
 
-                //if (myFirebaseRef.getAuth() == null) {
-                BackendRequest be = new BackendRequest("GET", this);
-                BackendRequest.getSpotifyMeAuth(be);
-                //}
+                    //if (myFirebaseRef.getAuth() == null) {
+                    BackendRequest be = new BackendRequest("GET", this);
+                    BackendRequest.getSpotifyMeAuth(be);
+                    //}
+                    // Handle successful response
+                    break;
+
+                // Auth flow returned an error
+                case ERROR:
+                    // Handle error response
+                    Log.e("SpotifyAuth", authResponse.getError());
+                    break;
+
+                // Most likely auth flow was cancelled
+                default:
+                    // Handle other cases
+                    Log.e("SpotifyAuth", authResponse.getError());
             }
         }
     }
@@ -538,12 +554,12 @@ public class MainActivity extends AppCompatActivity
         Log.d("Authentication", "Logged Out of Spotify");
     }
 
-    public void spotifyLogout() {
-        AuthenticationClient.logout(mainActivity.getApplicationContext());
-        spotifyAuthenticated = false;
-        pref.edit().putBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false).apply();
-        Log.d("Authentication", "Logged Out of Spotify");
-    }
+//    public void spotifyLogout() {
+//        AuthenticationClient.logout(mainActivity.getApplicationContext());
+//        spotifyAuthenticated = false;
+//        pref.edit().putBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false).apply();
+//        Log.d("Authentication", "Logged Out of Spotify");
+//    }
 
     @Override
     public void onLoginFailed(Throwable throwable) {
@@ -686,11 +702,6 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    /**
-     * Check the device to make sure it has the Google Play Services APK. If
-     * it doesn't, display a dialog that allows users to download the APK from
-     * the Google Play Store or enable it in the device's system settings.
-     */
     /**
      * Check the device to make sure it has the Google Play Services APK. If
      * it doesn't, display a dialog that allows users to download the APK from
