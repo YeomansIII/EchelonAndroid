@@ -13,6 +13,7 @@ import android.widget.RelativeLayout;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by jason on 7/10/15.
@@ -51,16 +52,13 @@ public class SongSearchFragment extends Fragment implements View.OnClickListener
     }
 
     public void searchSongs(String query) {
-        try {
-            String spotifyTracksUrl = "https://api.spotify.com/v1/search?q=" + URLEncoder.encode(query, "UTF-8") + "&type=track";
-            FragmentTransaction ft = mainActivity.getSupportFragmentManager().beginTransaction();
-            ListSongFragment lsf = new ListSongFragment();
-            Bundle bundle = new Bundle();
-            bundle.putString("get_url", spotifyTracksUrl);
-            lsf.setArguments(bundle);
-            ft.replace(R.id.container, lsf, "SONG_LIST_FRAG").addToBackStack(null).commit();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        FragmentTransaction ft = mainActivity.getSupportFragmentManager().beginTransaction();
+        ListSongFragment lsf = new ListSongFragment();
+        Bundle bundle = new Bundle();
+        bundle.putChar("what", ListSongFragment.SEARCH);
+        bundle.putString("searchQuery", query);
+        lsf.setArguments(bundle);
+        ft.replace(R.id.container, lsf, "SONG_LIST_FRAG").addToBackStack(null).commit();
+
     }
 }

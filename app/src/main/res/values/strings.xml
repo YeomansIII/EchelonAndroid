@@ -22,5 +22,9 @@
     <string name="list_id" />
     <string name="owner_id" />
     <string name="get_url" />
+    <string name="what" />
+    <string name="searchQuery" />
+    <string name="userId" />
+    <string name="playlistId" />
 
 </resources>

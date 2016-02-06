@@ -23,6 +23,14 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+
+import kaaes.spotify.webapi.android.models.FeaturedPlaylists;
+import kaaes.spotify.webapi.android.models.Pager;
+import kaaes.spotify.webapi.android.models.PlaylistSimple;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 /**
  * Created by jason on 7/10/15.
@@ -67,97 +75,58 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
     }
 
     public void getFeaturedPlaylists() {
-        final BrowseSongsFragment songSearchFrag = this;
-        new AsyncTask<Void, Void, String>() {
+        mainActivity.spotify.getFeaturedPlaylists(new Callback<FeaturedPlaylists>() {
             @Override
-            protected String doInBackground(Void... params) {
-                String response = "";
-                URL url;
-                HttpURLConnection urlConnection = null;
-                try {
-                    String spotifyTracksUrl = "https://api.spotify.com/v1/browse/featured-playlists?limit=6";
-                    url = new URL(spotifyTracksUrl);
+            public void success(FeaturedPlaylists featuredPlaylists, Response response) {
+                ((TextView) view.findViewById(R.id.featuredPlaylistsMessage)).setText(featuredPlaylists.message);
+                List<PlaylistSimple> items = featuredPlaylists.playlists.items;
+                Log.d("GettingPlaylists", items.toString());
+                LinearLayout playlistListLeft = (LinearLayout) view.findViewById(R.id.featuredPlaylistsListLayoutLeft);
+                LinearLayout playlistListRight = (LinearLayout) view.findViewById(R.id.featuredPlaylistsListLayoutRight);
+                playlistListLeft.removeAllViews();
+                playlistListRight.removeAllViews();
+                playlistListArr = new ArrayList<>();
+                boolean colLeft = true;
+                for (int i = 0; i < items.size(); i++) {
+                    PlaylistSimple curObj = items.get(i);
 
-                    urlConnection = (HttpURLConnection) url
-                            .openConnection();
-                    if (mainActivity.spotifyAuthToken != null) {
-                        urlConnection.setRequestProperty("Authorization", "Bearer " + mainActivity.spotifyAuthToken);
-                    }
-                    BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    while ((line = br.readLine()) != null) {
-                        sb.append(line);
-                    }
-                    br.close();
-                    return sb.toString();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        urlConnection.disconnect();
-                    } catch (Exception e) {
-                        e.printStackTrace(); //If you want further info on failure...
-                    }
-                }
-                return "{\"error\":\"error\"}";
-            }
+                    RelativeLayout rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.playlist_item, null);
+                    ImageView albumArtImage = (ImageView) rt.findViewById(R.id.playlistArtImage);
+                    TextView songTitleText = (TextView) rt.findViewById(R.id.playlistTitleText);
 
-            @Override
-            protected void onPostExecute(String msg) {
-                Log.d("GettingPlaylists", msg);
-
-                try {
-                    JSONObject msgJson = new JSONObject(msg);
-                    ((TextView) view.findViewById(R.id.featuredPlaylistsMessage)).setText(msgJson.getString("message"));
-                    JSONObject json = msgJson.getJSONObject("playlists");
-                    JSONArray items = json.getJSONArray("items");
-                    Log.d("GettingPlaylists", items.toString());
-                    LinearLayout playlistListLeft = (LinearLayout) view.findViewById(R.id.featuredPlaylistsListLayoutLeft);
-                    LinearLayout playlistListRight = (LinearLayout) view.findViewById(R.id.featuredPlaylistsListLayoutRight);
-                    playlistListLeft.removeAllViews();
-                    playlistListRight.removeAllViews();
-                    playlistListArr = new ArrayList<>();
-                    boolean colLeft = true;
-                    for (int i = 0; i < items.length(); i++) {
-                        JSONObject curObj = items.getJSONObject(i);
-
-                        RelativeLayout rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.playlist_item, null);
-                        ImageView albumArtImage = (ImageView) rt.findViewById(R.id.playlistArtImage);
-                        TextView songTitleText = (TextView) rt.findViewById(R.id.playlistTitleText);
-
-                        songTitleText.setText(curObj.getString("name"));
-                        //new ImageLoadTask(curObj.getJSONArray("images").getJSONObject(0).getString("url"), albumArtImage).execute();
-                        mainActivity.imgLoader.DisplayImage(curObj.getJSONArray("images").getJSONObject(0).getString("url"), albumArtImage);
-                        String url = "https://api.spotify.com/v1/users/"
-                                + curObj.getJSONObject("owner").getString("id")
-                                + "/playlists/"
-                                + curObj.getString("id");
-                        rt.setTag(R.string.get_url, url);
-                        rt.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                FragmentTransaction ft = mainActivity.getSupportFragmentManager().beginTransaction();
-                                ListSongFragment lsf = new ListSongFragment();
-                                Bundle bundle = new Bundle();
-                                bundle.putString("get_url", v.getTag(R.string.get_url).toString());
-                                lsf.setArguments(bundle);
-                                ft.replace(R.id.container, lsf, "SONG_LIST_FRAG").addToBackStack(null).commit();
-                            }
-                        });
-                        playlistListArr.add(rt);
-                        if (colLeft) {
-                            playlistListLeft.addView(rt);
-                            colLeft = false;
-                        } else {
-                            playlistListRight.addView(rt);
-                            colLeft = true;
+                    songTitleText.setText(curObj.name);
+                    //new ImageLoadTask(curObj.getJSONArray("images").getJSONObject(0).getString("url"), albumArtImage).execute();
+                    mainActivity.imgLoader.DisplayImage(curObj.images.get(0).url, albumArtImage);
+                    rt.setTag(R.string.userId, curObj.owner.id);
+                    rt.setTag(R.string.playlistId, curObj.id);
+                    rt.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            FragmentTransaction ft = mainActivity.getSupportFragmentManager().beginTransaction();
+                            ListSongFragment lsf = new ListSongFragment();
+                            Bundle bundle = new Bundle();
+                            bundle.putChar("what", ListSongFragment.PLAYLIST);
+                            bundle.putString("userId", v.getTag(R.string.userId).toString());
+                            bundle.putString("playlistId", v.getTag(R.string.playlistId).toString());
+                            lsf.setArguments(bundle);
+                            ft.replace(R.id.container, lsf, "SONG_LIST_FRAG").addToBackStack(null).commit();
                         }
+                    });
+                    playlistListArr.add(rt);
+                    if (colLeft) {
+                        playlistListLeft.addView(rt);
+                        colLeft = false;
+                    } else {
+                        playlistListRight.addView(rt);
+                        colLeft = true;
                     }
-                } catch (JSONException je) {
-                    je.printStackTrace();
                 }
             }
-        }.execute(null, null, null);
+
+            @Override
+            public void failure(RetrofitError error) {
+
+            }
+        });
     }
 }

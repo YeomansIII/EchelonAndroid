@@ -3,6 +3,7 @@ package io.yeomans.echelon;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,11 +21,27 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+
+import kaaes.spotify.webapi.android.models.Playlist;
+import kaaes.spotify.webapi.android.models.PlaylistTrack;
+import kaaes.spotify.webapi.android.models.Track;
+import kaaes.spotify.webapi.android.models.TracksPager;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 /**
  * Created by jason on 7/10/15.
  */
 public class ListSongFragment extends Fragment implements View.OnClickListener {
+
+    final static char SEARCH = '0';
+    final static char PLAYLIST = '1';
+    private char what;
+    private String searchQuery;
+    private String userId;
+    private String playlistId;
 
     private View view;
     private ArrayList<RelativeLayout> songListArr;
@@ -36,7 +53,14 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         //setHasOptionsMenu(true);
         mainActivity = (MainActivity) getActivity();
-        getUrl = getArguments().getString("get_url");
+        what = getArguments().getChar("what");
+        Log.d("WhatList", "" + what);
+        if (what == SEARCH) {
+            searchQuery = getArguments().getString("query");
+        } else if (what == PLAYLIST) {
+            userId = getArguments().getString("userId");
+            playlistId = getArguments().getString("playlistId");
+        }
         //ownerId = getArguments().getString("owner_id");
     }
 
@@ -57,86 +81,73 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
     }
 
     public void listSongs() {
-        //final ListSongFragment songSearchFrag = this;
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-                String response = "";
-                URL url;
-                HttpURLConnection urlConnection = null;
-                try {
-                    Log.d("ListSong", "Getting Songs");
-                    String spotifyTracksUrl = getUrl;
-                    url = new URL(spotifyTracksUrl);
-
-                    urlConnection = (HttpURLConnection) url
-                            .openConnection();
-                    if (mainActivity.spotifyAuthToken != null) {
-                        urlConnection.setRequestProperty("Authorization", "Bearer " + mainActivity.spotifyAuthToken);
-                    }
-                    BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    while ((line = br.readLine()) != null) {
-                        sb.append(line);
-                    }
-                    br.close();
-                    return sb.toString();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        urlConnection.disconnect();
-                    } catch (Exception e) {
-                        e.printStackTrace(); //If you want further info on failure...
-                    }
+        if (what == SEARCH) {
+            Log.d("WhatList", "Search");
+            mainActivity.spotify.searchTracks(searchQuery, new Callback<TracksPager>() {
+                @Override
+                public void success(TracksPager tracksPager, Response response) {
+                    generateLayout(tracksPager.tracks.items);
                 }
-                return "{\"error\":\"error\"}";
+
+                @Override
+                public void failure(RetrofitError error) {
+                    Log.wtf("WhatList", error.toString());
+                }
+            });
+        } else if (what == PLAYLIST) {
+            Log.d("WhatList", "Playlist");
+            mainActivity.spotify.getPlaylist(userId, playlistId, new Callback<Playlist>() {
+                @Override
+                public void success(Playlist playlist, Response response) {
+                    generateLayout(playlist.tracks.items);
+                }
+
+                @Override
+                public void failure(RetrofitError error) {
+                    Log.wtf("WhatList", error.toString());
+                }
+            });
+        }
+    }
+
+    public void generateLayout(List items) {
+        Log.d("Search Song", items.toString());
+        LinearLayout songList = (LinearLayout) view.findViewById(R.id.listSongListLayout);
+        songList.removeAllViews();
+        songListArr = new ArrayList<>();
+        for (int i = 0; i < items.size() - 1; i++) {
+            Track curObj;
+            Object obj = items.get(i);
+            if (obj instanceof Track) {
+                Log.d("WhatList", "Track");
+                curObj = (Track) obj;
+            } else if (obj instanceof PlaylistTrack) {
+                Log.d("WhatList", "Playlist");
+                curObj = ((PlaylistTrack) obj).track;
+            } else {
+                Log.wtf("Echelon", "This shouldn't be happening...");
+                break;
             }
 
-            @Override
-            protected void onPostExecute(String msg) {
-                Log.d("ListSongs", "" + msg);
-
-                try {
-                    JSONObject json = new JSONObject(msg).getJSONObject("tracks");
-                    JSONArray items = json.getJSONArray("items");
-                    Log.d("Search Song", items.toString());
-                    LinearLayout songList = (LinearLayout) view.findViewById(R.id.listSongListLayout);;
-                    songList.removeAllViews();
-                    songListArr = new ArrayList<>();
-                    for (int i = 0; i < items.length() - 1; i++) {
-                        JSONObject curObj;
-                        try {
-                            curObj = items.getJSONObject(i).getJSONObject("track");
-                        } catch (JSONException je) {
-                            curObj = items.getJSONObject(i);
+            SongItemView siv = new SongItemView(getContext(),
+                    curObj.name,
+                    curObj.artists.get(0).name,
+                    curObj.album.images.get(2).url,
+                    curObj.id,
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            for (RelativeLayout view : songListArr) {
+                                view.setOnClickListener(null);
+                            }
+                            view.setBackgroundColor(Color.DKGRAY);
+                            FirebaseCommon.addSong((String) v.getTag(), mainActivity);
                         }
+                    });
 
-                        SongItemView siv = new SongItemView(getContext(),
-                                curObj.getString("name"),
-                                curObj.getJSONArray("artists").getJSONObject(0).getString("name"),
-                                curObj.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"),
-                                curObj.getString("id"),
-                                new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        for (RelativeLayout view : songListArr) {
-                                            view.setOnClickListener(null);
-                                        }
-                                        view.setBackgroundColor(Color.DKGRAY);
-                                        FirebaseCommon.addSong((String) v.getTag(), mainActivity);
-                                    }
-                                });
-
-                        //mainActivity.imgLoader.DisplayImage(curObj.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"), albumArtImage);
-                        songListArr.add(siv);
-                        songList.addView(siv);
-                    }
-                } catch (JSONException je) {
-                    je.printStackTrace();
-                }
-            }
-        }.execute(null, null, null);
+            //mainActivity.imgLoader.DisplayImage(curObj.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"), albumArtImage);
+            songListArr.add(siv);
+            songList.addView(siv);
+        }
     }
 }

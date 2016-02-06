@@ -51,6 +51,10 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.fabric.sdk.android.Fabric;
+import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyService;
+import retrofit.RequestInterceptor;
+import retrofit.RestAdapter;
 
 
 public class MainActivity extends AppCompatActivity
@@ -94,12 +98,14 @@ public class MainActivity extends AppCompatActivity
 
     //SPOTIFY
     public static final String CLIENT_ID = "8b81e3deddce42c4b0f2972e181b8a3a";
-    public static final String REDIRECT_URI = "groupqueue://callback";
+    public static final String REDIRECT_URI = "echelonapp://callback";
     public static final int REQUEST_CODE = 9001;
 
     public boolean spotifyAuthenticated;
     public AuthenticationResponse authResponse;
     public String spotifyAuthToken;
+    public SpotifyApi api;
+    public SpotifyService spotify;
 
     public Player mPlayer;
     public boolean mPlayerPlaying;
@@ -154,7 +160,18 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         myFirebaseRef = new Firebase(FIREBASE_URL);
-        //myFirebaseRef.child("message").setValue("Do you have data? You'll love Firebase.");
+        api = new SpotifyApi();
+        RestAdapter restAdapter = new RestAdapter.Builder()
+                .setEndpoint(SpotifyApi.SPOTIFY_WEB_API_ENDPOINT)
+                .setRequestInterceptor(new RequestInterceptor() {
+                    @Override
+                    public void intercept(RequestFacade request) {
+                        request.addHeader("Authorization", "Bearer " + spotifyAuthToken);
+                    }
+                })
+                .build();
+
+        spotify = restAdapter.create(SpotifyService.class);
 
         context = getApplicationContext();
         mainActivity = this;
