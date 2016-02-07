@@ -18,8 +18,10 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +58,11 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
         what = getArguments().getChar("what");
         Log.d("WhatList", "" + what);
         if (what == SEARCH) {
-            searchQuery = getArguments().getString("query");
+            try {
+                searchQuery = URLEncoder.encode(getArguments().getString("searchQuery"), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         } else if (what == PLAYLIST) {
             userId = getArguments().getString("userId");
             playlistId = getArguments().getString("playlistId");
@@ -145,7 +151,6 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
                         }
                     });
 
-            //mainActivity.imgLoader.DisplayImage(curObj.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"), albumArtImage);
             songListArr.add(siv);
             songList.addView(siv);
         }

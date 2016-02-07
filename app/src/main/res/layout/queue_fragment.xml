@@ -44,7 +44,37 @@
         android:visibility="gone"/>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/groupAddSongButton"
+        android:id="@+id/groupAddSongFab3"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:src="@drawable/ic_add_white_36dp"
+        app:elevation="4dp"
+        android:layout_above="@+id/groupAddSongFab2"
+        android:layout_alignLeft="@+id/groupAddSongFab2"
+        android:layout_alignStart="@+id/groupAddSongFab2" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/groupAddSongFab2"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:src="@drawable/ic_add_white_36dp"
+        app:elevation="4dp"
+        android:layout_above="@+id/groupAddSongFab1"
+        android:layout_alignLeft="@+id/groupAddSongFab1"
+        android:layout_alignStart="@+id/groupAddSongFab1" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/groupAddSongFab1"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:src="@drawable/ic_add_white_36dp"
+        app:elevation="4dp"
+        android:layout_above="@+id/groupAddSongFab"
+        android:layout_alignLeft="@+id/groupAddSongFab"
+        android:layout_alignStart="@+id/groupAddSongFab" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/groupAddSongFab"
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:src="@drawable/ic_add_white_36dp"

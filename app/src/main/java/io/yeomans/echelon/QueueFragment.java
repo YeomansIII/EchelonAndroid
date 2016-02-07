@@ -27,6 +27,7 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -240,8 +241,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
 
                     songTitleText.setText(curSong.getTitle());
                     songArtistText.setText(curSong.getArtist());
-                    //new ImageLoadTask(curSong.getAlbumArtSmall(), albumArtImage).execute();
-                    mainActivity.imgLoader.DisplayImage(curSong.getAlbumArtSmall(), albumArtImage);
+                    Picasso.with(getContext()).load(curSong.getAlbumArtSmall()).into(albumArtImage);
                     //String uri = curSong.getUri();
                     //mainActivity.playQueue.add(uri);
                     rt.setOnClickListener(new View.OnClickListener() {
@@ -268,6 +268,31 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
                 songList.addView(tv);
             }
             Log.d("Play", "PlayQueueList End: " + playqueue);
+        }
+    }
+
+    public void animateFAB(){
+
+        if(isFabOpen){
+
+            fab.startAnimation(rotate_backward);
+            fab1.startAnimation(fab_close);
+            fab2.startAnimation(fab_close);
+            fab1.setClickable(false);
+            fab2.setClickable(false);
+            isFabOpen = false;
+            Log.d("Raj", "close");
+
+        } else {
+
+            fab.startAnimation(rotate_forward);
+            fab1.startAnimation(fab_open);
+            fab2.startAnimation(fab_open);
+            fab1.setClickable(true);
+            fab2.setClickable(true);
+            isFabOpen = true;
+            Log.d("Raj","open");
+
         }
     }
 

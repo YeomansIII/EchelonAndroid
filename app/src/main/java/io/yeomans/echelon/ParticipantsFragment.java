@@ -22,6 +22,7 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -164,7 +165,7 @@ public class ParticipantsFragment extends Fragment implements View.OnClickListen
                     userNameText.setText(curPart.getDisplayName());
                     userImage.setImageDrawable(mainActivity.getResources().getDrawable(R.drawable.ic_account_grey600_48dp));
                     if (curPart.getImageUrl() != null) {
-                        mainActivity.imgLoader.DisplayImage(curPart.getImageUrl(), userImage);
+                        Picasso.with(getContext()).load(curPart.getImageUrl()).transform(new CircleTransform()).into(userImage);
                     }
                     participantList.addView(rt);
                 }

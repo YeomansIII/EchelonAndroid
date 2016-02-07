@@ -43,6 +43,7 @@ import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerNotificationCallback;
 import com.spotify.sdk.android.player.PlayerState;
 import com.spotify.sdk.android.player.Spotify;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -148,7 +149,6 @@ public class MainActivity extends AppCompatActivity
     Context context;
     MainActivity mainActivity;
     MainActivity mainActivityClass;
-    public static ImageLoader imgLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,12 +171,13 @@ public class MainActivity extends AppCompatActivity
                 })
                 .build();
 
+        Picasso.with(getApplicationContext()).setIndicatorsEnabled(BuildConfig.DEBUG);
+
         spotify = restAdapter.create(SpotifyService.class);
 
         context = getApplicationContext();
         mainActivity = this;
         mainActivityClass = MainActivity.this;
-        imgLoader = new ImageLoader(this);
         mPlayerCherry = true;
 
         pref = getSharedPreferences(MAIN_PREFS_NAME, 0);
@@ -299,7 +300,7 @@ public class MainActivity extends AppCompatActivity
                 profileImage.setImageResource(R.drawable.ic_account_white_48dp);
                 String imgUrl = (String) dataSnapshot.child("image_url").getValue();
                 if (imgUrl != null) {
-                    imgLoader.DisplayImage(imgUrl, profileImage);
+                    Picasso.with(getApplicationContext()).load(imgUrl).transform(new CircleTransform()).into(profileImage);
                 }
             }
 
@@ -308,7 +309,6 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
-        //new ImageLoadTask(pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, ""), profileImage).execute();
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
 
             @Override

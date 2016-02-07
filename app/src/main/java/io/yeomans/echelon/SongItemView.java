@@ -6,6 +6,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 /**
  * Created by jason on 12/8/15.
  */
@@ -49,7 +51,7 @@ public class SongItemView extends RelativeLayout {
             artistText.setText(artist);
         }
         if (albumArtUrl != null) {
-            MainActivity.imgLoader.DisplayImage(albumArtUrl, albumImage);
+            Picasso.with(getContext()).load(albumArtUrl).into(albumImage);
         }
         if (id != null) {
             view.setTag(id);

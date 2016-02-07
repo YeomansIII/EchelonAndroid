@@ -13,6 +13,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -95,8 +97,7 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
                     TextView songTitleText = (TextView) rt.findViewById(R.id.playlistTitleText);
 
                     songTitleText.setText(curObj.name);
-                    //new ImageLoadTask(curObj.getJSONArray("images").getJSONObject(0).getString("url"), albumArtImage).execute();
-                    mainActivity.imgLoader.DisplayImage(curObj.images.get(0).url, albumArtImage);
+                    Picasso.with(getContext()).load(curObj.images.get(0).url).into(albumArtImage);
                     rt.setTag(R.string.userId, curObj.owner.id);
                     rt.setTag(R.string.playlistId, curObj.id);
                     rt.setOnClickListener(new View.OnClickListener() {
