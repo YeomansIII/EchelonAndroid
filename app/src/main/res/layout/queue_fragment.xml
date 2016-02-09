@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/tools"
     xmlns:materialdesign="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/tools"
     android:background="#7dffffff">
 
     <ScrollView
@@ -41,48 +41,51 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@android:color/black"
         android:textSize="20pt"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/groupAddSongFab3"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:src="@drawable/ic_add_white_36dp"
-        app:elevation="4dp"
         android:layout_above="@+id/groupAddSongFab2"
         android:layout_alignLeft="@+id/groupAddSongFab2"
-        android:layout_alignStart="@+id/groupAddSongFab2" />
+        android:layout_alignStart="@+id/groupAddSongFab2"
+        android:src="@drawable/ic_add_white_36dp"
+        android:visibility="invisible"
+        app:elevation="4dp" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/groupAddSongFab2"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:src="@drawable/ic_add_white_36dp"
-        app:elevation="4dp"
         android:layout_above="@+id/groupAddSongFab1"
         android:layout_alignLeft="@+id/groupAddSongFab1"
-        android:layout_alignStart="@+id/groupAddSongFab1" />
+        android:layout_alignStart="@+id/groupAddSongFab1"
+        android:src="@drawable/ic_add_white_36dp"
+        android:visibility="invisible"
+        app:elevation="4dp" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/groupAddSongFab1"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:src="@drawable/ic_add_white_36dp"
-        app:elevation="4dp"
         android:layout_above="@+id/groupAddSongFab"
         android:layout_alignLeft="@+id/groupAddSongFab"
-        android:layout_alignStart="@+id/groupAddSongFab" />
+        android:layout_alignStart="@+id/groupAddSongFab"
+        android:src="@drawable/ic_add_white_36dp"
+        android:visibility="invisible"
+        app:elevation="4dp" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/groupAddSongFab"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:src="@drawable/ic_add_white_36dp"
-        app:elevation="4dp"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="20dp"
         android:layout_marginRight="20dp"
-        android:layout_marginBottom="20dp" />
+        android:src="@drawable/ic_add_white_36dp"
+        app:elevation="4dp" />
 
 </RelativeLayout>

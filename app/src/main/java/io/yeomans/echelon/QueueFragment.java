@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.renderscript.Sampler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -16,6 +17,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -58,6 +61,10 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
     Firebase queuegroupRef;
     LinkedList<SpotifySong> playqueue;
     ValueEventListener trackListChangeListener;
+
+    private Boolean isFabOpen = false;
+    private FloatingActionButton fab, fab1, fab2, fab3;
+    private Animation fab_open, fab_close, rotate_forward, rotate_backward;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -111,9 +118,22 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
         //////////////
         ((TextView) view.findViewById(R.id.groupIdText)).setText(groupSettings.getString(MainActivity.PREF_GROUP_OWNER_USERNAME, "error"));
 
+        fab = (FloatingActionButton) view.findViewById(R.id.groupAddSongFab);
+        fab1 = (FloatingActionButton) view.findViewById(R.id.groupAddSongFab1);
+        fab2 = (FloatingActionButton) view.findViewById(R.id.groupAddSongFab2);
+        fab3 = (FloatingActionButton) view.findViewById(R.id.groupAddSongFab3);
+        fab_open = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.fab_open);
+        fab_close = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.fab_close);
+        rotate_forward = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.rotate_forward);
+        rotate_backward = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.rotate_backward);
+        fab.setOnClickListener(this);
+        fab1.setOnClickListener(this);
+        fab2.setOnClickListener(this);
+        fab3.setOnClickListener(this);
+
         this.view = view;
 
-        view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
+        //view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
 
         queuegroupRef.child("tracks").addValueEventListener(trackListChangeListener);
         return view;
@@ -271,15 +291,17 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    public void animateFAB(){
+    public void animateFAB() {
 
-        if(isFabOpen){
+        if (isFabOpen) {
 
             fab.startAnimation(rotate_backward);
             fab1.startAnimation(fab_close);
             fab2.startAnimation(fab_close);
+            fab3.startAnimation(fab_close);
             fab1.setClickable(false);
             fab2.setClickable(false);
+            fab3.setClickable(false);
             isFabOpen = false;
             Log.d("Raj", "close");
 
@@ -288,23 +310,44 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
             fab.startAnimation(rotate_forward);
             fab1.startAnimation(fab_open);
             fab2.startAnimation(fab_open);
+            fab3.startAnimation(fab_open);
             fab1.setClickable(true);
             fab2.setClickable(true);
+            fab3.setClickable(true);
             isFabOpen = true;
-            Log.d("Raj","open");
+            Log.d("Raj", "open");
 
         }
     }
 
     @Override
     public void onClick(View v) {
-        if (v == view.findViewById(R.id.groupAddSongButton)) {
-            FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
-            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            if (groupFragment != null && groupFragment.isVisible()) {
-                fragmentTransaction.setCustomAnimations(R.anim.slide_in_up, R.anim.fade_out).replace(R.id.container, new AddSongFragment(), "ADD_SONG_FRAG").addToBackStack(null).commit();
-            }
+//        if (v == view.findViewById(R.id.groupAddSongButton)) {
+//            FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+//            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+//            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//            if (groupFragment != null && groupFragment.isVisible()) {
+//                fragmentTransaction.setCustomAnimations(R.anim.slide_in_up, R.anim.fade_out).replace(R.id.container, new AddSongFragment(), "ADD_SONG_FRAG").addToBackStack(null).commit();
+//            }
+//        }
+        int id = v.getId();
+        switch (id) {
+            case R.id.groupAddSongFab:
+
+                animateFAB();
+                break;
+            case R.id.groupAddSongFab1:
+
+                Log.d("Raj", "Fab 1");
+                break;
+            case R.id.groupAddSongFab2:
+
+                Log.d("Raj", "Fab 2");
+                break;
+            case R.id.groupAddSongFab3:
+
+                Log.d("Raj", "Fab 3");
+                break;
         }
     }
 }
