@@ -36,4 +36,7 @@
 -keep class retrofit.** { *; }
 -keep class retrofit.http.** { *; }
 -keep class retrofit.client.** { *; }
+-dontwarn retrofit.**
+-dontwarn com.squareup.okhttp.**
+-dontwarn okio.**
 -dontwarn rx.**
