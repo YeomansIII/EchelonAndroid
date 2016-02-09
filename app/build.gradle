@@ -107,6 +107,7 @@ dependencies {
     compile 'com.android.support:design:23.1.1'
     compile 'com.google.android.gms:play-services-gcm:8.3.0'
     compile 'com.firebase:firebase-client-android:2.3.1+'
+    compile 'com.squareup.okhttp3:okhttp:3.1.1'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.github.kaaes:spotify-web-api-android:0.2.0'
 }

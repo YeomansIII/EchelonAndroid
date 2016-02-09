@@ -33,3 +33,7 @@
 -keepnames class io.yeomans.echelon.Participant.** { *; }
 -keepnames class io.yeomans.echelon.Participant { *; }
 -keepattributes Signature
+-keep class retrofit.** { *; }
+-keep class retrofit.http.** { *; }
+-keep class retrofit.client.** { *; }
+-dontwarn rx.**
