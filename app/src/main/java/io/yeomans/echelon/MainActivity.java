@@ -259,7 +259,7 @@ public class MainActivity extends AppCompatActivity
 //            } else {
             setContentViewHome();
             setUpNavDrawerAndActionBar();
-            checkGroup();
+            //checkGroup();
         }
 
         setOnPlayerControlCallback(((OnPlayerControlCallback) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")));
@@ -358,6 +358,7 @@ public class MainActivity extends AppCompatActivity
                                         }
                                         //dialogFragment.show(fragmentTransaction, "CURRENT_GROUP_DIALOG");
                                         fragmentTransaction.add(dialogFragment, null).commitAllowingStateLoss();
+                                        Log.d("Dialog", "Show group dialog");
                                         //fragmentTransaction.commitAllowingStateLoss();
                                     } else {
                                         myFirebaseRef.child("users/" + pref.getString(MainActivity.PREF_FIREBASE_UID, null) + "/cur_group").removeValue();

@@ -3,15 +3,15 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryDark">@color/primaryColorDark</item>
-        <item name="android:statusBarColor">@color/primaryColorDark</item>
         <item name="colorAccent">@color/ech_heroMode</item>
 
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
         <item name="android:imageButtonStyle">@style/ClearImageButton</item>
+        <item name="android:statusBarColor">@color/primaryColorDark</item>
+        <item name="android:navigationBarColor">@color/primaryColorDark</item>
     </style>
 
-    <style name="ThemeActionBar"
-        parent="Widget.AppCompat.Light.ActionBar.Solid">
+    <style name="ThemeActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid">
         <item name="android:background">@null</item>
         <!-- Support library compatibility -->
         <item name="background">@null</item>

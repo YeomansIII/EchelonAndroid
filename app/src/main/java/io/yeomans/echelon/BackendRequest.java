@@ -244,12 +244,12 @@ public class BackendRequest {
                                         if (dataSnapshot.hasChild("display_name")) {
                                             prefEdit.putString(MainActivity.PREF_USER_DISPLAY_NAME, (String) dataSnapshot.child("display_name").getValue());
                                         }
-                                        if (dataSnapshot.hasChild("ext_url")) {
-                                            prefEdit.putString(MainActivity.PREF_USER_EXT_URL, (String) dataSnapshot.child("ext_url").getValue());
-                                        }
-                                        if (dataSnapshot.hasChild("image_url")) {
-                                            prefEdit.putString(MainActivity.PREF_USER_IMAGE_URL, (String) dataSnapshot.child("image_url").getValue());
-                                        }
+                                        user.child("ext_url").setValue(pref.getString(MainActivity.PREF_SPOTIFY_EXT_URL, null));
+                                        prefEdit.putString(MainActivity.PREF_USER_EXT_URL, pref.getString(MainActivity.PREF_SPOTIFY_EXT_URL, null));
+
+                                        user.child("image_url").setValue(pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, null));
+                                        prefEdit.putString(MainActivity.PREF_USER_IMAGE_URL, pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, null));
+
                                         prefEdit.apply();
                                         activity.checkGroup();
                                     }

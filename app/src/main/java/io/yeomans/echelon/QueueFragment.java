@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -64,7 +65,8 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
 
     private Boolean isFabOpen = false;
     private FloatingActionButton fab, fab1, fab2, fab3;
-    private Animation fab_open, fab_close, rotate_forward, rotate_backward;
+    private Animation fab_open, fab_close, rotate_forward, rotate_backward, tip_fade_in, tip_fade_out;
+    private FrameLayout queueBrowseTextFrame, queueSearchTextFrame, queueYourMusicTextFrame;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -122,10 +124,15 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
         fab1 = (FloatingActionButton) view.findViewById(R.id.groupAddSongFab1);
         fab2 = (FloatingActionButton) view.findViewById(R.id.groupAddSongFab2);
         fab3 = (FloatingActionButton) view.findViewById(R.id.groupAddSongFab3);
+        queueBrowseTextFrame = (FrameLayout) view.findViewById(R.id.queueBrowseTextFrame);
+        queueSearchTextFrame = (FrameLayout) view.findViewById(R.id.queueSearchTextFrame);
+        queueYourMusicTextFrame = (FrameLayout) view.findViewById(R.id.queueYourMusicTextFrame);
         fab_open = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.fab_open);
         fab_close = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.fab_close);
         rotate_forward = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.rotate_forward);
         rotate_backward = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.rotate_backward);
+        tip_fade_in = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.tip_fade_in);
+        tip_fade_out = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.tip_fade_out);
         fab.setOnClickListener(this);
         fab1.setOnClickListener(this);
         fab2.setOnClickListener(this);
@@ -264,16 +271,16 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
                     Picasso.with(getContext()).load(curSong.getAlbumArtSmall()).into(albumArtImage);
                     //String uri = curSong.getUri();
                     //mainActivity.playQueue.add(uri);
-                    rt.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            //trackUri = (String) v.getTag();
-                            for (RelativeLayout view : songListArr) {
-                                view.setBackgroundColor(Color.TRANSPARENT);
-                            }
-                            v.setBackgroundColor(Color.GRAY);
-                        }
-                    });
+//                    rt.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                            //trackUri = (String) v.getTag();
+//                            for (RelativeLayout view : songListArr) {
+//                                view.setBackgroundColor(Color.TRANSPARENT);
+//                            }
+//                            v.setBackgroundColor(Color.GRAY);
+//                        }
+//                    });
                     songListArr.add(rt);
                     songList.addView(rt);
                 }
@@ -294,59 +301,59 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
     public void animateFAB() {
 
         if (isFabOpen) {
-
             fab.startAnimation(rotate_backward);
             fab1.startAnimation(fab_close);
             fab2.startAnimation(fab_close);
             fab3.startAnimation(fab_close);
+            queueBrowseTextFrame.startAnimation(fab_close);
+            queueSearchTextFrame.startAnimation(fab_close);
+            queueYourMusicTextFrame.startAnimation(fab_close);
             fab1.setClickable(false);
             fab2.setClickable(false);
             fab3.setClickable(false);
             isFabOpen = false;
-            Log.d("Raj", "close");
-
         } else {
-
             fab.startAnimation(rotate_forward);
             fab1.startAnimation(fab_open);
             fab2.startAnimation(fab_open);
             fab3.startAnimation(fab_open);
+            queueBrowseTextFrame.startAnimation(fab_open);
+            queueSearchTextFrame.startAnimation(fab_open);
+            queueYourMusicTextFrame.startAnimation(fab_open);
             fab1.setClickable(true);
             fab2.setClickable(true);
             fab3.setClickable(true);
             isFabOpen = true;
-            Log.d("Raj", "open");
-
         }
     }
 
     @Override
     public void onClick(View v) {
-//        if (v == view.findViewById(R.id.groupAddSongButton)) {
-//            FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
-//            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-//            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//            if (groupFragment != null && groupFragment.isVisible()) {
-//                fragmentTransaction.setCustomAnimations(R.anim.slide_in_up, R.anim.fade_out).replace(R.id.container, new AddSongFragment(), "ADD_SONG_FRAG").addToBackStack(null).commit();
-//            }
-//        }
         int id = v.getId();
+        FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+        GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         switch (id) {
             case R.id.groupAddSongFab:
-
                 animateFAB();
                 break;
             case R.id.groupAddSongFab1:
-
-                Log.d("Raj", "Fab 1");
+                if (groupFragment != null && groupFragment.isVisible()) {
+                    animateFAB();
+                    fragmentTransaction.setCustomAnimations(R.anim.slide_in_up, R.anim.fade_out).replace(R.id.container, new SongSearchFragment(), "SONG_SEARCH_FRAG").addToBackStack(null).commit();
+                }
                 break;
             case R.id.groupAddSongFab2:
-
-                Log.d("Raj", "Fab 2");
+                if (groupFragment != null && groupFragment.isVisible()) {
+                    animateFAB();
+                    fragmentTransaction.setCustomAnimations(R.anim.slide_in_up, R.anim.fade_out).replace(R.id.container, new YourMusicFragment(), "YOUR_MUSIC_FRAG").addToBackStack(null).commit();
+                }
                 break;
             case R.id.groupAddSongFab3:
-
-                Log.d("Raj", "Fab 3");
+                if (groupFragment != null && groupFragment.isVisible()) {
+                    animateFAB();
+                    fragmentTransaction.setCustomAnimations(R.anim.slide_in_up, R.anim.fade_out).replace(R.id.container, new BrowseSongsFragment(), "BROWSE_SONG_FRAG").addToBackStack(null).commit();
+                }
                 break;
         }
     }

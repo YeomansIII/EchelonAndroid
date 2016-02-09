@@ -98,6 +98,7 @@ dependencies {
     compile 'com.spotify.sdk:spotify-auth:1.0.0-beta12@aar'
     // This library handles music playback
     compile 'com.spotify.sdk:spotify-player:1.0.0-beta12@aar'
+    //compile 'kaaes.spotify.webapi.android:spotify-web-api-android:0.2.0@aar'
     compile('com.crashlytics.sdk.android:crashlytics:2.4.0@aar') {
         transitive = true;
     }
