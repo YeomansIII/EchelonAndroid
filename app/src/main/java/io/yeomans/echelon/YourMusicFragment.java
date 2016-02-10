@@ -3,6 +3,8 @@ package io.yeomans.echelon;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -72,48 +74,52 @@ public class YourMusicFragment extends Fragment implements View.OnClickListener 
             mainActivity.spotify.getPlaylists(sUid, new Callback<Pager<PlaylistSimple>>() {
                 @Override
                 public void success(Pager<PlaylistSimple> playlistSimplePager, Response response) {
-                    ((TextView) view.findViewById(R.id.featuredPlaylistsMessage)).setText("Your Playlists");
-                    List<PlaylistSimple> items = playlistSimplePager.items;
-                    Log.d("GettingPlaylists", items.toString());
-                    LinearLayout playlistListLeft = (LinearLayout) view.findViewById(R.id.featuredPlaylistsListLayoutLeft);
-                    LinearLayout playlistListRight = (LinearLayout) view.findViewById(R.id.featuredPlaylistsListLayoutRight);
-                    playlistListLeft.removeAllViews();
-                    playlistListRight.removeAllViews();
-                    playlistListArr = new ArrayList<>();
-                    boolean colLeft = true;
-                    for (int i = 0; i < items.size(); i++) {
-                        PlaylistSimple curObj = items.get(i);
-
-                        RelativeLayout rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.playlist_item, null);
-                        ImageView albumArtImage = (ImageView) rt.findViewById(R.id.playlistArtImage);
-                        TextView songTitleText = (TextView) rt.findViewById(R.id.playlistTitleText);
-
-                        songTitleText.setText(curObj.name);
-                        Picasso.with(getContext()).load(curObj.images.get(0).url).into(albumArtImage);
-                        rt.setTag(R.string.userId, curObj.owner.id);
-                        rt.setTag(R.string.playlistId, curObj.id);
-                        rt.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                FragmentTransaction ft = mainActivity.getSupportFragmentManager().beginTransaction();
-                                ListSongFragment lsf = new ListSongFragment();
-                                Bundle bundle = new Bundle();
-                                bundle.putChar("what", ListSongFragment.PLAYLIST);
-                                bundle.putString("userId", v.getTag(R.string.userId).toString());
-                                bundle.putString("playlistId", v.getTag(R.string.playlistId).toString());
-                                lsf.setArguments(bundle);
-                                ft.replace(R.id.container, lsf, "SONG_LIST_FRAG").addToBackStack(null).commit();
-                            }
-                        });
-                        playlistListArr.add(rt);
-                        if (colLeft) {
-                            playlistListLeft.addView(rt);
-                            colLeft = false;
-                        } else {
-                            playlistListRight.addView(rt);
-                            colLeft = true;
-                        }
-                    }
+                    RecyclerView rvPlaylists = (RecyclerView) view.findViewById(R.id.browsePlaylistRecyclerView);
+                    PlaylistRecyclerAdapter playlistRA = new PlaylistRecyclerAdapter(playlistSimplePager.items);
+                    rvPlaylists.setAdapter(playlistRA);
+                    rvPlaylists.setLayoutManager(new GridLayoutManager(getContext(), 2));
+//                    ((TextView) view.findViewById(R.id.featuredPlaylistsMessage)).setText("Your Playlists");
+//                    List<PlaylistSimple> items = playlistSimplePager.items;
+//                    Log.d("GettingPlaylists", items.toString());
+//                    LinearLayout playlistListLeft = (LinearLayout) view.findViewById(R.id.featuredPlaylistsListLayoutLeft);
+//                    LinearLayout playlistListRight = (LinearLayout) view.findViewById(R.id.featuredPlaylistsListLayoutRight);
+//                    playlistListLeft.removeAllViews();
+//                    playlistListRight.removeAllViews();
+//                    playlistListArr = new ArrayList<>();
+//                    boolean colLeft = true;
+//                    for (int i = 0; i < items.size(); i++) {
+//                        PlaylistSimple curObj = items.get(i);
+//
+//                        RelativeLayout rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.playlist_item, null);
+//                        ImageView albumArtImage = (ImageView) rt.findViewById(R.id.playlistArtImage);
+//                        TextView songTitleText = (TextView) rt.findViewById(R.id.playlistTitleText);
+//
+//                        songTitleText.setText(curObj.name);
+//                        Picasso.with(getContext()).load(curObj.images.get(0).url).into(albumArtImage);
+//                        rt.setTag(R.string.userId, curObj.owner.id);
+//                        rt.setTag(R.string.playlistId, curObj.id);
+//                        rt.setOnClickListener(new View.OnClickListener() {
+//                            @Override
+//                            public void onClick(View v) {
+//                                FragmentTransaction ft = mainActivity.getSupportFragmentManager().beginTransaction();
+//                                ListSongFragment lsf = new ListSongFragment();
+//                                Bundle bundle = new Bundle();
+//                                bundle.putChar("what", ListSongFragment.PLAYLIST);
+//                                bundle.putString("userId", v.getTag(R.string.userId).toString());
+//                                bundle.putString("playlistId", v.getTag(R.string.playlistId).toString());
+//                                lsf.setArguments(bundle);
+//                                ft.replace(R.id.container, lsf, "SONG_LIST_FRAG").addToBackStack(null).commit();
+//                            }
+//                        });
+//                        playlistListArr.add(rt);
+//                        if (colLeft) {
+//                            playlistListLeft.addView(rt);
+//                            colLeft = false;
+//                        } else {
+//                            playlistListRight.addView(rt);
+//                            colLeft = true;
+//                        }
+//                    }
                 }
 
                 @Override

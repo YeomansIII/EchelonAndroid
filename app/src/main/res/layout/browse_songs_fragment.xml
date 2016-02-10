@@ -9,49 +9,10 @@
         android:layout_width="fill_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/browsePlaylistRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/featuredPlaylistsMessage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-
-                android:padding="10dp"
-                android:singleLine="true"
-                android:text="Featured Playlists"
-                android:textSize="20sp" />
-
-            <LinearLayout
-                android:id="@+id/featuredPlaylistsListLayout"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:id="@+id/featuredPlaylistsListLayoutLeft"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="fill_horizontal|center_vertical|center|fill_vertical|center_horizontal|fill">
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/featuredPlaylistsListLayoutRight"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="fill_horizontal|center_vertical|center|fill_vertical|center_horizontal|fill">
-
-                </LinearLayout>
-            </LinearLayout>
-
-        </LinearLayout>
+            android:layout_height="wrap_content" />
     </ScrollView>
 
 </LinearLayout>
