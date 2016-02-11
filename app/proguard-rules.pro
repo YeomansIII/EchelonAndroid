@@ -42,6 +42,7 @@
 -keep class retrofit.** { *; }
 -keep class retrofit.http.** { *; }
 -keep class retrofit.client.** { *; }
+-keep class kaaes.spotify.webapi.android.** { *; }
 -dontwarn retrofit.**
 -dontwarn com.squareup.okhttp.**
 -dontwarn okio.**
