@@ -33,6 +33,12 @@
 -keepnames class io.yeomans.echelon.Participant.** { *; }
 -keepnames class io.yeomans.echelon.Participant { *; }
 -keepattributes Signature
+-keep class com.google.gson.** { *; }
+-keep class com.google.inject.** { *; }
+-keep class org.apache.http.** { *; }
+-keep class org.apache.james.mime4j.** { *; }
+-keep class javax.inject.** { *; }
+-keep class sun.misc.Unsafe { *; }
 -keep class retrofit.** { *; }
 -keep class retrofit.http.** { *; }
 -keep class retrofit.client.** { *; }
