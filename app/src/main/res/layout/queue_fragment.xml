@@ -27,6 +27,13 @@
         </LinearLayout>
     </ScrollView>
 
+    <FrameLayout
+        android:id="@+id/queueOverlayFrame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#acdcdcdc"
+        android:visibility="invisible"></FrameLayout>
+
     <TextView
         android:id="@+id/groupIdText"
         android:layout_width="fill_parent"
@@ -50,10 +57,10 @@
         android:layout_above="@+id/groupAddSongFab2"
         android:layout_alignLeft="@+id/groupAddSongFab2"
         android:layout_alignStart="@+id/groupAddSongFab2"
+        android:layout_marginBottom="10dp"
         android:src="@drawable/ic_album_white_36dp"
         android:visibility="invisible"
-        app:elevation="4dp"
-        android:layout_marginBottom="10dp" />
+        app:elevation="4dp" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/groupAddSongFab2"
@@ -62,10 +69,10 @@
         android:layout_above="@+id/groupAddSongFab1"
         android:layout_alignLeft="@+id/groupAddSongFab1"
         android:layout_alignStart="@+id/groupAddSongFab1"
+        android:layout_marginBottom="10dp"
         android:src="@drawable/ic_library_music_white_36dp"
         android:visibility="invisible"
-        app:elevation="4dp"
-        android:layout_marginBottom="10dp" />
+        app:elevation="4dp" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/groupAddSongFab1"
@@ -74,10 +81,10 @@
         android:layout_above="@+id/groupAddSongFab"
         android:layout_alignLeft="@+id/groupAddSongFab"
         android:layout_alignStart="@+id/groupAddSongFab"
+        android:layout_marginBottom="10dp"
         android:src="@drawable/ic_magnify_white_36dp"
         android:visibility="invisible"
-        app:elevation="4dp"
-        android:layout_marginBottom="10dp" />
+        app:elevation="4dp" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/groupAddSongFab"
@@ -92,80 +99,98 @@
         app:elevation="4dp" />
 
     <FrameLayout
+        android:id="@+id/queueSearchTextFrame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_toLeftOf="@+id/groupAddSongFab1"
         android:layout_alignBottom="@+id/groupAddSongFab1"
         android:layout_alignTop="@+id/groupAddSongFab1"
-        android:id="@+id/queueSearchTextFrame"
+        android:layout_toLeftOf="@+id/groupAddSongFab1"
         android:visibility="invisible">
 
         <TextView
+            android:id="@+id/textView6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Search"
-            android:id="@+id/textView6"
-            android:background="@drawable/tip_shape"
             android:layout_above="@+id/groupAddSongFab2"
-            android:layout_toRightOf="@+id/groupIdText"
-            android:layout_toEndOf="@+id/groupIdText"
-            android:layout_marginLeft="55dp"
-            android:layout_marginStart="55dp"
             android:layout_gravity="right|center_vertical"
-            android:padding="5dp"
-            android:textSize="20sp" />
+            android:layout_marginLeft="55dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginStart="55dp"
+            android:layout_toEndOf="@+id/groupIdText"
+            android:layout_toRightOf="@+id/groupIdText"
+            android:background="@drawable/tip_shape"
+            android:gravity="center"
+            android:text="Search"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:paddingTop="4dp"
+            android:paddingRight="5dp"
+            android:paddingBottom="4dp"
+            android:paddingLeft="5dp" />
     </FrameLayout>
 
     <FrameLayout
+        android:id="@+id/queueYourMusicTextFrame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_alignBottom="@+id/groupAddSongFab2"
         android:layout_below="@+id/groupAddSongFab3"
         android:layout_toLeftOf="@+id/groupAddSongFab2"
         android:layout_toStartOf="@+id/groupAddSongFab2"
-        android:layout_alignBottom="@+id/groupAddSongFab2"
-        android:id="@+id/queueYourMusicTextFrame"
         android:visibility="invisible">
 
         <TextView
+            android:id="@+id/textView7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Your Music"
-            android:id="@+id/textView7"
-            android:background="@drawable/tip_shape"
             android:layout_above="@+id/groupAddSongFab2"
-            android:layout_toRightOf="@+id/groupIdText"
-            android:layout_toEndOf="@+id/groupIdText"
+            android:layout_gravity="center_vertical|right"
             android:layout_marginLeft="55dp"
+            android:layout_marginRight="10dp"
             android:layout_marginStart="55dp"
-            android:layout_gravity="right|center_vertical"
-            android:padding="5dp"
-            android:textSize="20sp" />
+            android:layout_toEndOf="@+id/groupIdText"
+            android:layout_toRightOf="@+id/groupIdText"
+            android:background="@drawable/tip_shape"
+            android:gravity="center"
+            android:text="Your Music"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:paddingTop="4dp"
+            android:paddingRight="5dp"
+            android:paddingBottom="4dp"
+            android:paddingLeft="5dp" />
     </FrameLayout>
 
     <FrameLayout
+        android:id="@+id/queueBrowseTextFrame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_alignBottom="@+id/groupAddSongFab3"
         android:layout_alignTop="@+id/groupAddSongFab3"
         android:layout_toLeftOf="@+id/groupAddSongFab3"
         android:layout_toStartOf="@+id/groupAddSongFab3"
-        android:layout_alignBottom="@+id/groupAddSongFab3"
-        android:id="@+id/queueBrowseTextFrame"
         android:visibility="invisible">
 
         <TextView
+            android:id="@+id/textView8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Browse"
-            android:id="@+id/textView8"
-            android:background="@drawable/tip_shape"
             android:layout_above="@+id/groupAddSongFab2"
-            android:layout_toRightOf="@+id/groupIdText"
-            android:layout_toEndOf="@+id/groupIdText"
-            android:layout_marginLeft="55dp"
-            android:layout_marginStart="55dp"
             android:layout_gravity="right|center_vertical"
-            android:padding="5dp"
-            android:textSize="20sp" />
+            android:layout_marginLeft="55dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginStart="55dp"
+            android:layout_toEndOf="@+id/groupIdText"
+            android:layout_toRightOf="@+id/groupIdText"
+            android:background="@drawable/tip_shape"
+            android:gravity="center"
+            android:text="Browse"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:paddingTop="4dp"
+            android:paddingRight="5dp"
+            android:paddingBottom="4dp"
+            android:paddingLeft="5dp" />
     </FrameLayout>
 
 </RelativeLayout>

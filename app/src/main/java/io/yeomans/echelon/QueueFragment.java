@@ -66,7 +66,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
     private Boolean isFabOpen = false;
     private FloatingActionButton fab, fab1, fab2, fab3;
     private Animation fab_open, fab_close, rotate_forward, rotate_backward, tip_fade_in, tip_fade_out;
-    private FrameLayout queueBrowseTextFrame, queueSearchTextFrame, queueYourMusicTextFrame;
+    private FrameLayout queueBrowseTextFrame, queueSearchTextFrame, queueYourMusicTextFrame, queueOverlayFrame;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -127,6 +127,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
         queueBrowseTextFrame = (FrameLayout) view.findViewById(R.id.queueBrowseTextFrame);
         queueSearchTextFrame = (FrameLayout) view.findViewById(R.id.queueSearchTextFrame);
         queueYourMusicTextFrame = (FrameLayout) view.findViewById(R.id.queueYourMusicTextFrame);
+        queueOverlayFrame = (FrameLayout) view.findViewById(R.id.queueOverlayFrame);
         fab_open = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.fab_open);
         fab_close = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.fab_close);
         rotate_forward = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.rotate_forward);
@@ -308,6 +309,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
             queueBrowseTextFrame.startAnimation(fab_close);
             queueSearchTextFrame.startAnimation(fab_close);
             queueYourMusicTextFrame.startAnimation(fab_close);
+            queueOverlayFrame.startAnimation(tip_fade_out);
             fab1.setClickable(false);
             fab2.setClickable(false);
             fab3.setClickable(false);
@@ -320,6 +322,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
             queueBrowseTextFrame.startAnimation(fab_open);
             queueSearchTextFrame.startAnimation(fab_open);
             queueYourMusicTextFrame.startAnimation(fab_open);
+            queueOverlayFrame.startAnimation(tip_fade_in);
             fab1.setClickable(true);
             fab2.setClickable(true);
             fab3.setClickable(true);

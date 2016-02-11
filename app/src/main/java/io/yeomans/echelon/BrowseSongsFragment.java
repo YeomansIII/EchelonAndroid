@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -41,14 +42,27 @@ import retrofit.client.Response;
  */
 public class BrowseSongsFragment extends Fragment implements View.OnClickListener {
 
+
+    private static final String TAG = "BrowseSongsFragment";
+    private static final String KEY_LAYOUT_MANAGER = "layoutManager";
+    private static final int SPAN_COUNT = 2;
+
+    private enum LayoutManagerType {
+        GRID_LAYOUT_MANAGER,
+        LINEAR_LAYOUT_MANAGER
+    }
+
+    protected LayoutManagerType mCurrentLayoutManagerType;
+
     private View view;
     private ArrayList<RelativeLayout> playlistListArr;
     MainActivity mainActivity;
     boolean selected;
     RecyclerView rvPlaylists;
     PlaylistRecyclerAdapter playlistRA;
-    GridLayoutManager glm;
+    RecyclerView.LayoutManager mLayoutManager;
     List<PlaylistSimple> playlists;
+    String message;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,8 +70,8 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
         //setHasOptionsMenu(true);
         mainActivity = (MainActivity) getActivity();
         selected = false;
-        playlists = new ArrayList<PlaylistSimple>();
-        playlistRA = new PlaylistRecyclerAdapter(mainActivity.spotify.getFeaturedPlaylists().playlists.items);
+        playlists = new ArrayList<>();
+        getFeaturedPlaylists();
     }
 
     @Override
@@ -66,14 +80,38 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
         View view = inflater.inflate(R.layout.browse_songs_fragment,
                 container, false);
 
-        glm = new GridLayoutManager(getActivity(), 2);
+        //mLayoutManager = new GridLayoutManager(getActivity(), 2);
+        if (message != null) {
+            mainActivity.toolbar.setTitle(message);
+        }
 
         rvPlaylists = (RecyclerView) view.findViewById(R.id.browsePlaylistRecyclerView);
-        rvPlaylists.setLayoutManager(glm);
+        mLayoutManager = new GridLayoutManager(getActivity(), SPAN_COUNT);
+
+        mCurrentLayoutManagerType = LayoutManagerType.GRID_LAYOUT_MANAGER;
+
+        if (savedInstanceState != null) {
+            // Restore saved layout manager type.
+            mCurrentLayoutManagerType = (LayoutManagerType) savedInstanceState
+                    .getSerializable(KEY_LAYOUT_MANAGER);
+        }
+        setRecyclerViewLayoutManager(mCurrentLayoutManagerType);
+
+        playlistRA = new PlaylistRecyclerAdapter(playlists);
+        playlistRA.setOnPlaylistClickListener(new PlaylistRecyclerAdapter.OnPlaylistClickListener() {
+            @Override
+            public void onPlaylistClick(PlaylistRecyclerAdapter.ViewHolder viewHolder) {
+                FragmentTransaction ft = mainActivity.getSupportFragmentManager().beginTransaction();
+                ListSongFragment lsf = new ListSongFragment();
+                Bundle bundle = new Bundle();
+                bundle.putChar("what", viewHolder.what);
+                bundle.putString("userId", viewHolder.userId);
+                bundle.putString("playlistId", viewHolder.playlistId);
+                lsf.setArguments(bundle);
+                ft.replace(R.id.container, lsf, "SONG_LIST_FRAG").addToBackStack(null).commit();
+            }
+        });
         rvPlaylists.setAdapter(playlistRA);
-
-
-        //getFeaturedPlaylists();
 
         this.view = view;
         return view;
@@ -90,11 +128,52 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
 //        }
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save currently selected layout manager.
+        savedInstanceState.putSerializable(KEY_LAYOUT_MANAGER, mCurrentLayoutManagerType);
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    /**
+     * Set RecyclerView's LayoutManager to the one given.
+     *
+     * @param layoutManagerType Type of layout manager to switch to.
+     */
+    public void setRecyclerViewLayoutManager(LayoutManagerType layoutManagerType) {
+        int scrollPosition = 0;
+
+        // If a layout manager has already been set, get current scroll position.
+        if (rvPlaylists.getLayoutManager() != null) {
+            scrollPosition = ((LinearLayoutManager) rvPlaylists.getLayoutManager())
+                    .findFirstCompletelyVisibleItemPosition();
+        }
+
+        switch (layoutManagerType) {
+            case GRID_LAYOUT_MANAGER:
+                mLayoutManager = new GridLayoutManager(getActivity(), SPAN_COUNT);
+                mCurrentLayoutManagerType = LayoutManagerType.GRID_LAYOUT_MANAGER;
+                break;
+            case LINEAR_LAYOUT_MANAGER:
+                mLayoutManager = new LinearLayoutManager(getActivity());
+                mCurrentLayoutManagerType = LayoutManagerType.LINEAR_LAYOUT_MANAGER;
+                break;
+            default:
+                mLayoutManager = new LinearLayoutManager(getActivity());
+                mCurrentLayoutManagerType = LayoutManagerType.LINEAR_LAYOUT_MANAGER;
+        }
+
+        rvPlaylists.setLayoutManager(mLayoutManager);
+        rvPlaylists.scrollToPosition(scrollPosition);
+    }
+
     public void getFeaturedPlaylists() {
         mainActivity.spotify.getFeaturedPlaylists(new Callback<FeaturedPlaylists>() {
             @Override
             public void success(FeaturedPlaylists featuredPlaylists, Response response) {
                 Log.i("Playlists", "Get playlist results");
+                mainActivity.toolbar.setTitle(featuredPlaylists.message);
+                message = featuredPlaylists.message;
                 playlists.addAll(featuredPlaylists.playlists.items);
                 playlistRA.notifyDataSetChanged();
 

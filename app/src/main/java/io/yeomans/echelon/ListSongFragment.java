@@ -92,6 +92,7 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
             mainActivity.spotify.searchTracks(searchQuery, new Callback<TracksPager>() {
                 @Override
                 public void success(TracksPager tracksPager, Response response) {
+                    mainActivity.toolbar.setTitle(searchQuery);
                     generateLayout(tracksPager.tracks.items);
                 }
 
@@ -105,6 +106,7 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
             mainActivity.spotify.getPlaylist(userId, playlistId, new Callback<Playlist>() {
                 @Override
                 public void success(Playlist playlist, Response response) {
+                    mainActivity.toolbar.setTitle(playlist.name);
                     generateLayout(playlist.tracks.items);
                 }
 
@@ -135,10 +137,21 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
                 break;
             }
 
+            String imgUrl;
+            try {
+                imgUrl = curObj.album.images.get(2).url;
+            } catch (IndexOutOfBoundsException e) {
+                try {
+                    imgUrl = curObj.album.images.get(1).url;
+                } catch (IndexOutOfBoundsException e2) {
+                    imgUrl = curObj.album.images.get(0).url;
+                }
+            }
+
             SongItemView siv = new SongItemView(getContext(),
                     curObj.name,
                     curObj.artists.get(0).name,
-                    curObj.album.images.get(2).url,
+                    imgUrl,
                     curObj.id,
                     new View.OnClickListener() {
                         @Override
