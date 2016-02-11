@@ -27,8 +27,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 
 import kaaes.spotify.webapi.android.models.FeaturedPlaylists;
 import kaaes.spotify.webapi.android.models.Pager;
@@ -168,6 +174,14 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
     }
 
     public void getFeaturedPlaylists() {
+        Locale uLocale = Locale.getDefault();
+        String format = "yyyy-MM-dd'T'HH:mm:ss";
+        SimpleDateFormat sdf = new SimpleDateFormat(format, uLocale);
+        String dateTime = sdf.format(new Date());
+        Log.d("Playlists", uLocale.toString() + "    " + dateTime);
+        Map<String, Object> options = new HashMap<>();
+        options.put("locale", uLocale.toString());
+        options.put("timestamp", dateTime);
         mainActivity.spotify.getFeaturedPlaylists(new Callback<FeaturedPlaylists>() {
             @Override
             public void success(FeaturedPlaylists featuredPlaylists, Response response) {
