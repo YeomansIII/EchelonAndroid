@@ -40,8 +40,8 @@ android {
         applicationId "io.yeomans.echelon"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 20
-        versionName "0.3"
+        versionCode 21
+        versionName "0.4"
         archivesBaseName = "Echelon-$versionName-$versionCode"
     }
     signingConfigs {
