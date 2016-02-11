@@ -45,6 +45,10 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
     private ArrayList<RelativeLayout> playlistListArr;
     MainActivity mainActivity;
     boolean selected;
+    RecyclerView rvPlaylists;
+    PlaylistRecyclerAdapter playlistRA;
+    GridLayoutManager glm;
+    List<PlaylistSimple> playlists;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,7 +56,8 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
         //setHasOptionsMenu(true);
         mainActivity = (MainActivity) getActivity();
         selected = false;
-
+        playlists = new ArrayList<PlaylistSimple>();
+        playlistRA = new PlaylistRecyclerAdapter(mainActivity.spotify.getFeaturedPlaylists().playlists.items);
     }
 
     @Override
@@ -61,7 +66,14 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
         View view = inflater.inflate(R.layout.browse_songs_fragment,
                 container, false);
 
-        getFeaturedPlaylists();
+        glm = new GridLayoutManager(getActivity(), 2);
+
+        rvPlaylists = (RecyclerView) view.findViewById(R.id.browsePlaylistRecyclerView);
+        rvPlaylists.setLayoutManager(glm);
+        rvPlaylists.setAdapter(playlistRA);
+
+
+        //getFeaturedPlaylists();
 
         this.view = view;
         return view;
@@ -82,10 +94,9 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
         mainActivity.spotify.getFeaturedPlaylists(new Callback<FeaturedPlaylists>() {
             @Override
             public void success(FeaturedPlaylists featuredPlaylists, Response response) {
-                RecyclerView rvPlaylists = (RecyclerView) view.findViewById(R.id.browsePlaylistRecyclerView);
-                PlaylistRecyclerAdapter playlistRA = new PlaylistRecyclerAdapter(featuredPlaylists.playlists.items);
-                rvPlaylists.setAdapter(playlistRA);
-                rvPlaylists.setLayoutManager(new GridLayoutManager(getContext(), 2));
+                Log.i("Playlists", "Get playlist results");
+                playlists.addAll(featuredPlaylists.playlists.items);
+                playlistRA.notifyDataSetChanged();
 
 //                ((TextView) view.findViewById(R.id.featuredPlaylistsMessage)).setText(featuredPlaylists.message);
 //                List<PlaylistSimple> items = featuredPlaylists.playlists.items;

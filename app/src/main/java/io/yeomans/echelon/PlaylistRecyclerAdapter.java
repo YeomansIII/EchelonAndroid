@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.models.Pager;
@@ -24,8 +25,20 @@ public class PlaylistRecyclerAdapter extends RecyclerView.Adapter<PlaylistRecycl
     List<PlaylistSimple> mPlaylists;
     Context context;
 
+    public PlaylistRecyclerAdapter() {
+        mPlaylists = new ArrayList<PlaylistSimple>();
+    }
+
     public PlaylistRecyclerAdapter(List<PlaylistSimple> playlists) {
         mPlaylists = playlists;
+    }
+
+    public void setData(List<PlaylistSimple> playlists) {
+        mPlaylists = playlists;
+    }
+
+    public void addData(List<PlaylistSimple> playlists) {
+        mPlaylists.addAll(playlists);
     }
 
     @Override
@@ -67,6 +80,11 @@ public class PlaylistRecyclerAdapter extends RecyclerView.Adapter<PlaylistRecycl
 
     @Override
     public int getItemCount() {
-        return 0;
+        return mPlaylists.size();
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
     }
 }
