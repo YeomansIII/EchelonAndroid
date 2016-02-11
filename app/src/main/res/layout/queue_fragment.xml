@@ -123,9 +123,9 @@
             android:text="Search"
             android:textColor="@android:color/black"
             android:textSize="18sp"
-            android:paddingTop="4dp"
+            android:paddingTop="2dp"
             android:paddingRight="5dp"
-            android:paddingBottom="4dp"
+            android:paddingBottom="2dp"
             android:paddingLeft="5dp" />
     </FrameLayout>
 
@@ -155,9 +155,9 @@
             android:text="Your Music"
             android:textColor="@android:color/black"
             android:textSize="18sp"
-            android:paddingTop="4dp"
+            android:paddingTop="2dp"
             android:paddingRight="5dp"
-            android:paddingBottom="4dp"
+            android:paddingBottom="2dp"
             android:paddingLeft="5dp" />
     </FrameLayout>
 
@@ -187,9 +187,9 @@
             android:text="Browse"
             android:textColor="@android:color/black"
             android:textSize="18sp"
-            android:paddingTop="4dp"
+            android:paddingTop="2dp"
             android:paddingRight="5dp"
-            android:paddingBottom="4dp"
+            android:paddingBottom="2dp"
             android:paddingLeft="5dp" />
     </FrameLayout>
 
