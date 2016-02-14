@@ -31,8 +31,9 @@
         android:id="@+id/queueOverlayFrame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
         android:background="#acdcdcdc"
-        android:visibility="invisible"></FrameLayout>
+        android:visibility="invisible" />
 
     <TextView
         android:id="@+id/groupIdText"
@@ -120,13 +121,13 @@
             android:layout_toRightOf="@+id/groupIdText"
             android:background="@drawable/tip_shape"
             android:gravity="center"
+            android:paddingBottom="2dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:paddingTop="2dp"
             android:text="Search"
             android:textColor="@android:color/black"
-            android:textSize="18sp"
-            android:paddingTop="2dp"
-            android:paddingRight="5dp"
-            android:paddingBottom="2dp"
-            android:paddingLeft="5dp" />
+            android:textSize="18sp" />
     </FrameLayout>
 
     <FrameLayout
@@ -152,13 +153,13 @@
             android:layout_toRightOf="@+id/groupIdText"
             android:background="@drawable/tip_shape"
             android:gravity="center"
+            android:paddingBottom="2dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:paddingTop="2dp"
             android:text="Your Music"
             android:textColor="@android:color/black"
-            android:textSize="18sp"
-            android:paddingTop="2dp"
-            android:paddingRight="5dp"
-            android:paddingBottom="2dp"
-            android:paddingLeft="5dp" />
+            android:textSize="18sp" />
     </FrameLayout>
 
     <FrameLayout
@@ -184,13 +185,13 @@
             android:layout_toRightOf="@+id/groupIdText"
             android:background="@drawable/tip_shape"
             android:gravity="center"
+            android:paddingBottom="2dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:paddingTop="2dp"
             android:text="Browse"
             android:textColor="@android:color/black"
-            android:textSize="18sp"
-            android:paddingTop="2dp"
-            android:paddingRight="5dp"
-            android:paddingBottom="2dp"
-            android:paddingLeft="5dp" />
+            android:textSize="18sp" />
     </FrameLayout>
 
 </RelativeLayout>

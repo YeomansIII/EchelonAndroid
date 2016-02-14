@@ -1,26 +1,19 @@
 package io.yeomans.echelon;
 
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +31,17 @@ import retrofit.client.Response;
  */
 public class ListSongFragment extends Fragment implements View.OnClickListener {
 
+    private static final String TAG = "BrowseSongsFragment";
+    private static final String KEY_LAYOUT_MANAGER = "layoutManager";
+    private static final int SPAN_COUNT = 2;
+
+    private enum LayoutManagerType {
+        GRID_LAYOUT_MANAGER,
+        LINEAR_LAYOUT_MANAGER
+    }
+
+    protected LayoutManagerType mCurrentLayoutManagerType;
+
     final static char SEARCH = '0';
     final static char PLAYLIST = '1';
     private char what;
@@ -49,6 +53,12 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
     private ArrayList<RelativeLayout> songListArr;
     String getUrl;
     MainActivity mainActivity;
+    View loadOverlay;
+
+    RecyclerView mRecyclerView;
+    SonglistRecyclerAdapter songListRA;
+    RecyclerView.LayoutManager mLayoutManager;
+    List<Track> tracks;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -67,16 +77,44 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
             userId = getArguments().getString("userId");
             playlistId = getArguments().getString("playlistId");
         }
+        tracks = new ArrayList<>();
+        getSongs();
         //ownerId = getArguments().getString("owner_id");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.list_song_fragment,
+        final View view = inflater.inflate(R.layout.list_song_fragment,
                 container, false);
 
-        listSongs();
+        loadOverlay = view.findViewById(R.id.songListLoadOverlay);
+
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.songListRecyclerView);
+        mLayoutManager = new LinearLayoutManager(getActivity());
+
+        mCurrentLayoutManagerType = LayoutManagerType.LINEAR_LAYOUT_MANAGER;
+
+        if (savedInstanceState != null) {
+            // Restore saved layout manager type.
+            mCurrentLayoutManagerType = (LayoutManagerType) savedInstanceState
+                    .getSerializable(KEY_LAYOUT_MANAGER);
+        }
+        setRecyclerViewLayoutManager(mCurrentLayoutManagerType);
+
+        songListRA = new SonglistRecyclerAdapter(tracks, what);
+        songListRA.setOnSongClickListener(new SonglistRecyclerAdapter.OnSongClickListener() {
+            @Override
+            public void onSongClick(SonglistRecyclerAdapter.ViewHolder viewHolder) {
+                viewHolder.itemView.setBackgroundColor(Color.GRAY);
+                FirebaseCommon.addSong(viewHolder.trackId, mainActivity);
+            }
+        });
+        mRecyclerView.setAdapter(songListRA);
+
+        if (tracks.size() != 0) {
+            loadOverlay.setVisibility(View.GONE);
+        }
 
         this.view = view;
         return view;
@@ -86,14 +124,16 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
     }
 
-    public void listSongs() {
+    public void getSongs() {
         if (what == SEARCH) {
             Log.d("WhatList", "Search");
             mainActivity.spotify.searchTracks(searchQuery, new Callback<TracksPager>() {
                 @Override
                 public void success(TracksPager tracksPager, Response response) {
                     mainActivity.toolbar.setTitle(searchQuery);
-                    generateLayout(tracksPager.tracks.items);
+                    tracks.addAll(tracksPager.tracks.items);
+                    songListRA.notifyDataSetChanged();
+                    loadOverlay.setVisibility(View.GONE);
                 }
 
                 @Override
@@ -107,7 +147,11 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
                 @Override
                 public void success(Playlist playlist, Response response) {
                     mainActivity.toolbar.setTitle(playlist.name);
-                    generateLayout(playlist.tracks.items);
+                    for (PlaylistTrack t : playlist.tracks.items) {
+                        tracks.add(t.track);
+                    }
+                    songListRA.notifyDataSetChanged();
+                    loadOverlay.setVisibility(View.GONE);
                 }
 
                 @Override
@@ -118,54 +162,35 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    public void generateLayout(List items) {
-        Log.d("Search Song", items.toString());
-        LinearLayout songList = (LinearLayout) view.findViewById(R.id.listSongListLayout);
-        songList.removeAllViews();
-        songListArr = new ArrayList<>();
-        for (int i = 0; i < items.size() - 1; i++) {
-            Track curObj;
-            Object obj = items.get(i);
-            if (obj instanceof Track) {
-                Log.d("WhatList", "Track");
-                curObj = (Track) obj;
-            } else if (obj instanceof PlaylistTrack) {
-                Log.d("WhatList", "Playlist");
-                curObj = ((PlaylistTrack) obj).track;
-            } else {
-                Log.wtf("Echelon", "This shouldn't be happening...");
-                break;
-            }
+    /**
+     * Set RecyclerView's LayoutManager to the one given.
+     *
+     * @param layoutManagerType Type of layout manager to switch to.
+     */
+    public void setRecyclerViewLayoutManager(LayoutManagerType layoutManagerType) {
+        int scrollPosition = 0;
 
-            String imgUrl;
-            try {
-                imgUrl = curObj.album.images.get(2).url;
-            } catch (IndexOutOfBoundsException e) {
-                try {
-                    imgUrl = curObj.album.images.get(1).url;
-                } catch (IndexOutOfBoundsException e2) {
-                    imgUrl = curObj.album.images.get(0).url;
-                }
-            }
-
-            SongItemView siv = new SongItemView(getContext(),
-                    curObj.name,
-                    curObj.artists.get(0).name,
-                    imgUrl,
-                    curObj.id,
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            for (RelativeLayout view : songListArr) {
-                                view.setOnClickListener(null);
-                            }
-                            view.setBackgroundColor(Color.DKGRAY);
-                            FirebaseCommon.addSong((String) v.getTag(), mainActivity);
-                        }
-                    });
-
-            songListArr.add(siv);
-            songList.addView(siv);
+        // If a layout manager has already been set, get current scroll position.
+        if (mRecyclerView.getLayoutManager() != null) {
+            scrollPosition = ((LinearLayoutManager) mRecyclerView.getLayoutManager())
+                    .findFirstCompletelyVisibleItemPosition();
         }
+
+        switch (layoutManagerType) {
+            case GRID_LAYOUT_MANAGER:
+                mLayoutManager = new GridLayoutManager(getActivity(), SPAN_COUNT);
+                mCurrentLayoutManagerType = LayoutManagerType.GRID_LAYOUT_MANAGER;
+                break;
+            case LINEAR_LAYOUT_MANAGER:
+                mLayoutManager = new LinearLayoutManager(getActivity());
+                mCurrentLayoutManagerType = LayoutManagerType.LINEAR_LAYOUT_MANAGER;
+                break;
+            default:
+                mLayoutManager = new LinearLayoutManager(getActivity());
+                mCurrentLayoutManagerType = LayoutManagerType.LINEAR_LAYOUT_MANAGER;
+        }
+
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.scrollToPosition(scrollPosition);
     }
 }

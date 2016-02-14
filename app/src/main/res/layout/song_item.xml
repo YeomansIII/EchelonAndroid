@@ -5,7 +5,7 @@
     android:layout_height="wrap_content">
 
     <ImageView
-        android:id="@+id/albumArtImage"
+        android:id="@+id/songAlbumArtImage"
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:layout_alignParentLeft="true"
@@ -17,10 +17,10 @@
         android:id="@+id/songTitleText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/albumArtImage"
+        android:layout_alignTop="@+id/songAlbumArtImage"
         android:layout_marginTop="5dp"
         android:layout_toLeftOf="@+id/songItemVoterLayout"
-        android:layout_toRightOf="@+id/albumArtImage"
+        android:layout_toRightOf="@+id/songAlbumArtImage"
         android:layout_toStartOf="@+id/songItemVoterLayout"
         android:singleLine="true"
         android:text="Song Title"
@@ -30,10 +30,10 @@
         android:id="@+id/songArtistText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/albumArtImage"
+        android:layout_alignBottom="@+id/songAlbumArtImage"
         android:layout_marginBottom="10dp"
         android:layout_toLeftOf="@+id/songItemVoterLayout"
-        android:layout_toRightOf="@+id/albumArtImage"
+        android:layout_toRightOf="@+id/songAlbumArtImage"
         android:layout_toStartOf="@+id/songItemVoterLayout"
         android:text="Artist"
         android:textSize="15dp" />
@@ -44,7 +44,7 @@
         android:layout_height="70dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/albumArtImage"
+        android:layout_alignTop="@+id/songAlbumArtImage"
         android:visibility="gone">
 
         <LinearLayout

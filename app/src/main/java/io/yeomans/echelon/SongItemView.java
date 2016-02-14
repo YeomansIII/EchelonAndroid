@@ -43,7 +43,7 @@ public class SongItemView extends RelativeLayout {
         View view = inflate(getContext(), R.layout.song_item, null);
         titleText = (TextView) view.findViewById(R.id.songTitleText);
         artistText = (TextView) view.findViewById(R.id.songArtistText);
-        albumImage = (ImageView) view.findViewById(R.id.albumArtImage);
+        albumImage = (ImageView) view.findViewById(R.id.songAlbumArtImage);
         if (title != null) {
             titleText.setText(title);
         }

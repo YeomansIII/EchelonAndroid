@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.renderscript.Sampler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,8 +11,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -26,22 +22,16 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created by jason on 6/26/15.
@@ -138,6 +128,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
         fab1.setOnClickListener(this);
         fab2.setOnClickListener(this);
         fab3.setOnClickListener(this);
+        view.findViewById(R.id.queueOverlayFrame).setOnClickListener(this);
 
         this.view = view;
 
@@ -203,7 +194,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
                     } else {
                         rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.song_item, null);
                     }
-                    ImageView albumArtImage = (ImageView) rt.findViewById(R.id.albumArtImage);
+                    ImageView albumArtImage = (ImageView) rt.findViewById(R.id.songAlbumArtImage);
                     TextView songTitleText = (TextView) rt.findViewById(R.id.songTitleText);
                     TextView songArtistText = (TextView) rt.findViewById(R.id.songArtistText);
                     RelativeLayout voteControlsLayout = (RelativeLayout) rt.findViewById(R.id.songItemVoterLayout);
@@ -313,6 +304,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
             fab1.setClickable(false);
             fab2.setClickable(false);
             fab3.setClickable(false);
+            queueOverlayFrame.setClickable(false);
             isFabOpen = false;
         } else {
             fab.startAnimation(rotate_forward);
@@ -326,6 +318,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
             fab1.setClickable(true);
             fab2.setClickable(true);
             fab3.setClickable(true);
+            queueOverlayFrame.setClickable(true);
             isFabOpen = true;
         }
     }
@@ -333,31 +326,44 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
-        GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         switch (id) {
             case R.id.groupAddSongFab:
                 animateFAB();
                 break;
-            case R.id.groupAddSongFab1:
+            case R.id.groupAddSongFab1: {
+                FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+                GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 if (groupFragment != null && groupFragment.isVisible()) {
                     animateFAB();
-                    fragmentTransaction.setCustomAnimations(R.anim.slide_in_up, R.anim.fade_out).replace(R.id.container, new SongSearchFragment(), "SONG_SEARCH_FRAG").addToBackStack(null).commit();
+                    fragmentTransaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out).replace(R.id.container, new SongSearchFragment(), "SONG_SEARCH_FRAG").addToBackStack(null).commit();
                 }
                 break;
-            case R.id.groupAddSongFab2:
+            }
+            case R.id.groupAddSongFab2: {
+                FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+                GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 if (groupFragment != null && groupFragment.isVisible()) {
                     animateFAB();
-                    fragmentTransaction.setCustomAnimations(R.anim.slide_in_up, R.anim.fade_out).replace(R.id.container, new YourMusicFragment(), "YOUR_MUSIC_FRAG").addToBackStack(null).commit();
+                    fragmentTransaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out).replace(R.id.container, new YourMusicFragment(), "YOUR_MUSIC_FRAG").addToBackStack(null).commit();
                 }
                 break;
-            case R.id.groupAddSongFab3:
+            }
+            case R.id.groupAddSongFab3: {
+                FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+                GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 if (groupFragment != null && groupFragment.isVisible()) {
                     animateFAB();
                     fragmentTransaction.setCustomAnimations(R.anim.slide_in_up, R.anim.fade_out).replace(R.id.container, new BrowseSongsFragment(), "BROWSE_SONG_FRAG").addToBackStack(null).commit();
                 }
                 break;
+            }
+            case R.id.queueOverlayFrame:
+                animateFAB();
+                break;
+
         }
     }
 }
