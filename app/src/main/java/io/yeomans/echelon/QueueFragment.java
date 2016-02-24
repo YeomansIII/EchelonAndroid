@@ -26,6 +26,12 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.holder.ImageHolder;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -51,12 +57,16 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
     private ControlBarFragment controlBar;
     Firebase queuegroupRef;
     LinkedList<SpotifySong> playqueue;
-    ValueEventListener trackListChangeListener;
+    private ValueEventListener trackListChangeListener;
+    private ValueEventListener participantListener;
+    private ArrayList<Participant> participantsArray;
 
     private Boolean isFabOpen = false;
     private FloatingActionButton fab, fab1, fab2, fab3;
     private Animation fab_open, fab_close, rotate_forward, rotate_backward, tip_fade_in, tip_fade_out;
     private FrameLayout queueBrowseTextFrame, queueSearchTextFrame, queueYourMusicTextFrame, queueOverlayFrame;
+    private Drawer result;
+    private boolean particDrawerOpen;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -99,6 +109,30 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
             }
 
         };
+
+        participantListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //participantsArray = new ArrayList<>();
+                result.removeAllItems();
+                for (DataSnapshot o : dataSnapshot.getChildren()) {
+                    //participantsArray.add(o.getValue(Participant.class));
+                    Participant p = o.getValue(Participant.class);
+                    ProfileDrawerItem dItem = new ProfileDrawerItem().withName(p.getDisplayName());
+                    if (p.getImageUrl() != null) {
+                        dItem.withIcon(p.getImageUrl());
+                    } else {
+                        dItem.withIcon(R.drawable.ic_account_grey600_24dp);
+                    }
+                    result.addItem(dItem);
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        };
     }
 
     @Override
@@ -130,11 +164,46 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
         fab3.setOnClickListener(this);
         view.findViewById(R.id.queueOverlayFrame).setOnClickListener(this);
 
+        if (!mainSettings.getString(MainActivity.PREF_USER_AUTH_TYPE, "").equals("spotify")) {
+            fab2.setVisibility(View.GONE);
+            queueYourMusicTextFrame.setVisibility(View.GONE);
+        }
+
+        result = new DrawerBuilder()
+                .withActivity(getActivity())
+                .withRootView((ViewGroup) view.findViewById(R.id.queueGroupRootView))
+                .withDisplayBelowStatusBar(false)
+                .withSavedInstance(savedInstanceState)
+                .withDrawerGravity(Gravity.END)
+                .withOnDrawerListener(new Drawer.OnDrawerListener() {
+                    @Override
+                    public void onDrawerOpened(View drawerView) {
+                        fab.setImageResource(R.drawable.ic_account_plus_white_36dp);
+                        particDrawerOpen = true;
+                    }
+
+                    @Override
+                    public void onDrawerClosed(View drawerView) {
+                        fab.setImageResource(R.drawable.ic_add_white_36dp);
+                        particDrawerOpen = false;
+                    }
+
+                    @Override
+                    public void onDrawerSlide(View drawerView, float slideOffset) {
+
+                    }
+                })
+                .buildForFragment();
+        result.getDrawerLayout().setFitsSystemWindows(false);
+        result.getSlider().setFitsSystemWindows(false);
+        particDrawerOpen = false;
+
         this.view = view;
 
         //view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
 
         queuegroupRef.child("tracks").addValueEventListener(trackListChangeListener);
+        queuegroupRef.child("participants").addValueEventListener(participantListener);
         return view;
     }
 
@@ -160,6 +229,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
     public void onDestroyView() {
         super.onDestroyView();
         queuegroupRef.child("tracks").removeEventListener(trackListChangeListener);
+        queuegroupRef.child("participants").removeEventListener(participantListener);
         //getView().findViewById(R.id.groupAddSongButton).setVisibility(View.GONE);
     }
 
@@ -328,7 +398,11 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
         int id = v.getId();
         switch (id) {
             case R.id.groupAddSongFab:
-                animateFAB();
+                if(particDrawerOpen) {
+                    Log.i("Queue", "Can't add a friend quite yet!");
+                } else {
+                    animateFAB();
+                }
                 break;
             case R.id.groupAddSongFab1: {
                 FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
@@ -356,7 +430,7 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 if (groupFragment != null && groupFragment.isVisible()) {
                     animateFAB();
-                    fragmentTransaction.setCustomAnimations(R.anim.slide_in_up, R.anim.fade_out).replace(R.id.container, new BrowseSongsFragment(), "BROWSE_SONG_FRAG").addToBackStack(null).commit();
+                    fragmentTransaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out).replace(R.id.container, new BrowseSongsFragment(), "BROWSE_SONG_FRAG").addToBackStack(null).commit();
                 }
                 break;
             }

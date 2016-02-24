@@ -75,42 +75,10 @@ public class GroupFragment extends Fragment {
                 }
             } else {
                 Log.d("Group", "Not leader");
-                //controlBar.ready(false);
             }
-//            ControlBarFragment controlBar = (ControlBarFragment) mainActivity.getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG");
-//            View cL = controlBar.getView().findViewById(R.id.controlCoordinatorLayout);
-//            Snackbar snackbar = Snackbar
-//                    .make(cL, "Had a snack at Snackbar", Snackbar.LENGTH_LONG);
-//            View snackbarView = snackbar.getView();
-//            snackbarView.setBackgroundColor(Color.DKGRAY);
-//            TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
-//            textView.setTextColor(Color.YELLOW);
-//            snackbar.show();
         }
 
-        viewPager = (ViewPager) view.findViewById(R.id.group_tab_viewpager);
-        setupViewPager(viewPager);
-        tabLayout = (TabLayout) view.findViewById(R.id.group_tab_tabs);
-        tabLayout.setupWithViewPager(viewPager);
-        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
-//                switch (tab.getPosition()) {
-//                    case 0:
-//                        Toast.makeText(mainActivity.context, "Tab One Selected", Toast.LENGTH_SHORT).show();
-//                        break;
-//                }
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-            }
-        });
+        mainActivity.getSupportFragmentManager().beginTransaction().replace(R.id.groupFragmentFrame, new QueueFragment(), "QUEUE_FRAG").commit();
         return view;
     }
 

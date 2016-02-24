@@ -59,7 +59,7 @@ public class PlaylistRecyclerAdapter extends RecyclerView.Adapter<PlaylistRecycl
     @Override
     public void onBindViewHolder(PlaylistRecyclerAdapter.ViewHolder holder, int position) {
         PlaylistSimple curPlaylist = mPlaylists.get(position);
-        Picasso.with(context).load(curPlaylist.images.get(0).url).into(holder.image);
+        Picasso.with(context).load(curPlaylist.images.get(0).url).placeholder(R.drawable.ic_music_circle_black_48dp).into(holder.image);
         holder.name.setText(curPlaylist.name);
 
         holder.what = ListSongFragment.PLAYLIST;

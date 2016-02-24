@@ -62,7 +62,7 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
             }
         }
 
-        Picasso.with(context).load(imgUrl).into(holder.image);
+        Picasso.with(context).load(imgUrl).placeholder(R.drawable.ic_music_circle_black_36dp).into(holder.image);
         holder.title.setText(curTrack.name);
         String artistText = "";
         List<ArtistSimple> artists = curTrack.artists;

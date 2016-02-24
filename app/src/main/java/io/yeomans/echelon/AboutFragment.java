@@ -1,11 +1,14 @@
 package io.yeomans.echelon;
 
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -29,6 +32,14 @@ public class AboutFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.about_fragment,
                 container, false);
+
+        PackageInfo pInfo = null;
+        try {
+            pInfo = mainActivity.getPackageManager().getPackageInfo(mainActivity.getPackageName(), 0);
+            ((TextView) view.findViewById(R.id.aboutVersionText)).setText("Version: " + pInfo.versionName + " - " + pInfo.versionCode);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
         this.view = view;
         return view;

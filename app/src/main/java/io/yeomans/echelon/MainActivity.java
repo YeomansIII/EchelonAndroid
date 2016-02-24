@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -34,6 +35,18 @@ import com.firebase.client.ValueEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IProfile;
+import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
+import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -69,6 +82,9 @@ public class MainActivity extends AppCompatActivity
     public DrawerLayout drawerLayout;
     public static final String MAIN_PREFS_NAME = "basic_pref";
     public static final String GROUP_PREFS_NAME = "group_pref";
+
+    //NAV DRAWER
+    private IProfile profile;
 
     //USER PREF
     public static final String PREF_USER_AUTH_TYPE = "user_auth_type";
@@ -239,27 +255,8 @@ public class MainActivity extends AppCompatActivity
         if (!loggedIn) {
             setContentViewLogin();
         } else {
-//            if (pref.getBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false)) {
-//                authenticateSpotify();
-//            }
-//            setUpNavDrawerAndActionBar();
-//            if (groupPref.getString(MainActivity.PREF_GROUP_NAME, null) != null) {
-//                FragmentManager fragmentManager = getSupportFragmentManager();
-//                Fragment fragment = new GroupFragment();
-//                Bundle bundle = new Bundle();
-//                if (groupPref.getString(MainActivity.PREF_GROUP_LEADER_UID, "").equals(pref.getString(MainActivity.PREF_FIREBASE_UID, "."))) {
-//                    bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
-//                } else {
-//                    bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
-//                }
-//                fragment.setArguments(bundle);
-//                fragmentManager.beginTransaction()
-//                        .replace(R.id.container, fragment, "GROUP_FRAG")
-//                        .commit();
-//            } else {
             setContentViewHome();
             setUpNavDrawerAndActionBar();
-            //checkGroup();
         }
 
         setOnPlayerControlCallback(((OnPlayerControlCallback) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")));
@@ -278,58 +275,140 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void setUpNavDrawerAndActionBar() {
-        //setContentViewControl();
-        //setContentViewNav();
-        navigationView = (NavigationView) findViewById(R.id.navigation_drawer);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        // Initializing Drawer Layout and ActionBarToggle
-        //drawerLayout.setVisibility(View.VISIBLE);
-        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-        myFirebaseRef.child("users").child(myFirebaseRef.getAuth().getUid()).addValueEventListener(new ValueEventListener() {
+        DrawerImageLoader.init(new AbstractDrawerImageLoader() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                String displayName = (String) dataSnapshot.child("display_name").getValue();
-                if (displayName != null && !displayName.equals("null")) {
-                    ((TextView) findViewById(R.id.navHeaderUsernameText)).setText(displayName);
-                    pref.edit().putString(MainActivity.PREF_USER_DISPLAY_NAME, displayName).apply();
-                } else {
-                    ((TextView) findViewById(R.id.navHeaderUsernameText)).setText((String) dataSnapshot.child("id").getValue());
-                }
-                ImageView profileImage = (ImageView) findViewById(R.id.navHeaderProfileImage);
-                profileImage.setImageResource(R.drawable.ic_account_white_48dp);
-                String imgUrl = (String) dataSnapshot.child("image_url").getValue();
-                if (imgUrl != null) {
-                    Picasso.with(getApplicationContext()).load(imgUrl).transform(new CircleTransform()).into(profileImage);
-                }
+            public void set(ImageView imageView, Uri uri, Drawable placeholder) {
+                Picasso.with(imageView.getContext()).load(uri).placeholder(placeholder).into(imageView);
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
+            public void cancel(ImageView imageView) {
+                Picasso.with(imageView.getContext()).cancelRequest(imageView);
             }
         });
-        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+        profile = new ProfileDrawerItem();
+        final AccountHeader headerResult = new AccountHeaderBuilder()
+                .withActivity(this)
+                .withHeaderBackground(R.drawable.nav_header_bg)
+                .addProfiles(profile)
+                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
+                    @Override
+                    public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
+                        return false;
+                    }
+                })
+                .withSelectionListEnabledForSingleProfile(false)
+                .build();
+        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withName("Home").withIcon(R.drawable.ic_home_grey600_36dp);
+        PrimaryDrawerItem item2 = new PrimaryDrawerItem().withName("Group").withIcon(R.drawable.ic_queue_music_grey_36dp);
+        PrimaryDrawerItem item3 = new PrimaryDrawerItem().withName("Account").withIcon(R.drawable.ic_account_grey600_36dp);
+        PrimaryDrawerItem item4 = new PrimaryDrawerItem().withName("Settings").withIcon(R.drawable.ic_settings_grey600_36dp);
+        SecondaryDrawerItem item5 = new SecondaryDrawerItem().withName("Submit Feature/Bug");
+        SecondaryDrawerItem item6 = new SecondaryDrawerItem().withName("About");
+        final Drawer result = new DrawerBuilder()
+                .withActivity(this)
+                .withToolbar(toolbar)
+                .withAccountHeader(headerResult)
+                .addDrawerItems(
+                        item1,
+                        item2,
+                        item3,
+                        item4,
+                        new DividerDrawerItem(),
+                        item5,
+                        item6
+                )
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        boolean returner = false;
+                        FragmentManager fragmentManager = getSupportFragmentManager();
+                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                // Code here will be triggered once the drawer closes as we dont want anything to happen so we leave this blank
-                super.onDrawerClosed(drawerView);
-            }
+                        switch (position) {
+                            case 1:
+                                fragmentTransaction
+                                        .replace(R.id.container, new HomeFragment(), "HOME_FRAG")
+                                        .commit();
+                                returner = true;
+                                break;
+                            case 2:
+                                GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+                                String gName = groupPref.getString(MainActivity.PREF_GROUP_NAME, null);
+                                if (groupFragment != null && groupFragment.isVisible()) {
+                                    Log.d("Nav", "You are already at the group!");
+                                } else if (gName != null) {
+                                    View cfocus = getCurrentFocus();
+                                    if (cfocus != null) {
+                                        InputMethodManager imm = (InputMethodManager) getSystemService(
+                                                Context.INPUT_METHOD_SERVICE);
+                                        imm.hideSoftInputFromWindow(cfocus.getWindowToken(), 0);
+                                    }
+                                    Fragment fragment = new GroupFragment();
+                                    Bundle bundle = new Bundle();
+                                    if (groupPref.getString(MainActivity.PREF_GROUP_LEADER_UID, "").equals(pref.getString(MainActivity.PREF_FIREBASE_UID, "."))) {
+                                        bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
+                                    } else {
+                                        bundle.putStringArray("extra_stuff", new String[]{"" + false, "" + false});
+                                    }
+                                    fragment.setArguments(bundle);
+                                    fragmentManager.beginTransaction()
+                                            .replace(R.id.container, fragment, "GROUP_FRAG")
+                                            .commit();
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "Please create or join a group first", Toast.LENGTH_SHORT).show();
+                                }
+                                returner = true;
+                                break;
+                            case 3:
+                                fragmentTransaction.replace(R.id.container, new AccountFragment(), "ACCOUNT_FRAG").addToBackStack(null).commit();
+                                returner = true;
+                                break;
+                            case 4:
+                                fragmentTransaction.replace(R.id.container, new SettingsFragment(), "SETTINGS_FRAG").addToBackStack(null).commit();
+                                returner = true;
+                                break;
+                            case 6:
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://docs.google.com/forms/d/1xta8IsctqjHZ-o5-NNOgUUIuX9WFjsqvWFFaWnLauLw/viewform?usp=send_form"));
+                                startActivity(browserIntent);
+                                break;
+                            case 7:
+                                fragmentTransaction.replace(R.id.container, new AboutFragment(), "ABPOUT_FRAG").addToBackStack(null).commit();
+                                returner = true;
+                                break;
+                        }
+                        return false;
+                    }
+                }).build();
+        myFirebaseRef.child("users").child(myFirebaseRef.getAuth().getUid())
+                .addValueEventListener(
+                        new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                String displayName = (String) dataSnapshot.child("display_name").getValue();
+                                if (displayName != null && !displayName.equals("null")) {
+                                    profile.withName(displayName);
+                                    pref.edit().putString(MainActivity.PREF_USER_DISPLAY_NAME, displayName).apply();
+                                } else {
+                                    profile.withName((String) dataSnapshot.child("id").getValue());
+                                }
+                                String email = (String) dataSnapshot.child("email").getValue();
+                                if (email != null && !email.equals("null")) {
+                                    profile.withEmail(email);
+                                }
+                                String imgUrl = (String) dataSnapshot.child("image_url").getValue();
+                                if (imgUrl != null) {
+                                    profile.withIcon(imgUrl);
+                                }
+                                headerResult.updateProfile(profile);
+                            }
 
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                // Code here will be triggered once the drawer open as we dont want anything to happen so we leave this blank
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
 
-                super.onDrawerOpened(drawerView);
-            }
-        };
-
-        //Setting the actionbarToggle to drawer layout
-        drawerLayout.setDrawerListener(actionBarDrawerToggle);
-
-        //calling sync state is necessay or else your hamburger icon wont show up
-        actionBarDrawerToggle.syncState();
+                            }
+                        }
+                );
     }
 
     public void checkGroup() {

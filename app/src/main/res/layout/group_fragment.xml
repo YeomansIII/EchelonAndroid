@@ -7,15 +7,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.design.widget.TabLayout
-            android:id="@+id/group_tab_tabs"
-            android:layout_width="match_parent"
-            android:layout_height="50dp" />
+        <!--<android.support.design.widget.TabLayout-->
+        <!--android:id="@+id/group_tab_tabs"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="50dp" />-->
 
-        <android.support.v4.view.ViewPager
-            android:id="@+id/group_tab_viewpager"
+        <!--<android.support.v4.view.ViewPager-->
+        <!--android:id="@+id/group_tab_viewpager"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_marginTop="50dp"/>-->
+        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/groupFragmentFrame"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="50dp"/>
+            android:layout_height="match_parent" />
     </android.support.design.widget.CoordinatorLayout>
 </RelativeLayout>
