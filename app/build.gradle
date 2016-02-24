@@ -46,10 +46,10 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file("/opt/android-keys/echelon_keystore.jks")
-            storePassword "echelon-store-VAHP4NfRjydnC9X9"
+            storeFile file("${System.env.ECHELON_KEYSTORE_PATH}")
+            storePassword "${System.env.ECHELON_KEYSTORE_PW}"
             keyAlias "echelon"
-            keyPassword "echelon-keypass-4CFuZzyuM5AW8cWy"
+            keyPassword "${System.env.ECHELON_ALIAS_PW}"
         }
     }
     buildTypes {
@@ -59,12 +59,12 @@ android {
             debuggable true
             //signingConfig signingConfigs.release
         }
-        debugmini {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            debuggable true
-            signingConfig signingConfigs.release
-        }
+//        debugmini {
+//            minifyEnabled true
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//            debuggable true
+//            signingConfig signingConfigs.release
+//        }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
