@@ -44,22 +44,17 @@ import java.util.Map;
  */
 public class QueueFragment extends Fragment implements View.OnClickListener {
 
-    private String playId;
-    private boolean leader;
     public boolean isDestroyed;
-    private boolean shouldExecuteOnResume;
     private SharedPreferences groupSettings;
     private SharedPreferences mainSettings;
 
     private View view;
     private ArrayList<RelativeLayout> songListArr;
     private MainActivity mainActivity;
-    private ControlBarFragment controlBar;
     Firebase queuegroupRef;
     LinkedList<SpotifySong> playqueue;
     private ValueEventListener trackListChangeListener;
     private ValueEventListener participantListener;
-    private ArrayList<Participant> participantsArray;
 
     private Boolean isFabOpen = false;
     private FloatingActionButton fab, fab1, fab2, fab3;
@@ -78,7 +73,6 @@ public class QueueFragment extends Fragment implements View.OnClickListener {
         mainActivity = (MainActivity) getActivity();
         playqueue = mainActivity.playQueue;
         isDestroyed = false;
-        shouldExecuteOnResume = false;
 
         queuegroupRef = mainActivity.myFirebaseRef.child("queuegroups/" + groupSettings.getString(MainActivity.PREF_GROUP_NAME, ""));
         trackListChangeListener = new ValueEventListener() {

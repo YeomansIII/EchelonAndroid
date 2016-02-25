@@ -8,6 +8,11 @@
         android:icon="@android:drawable/ic_menu_close_clear_cancel"
         android:onClick="onLeaveGroupClick"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_group_participants"
+        android:title="Participants"
+        android:icon="@drawable/ic_account_multiple_white_36dp"
+        app:showAsAction="always" />
     <!--<item-->
         <!--android:id="@+id/action_search"-->
         <!--android:title="@string/action_search"-->
