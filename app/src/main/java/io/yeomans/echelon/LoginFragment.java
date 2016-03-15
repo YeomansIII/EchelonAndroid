@@ -38,7 +38,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         view.findViewById(R.id.anonymousLoginButton).setOnClickListener(this);
 
         mainActivity.toolbar.setVisibility(View.GONE);
-        mainActivity.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        //mainActivity.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         creatingAccount = false;
 
         this.view = view;

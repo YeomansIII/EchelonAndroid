@@ -9,13 +9,12 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -23,7 +22,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
@@ -72,14 +70,14 @@ import retrofit.RestAdapter;
 
 
 public class MainActivity extends AppCompatActivity
-        implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener, PlayerNotificationCallback, ConnectionStateCallback {
+        implements View.OnClickListener, PlayerNotificationCallback, ConnectionStateCallback {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     public Toolbar toolbar;
     private NavigationView navigationView;
-    public DrawerLayout drawerLayout;
+    public CoordinatorLayout coordinatorLayout;
     public static final String MAIN_PREFS_NAME = "basic_pref";
     public static final String GROUP_PREFS_NAME = "group_pref";
 
@@ -240,7 +238,7 @@ public class MainActivity extends AppCompatActivity
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
 
 
         // Check device for Play Services APK. If check succeeds, proceed with
@@ -511,72 +509,72 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public boolean onNavigationItemSelected(MenuItem menuItem) {
-        boolean returner = false;
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        switch (menuItem.getItemId()) {
-            case R.id.drawer_home:
-                fragmentTransaction
-                        .replace(R.id.container, new HomeFragment(), "HOME_FRAG")
-                        .commit();
-                returner = true;
-                break;
-            case R.id.drawer_group:
-                GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-                String gName = groupPref.getString(MainActivity.PREF_GROUP_NAME, null);
-                if (groupFragment != null && groupFragment.isVisible()) {
-                    Log.d("Nav", "You are already at the group!");
-                } else if (gName != null) {
-                    View view = getCurrentFocus();
-                    if (view != null) {
-                        InputMethodManager imm = (InputMethodManager) getSystemService(
-                                Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                    }
-                    Fragment fragment = new GroupFragment();
-                    Bundle bundle = new Bundle();
-                    if (groupPref.getString(MainActivity.PREF_GROUP_LEADER_UID, "").equals(pref.getString(MainActivity.PREF_FIREBASE_UID, "."))) {
-                        bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
-                    } else {
-                        bundle.putStringArray("extra_stuff", new String[]{"" + false, "" + false});
-                    }
-                    fragment.setArguments(bundle);
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.container, fragment, "GROUP_FRAG")
-                            .commit();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Please create or join a group first", Toast.LENGTH_SHORT).show();
+//    @Override
+//    public boolean onNavigationItemSelected(MenuItem menuItem) {
+//        boolean returner = false;
+//        FragmentManager fragmentManager = getSupportFragmentManager();
+//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//        switch (menuItem.getItemId()) {
+//            case R.id.drawer_home:
+//                fragmentTransaction
+//                        .replace(R.id.container, new HomeFragment(), "HOME_FRAG")
+//                        .commit();
+//                returner = true;
+//                break;
+//            case R.id.drawer_group:
+//                GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+//                String gName = groupPref.getString(MainActivity.PREF_GROUP_NAME, null);
+//                if (groupFragment != null && groupFragment.isVisible()) {
+//                    Log.d("Nav", "You are already at the group!");
+//                } else if (gName != null) {
+//                    View view = getCurrentFocus();
+//                    if (view != null) {
+//                        InputMethodManager imm = (InputMethodManager) getSystemService(
+//                                Context.INPUT_METHOD_SERVICE);
+//                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+//                    }
+//                    Fragment fragment = new GroupFragment();
+//                    Bundle bundle = new Bundle();
+//                    if (groupPref.getString(MainActivity.PREF_GROUP_LEADER_UID, "").equals(pref.getString(MainActivity.PREF_FIREBASE_UID, "."))) {
+//                        bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
+//                    } else {
+//                        bundle.putStringArray("extra_stuff", new String[]{"" + false, "" + false});
+//                    }
+//                    fragment.setArguments(bundle);
 //                    fragmentManager.beginTransaction()
-//                            .add(R.id.container, new queueFragment(), "GROUP_FRAG")
+//                            .replace(R.id.container, fragment, "GROUP_FRAG")
 //                            .commit();
-                }
-                returner = true;
-                break;
-            case R.id.drawer_account:
-                fragmentTransaction.replace(R.id.container, new AccountFragment(), "ACCOUNT_FRAG").addToBackStack(null).commit();
-                returner = true;
-                break;
-            case R.id.drawer_settings:
-                fragmentTransaction.replace(R.id.container, new SettingsFragment(), "SETTINGS_FRAG").addToBackStack(null).commit();
-                returner = true;
-                break;
-            case R.id.drawer_bug:
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://docs.google.com/forms/d/1xta8IsctqjHZ-o5-NNOgUUIuX9WFjsqvWFFaWnLauLw/viewform?usp=send_form"));
-                startActivity(browserIntent);
-                break;
-            case R.id.drawer_about:
-                fragmentTransaction.replace(R.id.container, new AboutFragment(), "ABPOUT_FRAG").addToBackStack(null).commit();
-                returner = true;
-                break;
-        }
-        if (returner) {
-            drawerLayout.closeDrawer(navigationView);
-            return true;
-        }
-        return false;
-    }
+//                } else {
+//                    Toast.makeText(getApplicationContext(), "Please create or join a group first", Toast.LENGTH_SHORT).show();
+////                    fragmentManager.beginTransaction()
+////                            .add(R.id.container, new queueFragment(), "GROUP_FRAG")
+////                            .commit();
+//                }
+//                returner = true;
+//                break;
+//            case R.id.drawer_account:
+//                fragmentTransaction.replace(R.id.container, new AccountFragment(), "ACCOUNT_FRAG").addToBackStack(null).commit();
+//                returner = true;
+//                break;
+//            case R.id.drawer_settings:
+//                fragmentTransaction.replace(R.id.container, new SettingsFragment(), "SETTINGS_FRAG").addToBackStack(null).commit();
+//                returner = true;
+//                break;
+//            case R.id.drawer_bug:
+//                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://docs.google.com/forms/d/1xta8IsctqjHZ-o5-NNOgUUIuX9WFjsqvWFFaWnLauLw/viewform?usp=send_form"));
+//                startActivity(browserIntent);
+//                break;
+//            case R.id.drawer_about:
+//                fragmentTransaction.replace(R.id.container, new AboutFragment(), "ABPOUT_FRAG").addToBackStack(null).commit();
+//                returner = true;
+//                break;
+//        }
+//        if (returner) {
+//            drawerLayout.closeDrawer(navigationView);
+//            return true;
+//        }
+//        return false;
+//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {

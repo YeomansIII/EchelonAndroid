@@ -98,7 +98,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                 if (nowPlayingSS != null) {
                     playqueue.addFirst(nowPlayingSS);
                 }
-                refreshQueueList();
+                //refreshQueueList();
             }
 
             @Override
@@ -279,106 +279,106 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         isDestroyed = true;
     }
 
-    public void refreshQueueList() {
-        Log.d("RefreshQueue", "Refresh Queue List");
-        if (getActivity() != null) {
-            Log.d("Play", "PlayQueueList: " + playqueue);
-
-            if (playqueue.size() > 0) {
-                LinearLayout songList = (LinearLayout) view.findViewById(R.id.queueListLayout);
-                songList.removeAllViews();
-                songListArr = new ArrayList<>();
-                for (int i = 0; i < playqueue.size(); i++) {
-                    final SpotifySong curSong = playqueue.get(i);
-                    RelativeLayout rt;
-                    if (curSong.isNowPlaying()) {
-                        rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.now_playing_item, null);
-                    } else {
-                        rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.song_item, null);
-                    }
-                    ImageView albumArtImage = (ImageView) rt.findViewById(R.id.songAlbumArtImage);
-                    TextView songTitleText = (TextView) rt.findViewById(R.id.songTitleText);
-                    TextView songArtistText = (TextView) rt.findViewById(R.id.songArtistText);
-                    RelativeLayout voteControlsLayout = (RelativeLayout) rt.findViewById(R.id.songItemVoterLayout);
-
-                    if (!curSong.isNowPlaying()) {
-                        voteControlsLayout.setVisibility(View.VISIBLE);
-                        ImageButton voteUp = (ImageButton) rt.findViewById(R.id.voteSongUpButton);
-                        ImageButton voteDown = (ImageButton) rt.findViewById(R.id.voteSongDownButton);
-                        TextView ratingText = (TextView) rt.findViewById(R.id.songRatingText);
-
-                        String fUid = mainSettings.getString(MainActivity.PREF_FIREBASE_UID, null);
-                        Log.d("RefreshList", fUid);
-                        //Check if user has voted up or down
-                        Map<String, Object> votedUp = curSong.getVotedUp();
-                        if (votedUp == null || !votedUp.containsKey(fUid)) {
-                            voteUp.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    v.setOnClickListener(null);
-                                    FirebaseCommon.rankSong(curSong.getKey(), 0, mainActivity);
-                                    FirebaseCommon.rankSong(curSong.getKey(), 1, mainActivity);
-                                }
-                            });
-                        } else {
-                            voteUp.setImageResource(R.drawable.ic_chevron_up_gold_48dp);
-                            voteUp.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    v.setOnClickListener(null);
-                                    FirebaseCommon.rankSong(curSong.getKey(), 0, mainActivity);
-                                }
-                            });
-                        }
-                        Map<String, Object> votedDown = curSong.getVotedDown();
-                        if (votedDown == null || !votedDown.containsKey(fUid)) {
-                            voteDown.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    v.setOnClickListener(null);
-                                    FirebaseCommon.rankSong(curSong.getKey(), 0, mainActivity);
-                                    FirebaseCommon.rankSong(curSong.getKey(), -1, mainActivity);
-                                }
-                            });
-                        } else {
-                            voteDown.setImageResource(R.drawable.ic_chevron_down_gold_48dp);
-                            voteDown.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    v.setOnClickListener(null);
-                                    FirebaseCommon.rankSong(curSong.getKey(), 0, mainActivity);
-                                }
-                            });
-                        }
-                        int rating = 0;
-                        if (votedUp != null) {
-                            rating += votedUp.size();
-                        }
-                        if (votedDown != null) {
-                            rating -= votedDown.size();
-                        }
-                        ratingText.setText("" + rating);
-                    }
-
-                    songTitleText.setText(curSong.getTitle());
-                    songArtistText.setText(curSong.getArtist());
-                    Picasso.with(getContext()).load(curSong.getAlbumArtSmall()).into(albumArtImage);
-                    songListArr.add(rt);
-                    songList.addView(rt);
-                }
-            } else {
-                LinearLayout songList = (LinearLayout) view.findViewById(R.id.queueListLayout);
-                songList.removeAllViews();
-                TextView tv = new TextView(getActivity().getApplicationContext());
-                tv.setText("No songs in queue. Search for a song!");
-                tv.setTextColor(Color.BLACK);
-                tv.setGravity(Gravity.CENTER);
-                //tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                songList.addView(tv);
-            }
-            Log.d("Play", "PlayQueueList End: " + playqueue);
-        }
-    }
+//    public void refreshQueueList() {
+//        Log.d("RefreshQueue", "Refresh Queue List");
+//        if (getActivity() != null) {
+//            Log.d("Play", "PlayQueueList: " + playqueue);
+//
+//            if (playqueue.size() > 0) {
+//                LinearLayout songList = (LinearLayout) view.findViewById(R.id.queueListLayout);
+//                songList.removeAllViews();
+//                songListArr = new ArrayList<>();
+//                for (int i = 0; i < playqueue.size(); i++) {
+//                    final SpotifySong curSong = playqueue.get(i);
+//                    RelativeLayout rt;
+//                    if (curSong.isNowPlaying()) {
+//                        rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.now_playing_item, null);
+//                    } else {
+//                        rt = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.song_item, null);
+//                    }
+//                    ImageView albumArtImage = (ImageView) rt.findViewById(R.id.songAlbumArtImage);
+//                    TextView songTitleText = (TextView) rt.findViewById(R.id.songTitleText);
+//                    TextView songArtistText = (TextView) rt.findViewById(R.id.songArtistText);
+//                    RelativeLayout voteControlsLayout = (RelativeLayout) rt.findViewById(R.id.songItemVoterLayout);
+//
+//                    if (!curSong.isNowPlaying()) {
+//                        voteControlsLayout.setVisibility(View.VISIBLE);
+//                        ImageButton voteUp = (ImageButton) rt.findViewById(R.id.voteSongUpButton);
+//                        ImageButton voteDown = (ImageButton) rt.findViewById(R.id.voteSongDownButton);
+//                        TextView ratingText = (TextView) rt.findViewById(R.id.songRatingText);
+//
+//                        String fUid = mainSettings.getString(MainActivity.PREF_FIREBASE_UID, null);
+//                        Log.d("RefreshList", fUid);
+//                        //Check if user has voted up or down
+//                        Map<String, Object> votedUp = curSong.getVotedUp();
+//                        if (votedUp == null || !votedUp.containsKey(fUid)) {
+//                            voteUp.setOnClickListener(new View.OnClickListener() {
+//                                @Override
+//                                public void onClick(View v) {
+//                                    v.setOnClickListener(null);
+//                                    FirebaseCommon.rankSong(curSong.getKey(), 0, mainActivity);
+//                                    FirebaseCommon.rankSong(curSong.getKey(), 1, mainActivity);
+//                                }
+//                            });
+//                        } else {
+//                            voteUp.setImageResource(R.drawable.ic_chevron_up_gold_48dp);
+//                            voteUp.setOnClickListener(new View.OnClickListener() {
+//                                @Override
+//                                public void onClick(View v) {
+//                                    v.setOnClickListener(null);
+//                                    FirebaseCommon.rankSong(curSong.getKey(), 0, mainActivity);
+//                                }
+//                            });
+//                        }
+//                        Map<String, Object> votedDown = curSong.getVotedDown();
+//                        if (votedDown == null || !votedDown.containsKey(fUid)) {
+//                            voteDown.setOnClickListener(new View.OnClickListener() {
+//                                @Override
+//                                public void onClick(View v) {
+//                                    v.setOnClickListener(null);
+//                                    FirebaseCommon.rankSong(curSong.getKey(), 0, mainActivity);
+//                                    FirebaseCommon.rankSong(curSong.getKey(), -1, mainActivity);
+//                                }
+//                            });
+//                        } else {
+//                            voteDown.setImageResource(R.drawable.ic_chevron_down_gold_48dp);
+//                            voteDown.setOnClickListener(new View.OnClickListener() {
+//                                @Override
+//                                public void onClick(View v) {
+//                                    v.setOnClickListener(null);
+//                                    FirebaseCommon.rankSong(curSong.getKey(), 0, mainActivity);
+//                                }
+//                            });
+//                        }
+//                        int rating = 0;
+//                        if (votedUp != null) {
+//                            rating += votedUp.size();
+//                        }
+//                        if (votedDown != null) {
+//                            rating -= votedDown.size();
+//                        }
+//                        ratingText.setText("" + rating);
+//                    }
+//
+//                    songTitleText.setText(curSong.getTitle());
+//                    songArtistText.setText(curSong.getArtist());
+//                    Picasso.with(getContext()).load(curSong.getAlbumArtSmall()).into(albumArtImage);
+//                    songListArr.add(rt);
+//                    songList.addView(rt);
+//                }
+//            } else {
+//                LinearLayout songList = (LinearLayout) view.findViewById(R.id.queueListLayout);
+//                songList.removeAllViews();
+//                TextView tv = new TextView(getActivity().getApplicationContext());
+//                tv.setText("No songs in queue. Search for a song!");
+//                tv.setTextColor(Color.BLACK);
+//                tv.setGravity(Gravity.CENTER);
+//                //tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+//                songList.addView(tv);
+//            }
+//            Log.d("Play", "PlayQueueList End: " + playqueue);
+//        }
+//    }
 
     public void animateFAB() {
 

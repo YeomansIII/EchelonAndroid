@@ -1,31 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/queueGroupRootView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#7dffffff">
 
-    <ScrollView
-        android:id="@+id/scrollView"
+    <RelativeLayout
+        android:id="@+id/queueGroupNowPlaying"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_alignParentTop="true"
+        android:background="#444">
+
+        <RelativeLayout
+            android:id="@+id/queueGroupNowPlayingBottom"
+            android:layout_width="match_parent"
+            android:layout_height="85dp"
+            android:layout_alignParentBottom="true">
+
+            <ImageView
+                android:id="@+id/queueGroupNowPlayingBottomBG"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY"
+                app:srcCompat="@drawable/now_playing_triangle_vec"
+                tools:src="@drawable/now_playing_triangle_vec" />
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/queuedSongsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:id="@+id/queueListLayout"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_gravity="center_horizontal"
-                android:orientation="vertical"
-                android:paddingTop="0dp" />
-        </LinearLayout>
-    </ScrollView>
+        android:layout_below="@+id/queueGroupNowPlaying"
+        android:background="@color/white" />
 
     <FrameLayout
         android:id="@+id/queueOverlayFrame"
