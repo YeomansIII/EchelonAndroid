@@ -24,7 +24,7 @@
                 android:id="@+id/queueGroupNowPlayingBottomBG"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="fitXY"
+                android:scaleType="fitStart"
                 app:srcCompat="@drawable/now_playing_triangle_vec"
                 tools:src="@drawable/now_playing_triangle_vec" />
         </RelativeLayout>

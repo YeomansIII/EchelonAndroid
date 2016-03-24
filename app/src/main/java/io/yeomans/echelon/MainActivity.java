@@ -371,7 +371,7 @@ public class MainActivity extends AppCompatActivity
                                 startActivity(browserIntent);
                                 break;
                             case 7:
-                                fragmentTransaction.replace(R.id.container, new AboutFragment(), "ABPOUT_FRAG").addToBackStack(null).commit();
+                                fragmentTransaction.replace(R.id.container, new AboutFragment(), "ABOUT_FRAG").addToBackStack(null).commit();
                                 returner = true;
                                 break;
                         }
@@ -508,73 +508,6 @@ public class MainActivity extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
-
-//    @Override
-//    public boolean onNavigationItemSelected(MenuItem menuItem) {
-//        boolean returner = false;
-//        FragmentManager fragmentManager = getSupportFragmentManager();
-//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//        switch (menuItem.getItemId()) {
-//            case R.id.drawer_home:
-//                fragmentTransaction
-//                        .replace(R.id.container, new HomeFragment(), "HOME_FRAG")
-//                        .commit();
-//                returner = true;
-//                break;
-//            case R.id.drawer_group:
-//                GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-//                String gName = groupPref.getString(MainActivity.PREF_GROUP_NAME, null);
-//                if (groupFragment != null && groupFragment.isVisible()) {
-//                    Log.d("Nav", "You are already at the group!");
-//                } else if (gName != null) {
-//                    View view = getCurrentFocus();
-//                    if (view != null) {
-//                        InputMethodManager imm = (InputMethodManager) getSystemService(
-//                                Context.INPUT_METHOD_SERVICE);
-//                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-//                    }
-//                    Fragment fragment = new GroupFragment();
-//                    Bundle bundle = new Bundle();
-//                    if (groupPref.getString(MainActivity.PREF_GROUP_LEADER_UID, "").equals(pref.getString(MainActivity.PREF_FIREBASE_UID, "."))) {
-//                        bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
-//                    } else {
-//                        bundle.putStringArray("extra_stuff", new String[]{"" + false, "" + false});
-//                    }
-//                    fragment.setArguments(bundle);
-//                    fragmentManager.beginTransaction()
-//                            .replace(R.id.container, fragment, "GROUP_FRAG")
-//                            .commit();
-//                } else {
-//                    Toast.makeText(getApplicationContext(), "Please create or join a group first", Toast.LENGTH_SHORT).show();
-////                    fragmentManager.beginTransaction()
-////                            .add(R.id.container, new queueFragment(), "GROUP_FRAG")
-////                            .commit();
-//                }
-//                returner = true;
-//                break;
-//            case R.id.drawer_account:
-//                fragmentTransaction.replace(R.id.container, new AccountFragment(), "ACCOUNT_FRAG").addToBackStack(null).commit();
-//                returner = true;
-//                break;
-//            case R.id.drawer_settings:
-//                fragmentTransaction.replace(R.id.container, new SettingsFragment(), "SETTINGS_FRAG").addToBackStack(null).commit();
-//                returner = true;
-//                break;
-//            case R.id.drawer_bug:
-//                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://docs.google.com/forms/d/1xta8IsctqjHZ-o5-NNOgUUIuX9WFjsqvWFFaWnLauLw/viewform?usp=send_form"));
-//                startActivity(browserIntent);
-//                break;
-//            case R.id.drawer_about:
-//                fragmentTransaction.replace(R.id.container, new AboutFragment(), "ABPOUT_FRAG").addToBackStack(null).commit();
-//                returner = true;
-//                break;
-//        }
-//        if (returner) {
-//            drawerLayout.closeDrawer(navigationView);
-//            return true;
-//        }
-//        return false;
-//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -835,7 +768,7 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Gets the current registration ID for application on GCM service, if there is one.
-     * <p/>
+     * <p>
      * If result is empty, the app needs to register.
      *
      * @return registration ID, or empty string if there is no existing
@@ -861,7 +794,7 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Registers the application with GCM servers asynchronously.
-     * <p/>
+     * <p>
      * Stores the registration ID and the app versionCode in the application's
      * shared preferences.
      */
