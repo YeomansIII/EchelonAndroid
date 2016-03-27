@@ -88,6 +88,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.2.1'
     compile 'com.android.support:support-v4:23.2.1'
     compile 'com.android.support:design:23.2.1'
+    compile 'com.android.support:recyclerview-v7:23.2.1'
     compile 'com.android.support:support-vector-drawable:23.2.1'
     compile 'com.google.android.gms:play-services-gcm:8.4.0'
     compile 'com.firebase:firebase-client-android:2.3.1+'

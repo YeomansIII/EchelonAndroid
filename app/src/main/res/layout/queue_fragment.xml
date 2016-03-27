@@ -7,35 +7,12 @@
     android:layout_height="match_parent"
     android:background="#7dffffff">
 
-    <RelativeLayout
-        android:id="@+id/queueGroupNowPlaying"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_alignParentTop="true"
-        android:background="#444">
-
-        <RelativeLayout
-            android:id="@+id/queueGroupNowPlayingBottom"
-            android:layout_width="match_parent"
-            android:layout_height="85dp"
-            android:layout_alignParentBottom="true">
-
-            <ImageView
-                android:id="@+id/queueGroupNowPlayingBottomBG"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="fitStart"
-                app:srcCompat="@drawable/now_playing_triangle_vec"
-                tools:src="@drawable/now_playing_triangle_vec" />
-        </RelativeLayout>
-    </RelativeLayout>
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/queuedSongsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/queueGroupNowPlaying"
-        android:background="@color/white" />
+        android:background="@color/white"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <FrameLayout
         android:id="@+id/queueOverlayFrame"
