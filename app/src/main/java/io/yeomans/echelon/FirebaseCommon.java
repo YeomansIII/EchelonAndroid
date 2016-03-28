@@ -29,7 +29,7 @@ import java.util.Map;
  */
 public class FirebaseCommon {
 
-    static void addSong(String songId, MainActivity mainActivity) {
+    static void addSong(String songId, final MainActivity mainActivity) {
         final MainActivity main = mainActivity;
         new AsyncTask<String, Void, String>() {
             @Override
@@ -79,8 +79,7 @@ public class FirebaseCommon {
                         JSONObject album = spotifyTrackJson.getJSONObject("album");
                         JSONArray images = album.getJSONArray("images");
                         SharedPreferences groupPrefs = main.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
-                        Firebase ref = new Firebase(MainActivity.FIREBASE_URL);
-                        Firebase push = ref.child("queuegroups").child(groupPrefs.getString(MainActivity.PREF_GROUP_NAME, "")).child("tracks").push();
+                        Firebase push = mainActivity.myFirebaseRef.child("queuegroups").child(groupPrefs.getString(MainActivity.PREF_GROUP_NAME, "")).child("tracks").push();
                         Map<String, Object> toAdd = new HashMap<>();
                         toAdd.put("key", push.getKey());
                         toAdd.put("added", ServerValue.TIMESTAMP);
@@ -117,19 +116,19 @@ public class FirebaseCommon {
     static public void rankSong(String key, final int upDown, MainActivity mainActivity) {
         SharedPreferences prefs = mainActivity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
         SharedPreferences groupPrefs = mainActivity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
-        final String firePath = MainActivity.FIREBASE_URL
-                + "/queuegroups/"
+        Firebase ref = mainActivity.myFirebaseRef.child("/queuegroups/"
                 + groupPrefs.getString(MainActivity.PREF_GROUP_NAME, null) +
-                "/tracks/" + key;
-        Firebase ref = new Firebase(firePath);
+                "/tracks/" + key);
+
+        String uid = ref.getAuth().getUid();
 
         if (upDown > 0) {
-            ref.child("votedUp").child(prefs.getString(MainActivity.PREF_FIREBASE_UID, null)).setValue(true);
+            ref.child("votedUp").child(uid).setValue(true);
         } else if (upDown < 0) {
-            ref.child("votedDown").child(prefs.getString(MainActivity.PREF_FIREBASE_UID, null)).setValue(true);
+            ref.child("votedDown").child(uid).setValue(true);
         } else {
-            ref.child("votedUp").child(prefs.getString(MainActivity.PREF_FIREBASE_UID, null)).removeValue();
-            ref.child("votedDown").child(prefs.getString(MainActivity.PREF_FIREBASE_UID, null)).removeValue();
+            ref.child("votedUp").child(uid).removeValue();
+            ref.child("votedDown").child(uid).removeValue();
         }
     }
 }

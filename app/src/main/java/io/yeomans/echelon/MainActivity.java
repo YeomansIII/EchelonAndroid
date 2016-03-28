@@ -156,7 +156,8 @@ public class MainActivity extends AppCompatActivity
     //FIREBASE
     Firebase myFirebaseRef;
     public static final String PREF_FIREBASE_UID = "firebase_uid";
-    public static final String FIREBASE_URL = "https://flickering-heat-6442.firebaseio.com/";
+    public static final String PROD_FIREBASE_URL = "https://flickering-heat-6442.firebaseio.com/";
+    public static final String DEV_FIREBASE_URL = "https://echelon-dev.firebaseio.com/";
     public static final String ECHELONADO_URL = "https://api.echelonapp.io:8081/";
 
     //COMMON
@@ -174,7 +175,13 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
-        myFirebaseRef = new Firebase(FIREBASE_URL);
+        if (BuildConfig.DEBUG_MODE) {
+            Log.i("MainActivity","Debug Mode");
+            myFirebaseRef = new Firebase(DEV_FIREBASE_URL);
+        } else {
+            Log.i("MainActivity","Production Mode");
+            myFirebaseRef = new Firebase(PROD_FIREBASE_URL);
+        }
         api = new SpotifyApi();
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint(SpotifyApi.SPOTIFY_WEB_API_ENDPOINT)
@@ -769,7 +776,7 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Gets the current registration ID for application on GCM service, if there is one.
-     * <p>
+     * <p/>
      * If result is empty, the app needs to register.
      *
      * @return registration ID, or empty string if there is no existing
@@ -795,7 +802,7 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Registers the application with GCM servers asynchronously.
-     * <p>
+     * <p/>
      * Stores the registration ID and the app versionCode in the application's
      * shared preferences.
      */

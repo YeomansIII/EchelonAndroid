@@ -37,6 +37,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Created by jason on 8/10/15.
  */
@@ -71,10 +74,16 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     private ValueEventListener participantListener;
 
     private Boolean isFabOpen = false;
-    private FloatingActionButton fab, fab1, fab2, fab3;
+    @Bind(R.id.groupAddSongFab) protected FloatingActionButton fab;
+    @Bind(R.id.groupAddSongFab1) protected FloatingActionButton fab1;
+    @Bind(R.id.groupAddSongFab2) protected FloatingActionButton fab2;
+    @Bind(R.id.groupAddSongFab3) protected FloatingActionButton fab3;
     private Animation fab_open, fab_close, rotate_forward, rotate_backward, tip_fade_in, tip_fade_out;
-    private FrameLayout queueBrowseTextFrame, queueSearchTextFrame, queueYourMusicTextFrame, queueOverlayFrame;
-    private TextView songCountText;
+    @Bind(R.id.queueBrowseTextFrame) protected FrameLayout queueBrowseTextFrame;
+    @Bind(R.id.queueSearchTextFrame) protected FrameLayout queueSearchTextFrame;
+    @Bind(R.id.queueYourMusicTextFrame) protected FrameLayout queueYourMusicTextFrame;
+    @Bind(R.id.queueOverlayFrame) protected FrameLayout queueOverlayFrame;
+    @Bind(R.id.queueGroupNowPlayingSongCount) protected TextView songCountText;
     private Drawer particDrawerResult;
     private boolean particDrawerOpen;
 
@@ -156,6 +165,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.queue_fragment,
                 container, false);
+        ButterKnife.bind(this, view);
 
         mainActivity.toolbar.setBackgroundColor(getResources().getColor(R.color.primaryColor));
         mainActivity.getSupportActionBar().setTitle(groupSettings.getString(MainActivity.PREF_GROUP_NAME, "error"));
@@ -204,17 +214,8 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                 Log.d("Group", "Not leader");
             }
         }
-        ((TextView) view.findViewById(R.id.groupIdText)).setText(groupSettings.getString(MainActivity.PREF_GROUP_OWNER_USERNAME, "error"));
+        //((TextView) view.findViewById(R.id.groupIdText)).setText(groupSettings.getString(MainActivity.PREF_GROUP_OWNER_USERNAME, "error"));
 
-        songCountText = (TextView) view.findViewById(R.id.queueGroupNowPlayingSongCount);
-        fab = (FloatingActionButton) view.findViewById(R.id.groupAddSongFab);
-        fab1 = (FloatingActionButton) view.findViewById(R.id.groupAddSongFab1);
-        fab2 = (FloatingActionButton) view.findViewById(R.id.groupAddSongFab2);
-        fab3 = (FloatingActionButton) view.findViewById(R.id.groupAddSongFab3);
-        queueBrowseTextFrame = (FrameLayout) view.findViewById(R.id.queueBrowseTextFrame);
-        queueSearchTextFrame = (FrameLayout) view.findViewById(R.id.queueSearchTextFrame);
-        queueYourMusicTextFrame = (FrameLayout) view.findViewById(R.id.queueYourMusicTextFrame);
-        queueOverlayFrame = (FrameLayout) view.findViewById(R.id.queueOverlayFrame);
         fab_open = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.fab_open);
         fab_close = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.fab_close);
         rotate_forward = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.rotate_forward);

@@ -33,6 +33,7 @@ android {
     }
     buildTypes {
         debug {
+            buildConfigField "boolean", "DEBUG_MODE", "true"
             minifyEnabled false
             //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             debuggable true
@@ -45,6 +46,7 @@ android {
 //            signingConfig signingConfigs.release
 //        }
         release {
+            buildConfigField "boolean", "DEBUG_MODE", "false"
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
@@ -90,6 +92,7 @@ dependencies {
     compile 'com.android.support:design:23.2.1'
     compile 'com.android.support:recyclerview-v7:23.2.1'
     compile 'com.android.support:support-vector-drawable:23.2.1'
+    compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.google.android.gms:play-services-gcm:8.4.0'
     compile 'com.firebase:firebase-client-android:2.3.1+'
     compile 'com.squareup.okhttp3:okhttp:3.1.1'

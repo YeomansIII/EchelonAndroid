@@ -222,39 +222,44 @@ public class BackendRequest {
                                     Log.d("GetFirebaseSpotifyToken", "DATA CHANGED");
                                     SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
                                     String uid = pref.getString(MainActivity.PREF_FIREBASE_UID, null);
-                                    Firebase user = new Firebase(MainActivity.FIREBASE_URL + "users/" + uid);
+                                    Firebase user = activity.myFirebaseRef.child("users/" + uid);
+                                    Firebase participant = activity.myFirebaseRef.child("participants/" + uid);
                                     if (dataSnapshot.getValue() == null) {
                                         Log.d("GetFirebaseSpotifyToken", "New User, creating in DB");
                                         Map<String, Object> userInfo = new HashMap<>();
-                                        userInfo.put("id", pref.getString(MainActivity.PREF_SPOTIFY_UID, null));
-                                        userInfo.put("display_name", pref.getString(MainActivity.PREF_SPOTIFY_DISPLAY_NAME, null));
                                         userInfo.put("email", pref.getString(MainActivity.PREF_SPOTIFY_EMAIL, null));
-                                        userInfo.put("country", pref.getString(MainActivity.PREF_SPOTIFY_COUNTRY, null));
-                                        userInfo.put("ext_url", pref.getString(MainActivity.PREF_SPOTIFY_EXT_URL, null));
-                                        userInfo.put("image_url", pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, null));
                                         userInfo.put("product", pref.getString(MainActivity.PREF_SPOTIFY_PRODUCT, null));
                                         userInfo.put("type", pref.getString(MainActivity.PREF_SPOTIFY_TYPE, null));
-                                        userInfo.put("uri", pref.getString(MainActivity.PREF_SPOTIFY_URI, null));
+
+                                        Map<String, Object> participantInfo = new HashMap<>();
+                                        participantInfo.put("id", pref.getString(MainActivity.PREF_SPOTIFY_UID, null));
+                                        participantInfo.put("display_name", pref.getString(MainActivity.PREF_SPOTIFY_DISPLAY_NAME, null));
+                                        participantInfo.put("country", pref.getString(MainActivity.PREF_SPOTIFY_COUNTRY, null));
+                                        participantInfo.put("ext_url", pref.getString(MainActivity.PREF_SPOTIFY_EXT_URL, null));
+                                        participantInfo.put("image_url", pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, null));
+                                        participantInfo.put("uri", pref.getString(MainActivity.PREF_SPOTIFY_URI, null));
+
 
                                         if (uid != null) {
                                             user.setValue(userInfo);
+                                            participant.setValue(participantInfo);
                                         }
                                     } else {
                                         SharedPreferences.Editor prefEdit = pref.edit();
                                         if (dataSnapshot.hasChild("display_name")) {
                                             prefEdit.putString(MainActivity.PREF_USER_DISPLAY_NAME, (String) dataSnapshot.child("display_name").getValue());
                                         }
-                                        user.child("ext_url").setValue(pref.getString(MainActivity.PREF_SPOTIFY_EXT_URL, null));
+                                        participant.child("ext_url").setValue(pref.getString(MainActivity.PREF_SPOTIFY_EXT_URL, null));
                                         prefEdit.putString(MainActivity.PREF_USER_EXT_URL, pref.getString(MainActivity.PREF_SPOTIFY_EXT_URL, null));
 
-                                        user.child("image_url").setValue(pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, null));
+                                        participant.child("image_url").setValue(pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, null));
                                         prefEdit.putString(MainActivity.PREF_USER_IMAGE_URL, pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, null));
 
                                         prefEdit.apply();
                                         activity.checkGroup();
                                     }
-                                    user.child("online").onDisconnect().setValue(false);
-                                    user.child("online").setValue(true);
+                                    participant.child("online").onDisconnect().setValue(false);
+                                    participant.child("online").setValue(true);
                                 }
 
                                 @Override
