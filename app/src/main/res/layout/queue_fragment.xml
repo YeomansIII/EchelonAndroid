@@ -7,12 +7,80 @@
     android:layout_height="match_parent"
     android:background="#7dffffff">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/queuedSongsRecyclerView"
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        android:fillViewport="true"
+        android:fitsSystemWindows="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:id="@+id/queueGroupNowPlaying"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_alignParentTop="true"
+                android:background="#444">
+
+                <ImageView
+                    android:id="@+id/queueGroupNowPlayingAlbumCover"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY" />
+
+                <RelativeLayout
+                    android:id="@+id/queueGroupNowPlayingBottom"
+                    android:layout_width="match_parent"
+                    android:layout_height="85dp"
+                    android:layout_alignParentBottom="true">
+
+                    <ImageView
+                        android:id="@+id/queueGroupNowPlayingBottomBG"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="fitXY"
+                        app:srcCompat="@drawable/now_playing_triangle_vec"
+                        tools:src="@drawable/now_playing_triangle_vec" />
+
+                    <TextView
+                        android:id="@+id/queueGroupNowPlayingSongCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentLeft="true"
+                        android:layout_marginBottom="20dp"
+                        android:layout_marginLeft="10dp"
+                        android:text="##"
+                        android:textColor="@color/full_red"
+                        android:textSize="25sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBaseline="@id/queueGroupNowPlayingSongCount"
+                        android:layout_marginLeft="4dp"
+                        android:layout_toEndOf="@id/queueGroupNowPlayingSongCount"
+                        android:layout_toRightOf="@id/queueGroupNowPlayingSongCount"
+                        android:text="Songs"
+                        android:textColor="@color/full_red"
+                        android:textSize="20sp" />
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/queuedSongsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
 
     <FrameLayout
         android:id="@+id/queueOverlayFrame"

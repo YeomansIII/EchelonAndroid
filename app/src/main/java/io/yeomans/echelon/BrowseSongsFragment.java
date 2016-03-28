@@ -185,7 +185,7 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
 
             @Override
             public void failure(RetrofitError error) {
-
+                Log.wtf("WhatList", error.toString() + "   " + error.getMessage());
             }
         });
     }

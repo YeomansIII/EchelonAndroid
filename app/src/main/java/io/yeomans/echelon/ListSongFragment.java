@@ -138,7 +138,7 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
 
                 @Override
                 public void failure(RetrofitError error) {
-                    Log.wtf("WhatList", error.toString());
+                    Log.wtf("WhatList", error.toString() + "   " + error.getMessage());
                 }
             });
         } else if (what == PLAYLIST) {
@@ -156,7 +156,7 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
 
                 @Override
                 public void failure(RetrofitError error) {
-                    Log.wtf("WhatList", error.toString());
+                    Log.wtf("WhatList", error.toString() + "   " + error.getMessage());
                 }
             });
         }

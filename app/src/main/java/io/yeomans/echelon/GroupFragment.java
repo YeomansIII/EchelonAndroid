@@ -1,14 +1,14 @@
 package io.yeomans.echelon;
 
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -20,14 +20,9 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -35,12 +30,12 @@ import com.firebase.client.ValueEventListener;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
-import com.squareup.picasso.Picasso;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.List;
 
 /**
  * Created by jason on 8/10/15.
@@ -50,6 +45,20 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     private ControlBarFragment controlBar;
     private boolean leader;
 
+    private static final String TAG = "BrowseSongsFragment";
+    private static final String KEY_LAYOUT_MANAGER = "layoutManager";
+    private static final int SPAN_COUNT = 2;
+
+    private enum LayoutManagerType {
+        GRID_LAYOUT_MANAGER,
+        LINEAR_LAYOUT_MANAGER
+    }
+
+    protected LayoutManagerType mCurrentLayoutManagerType;
+    RecyclerView mRecyclerView;
+    SonglistRecyclerAdapter songListRA;
+    RecyclerView.LayoutManager mLayoutManager;
+
     public boolean isDestroyed;
     private SharedPreferences groupSettings;
     private SharedPreferences mainSettings;
@@ -57,7 +66,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     private View view;
     private ArrayList<RelativeLayout> songListArr;
     Firebase queuegroupRef;
-    LinkedList<SpotifySong> playqueue;
+    List<SpotifySong> playqueue;
     private ValueEventListener trackListChangeListener;
     private ValueEventListener participantListener;
 
@@ -65,6 +74,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     private FloatingActionButton fab, fab1, fab2, fab3;
     private Animation fab_open, fab_close, rotate_forward, rotate_backward, tip_fade_in, tip_fade_out;
     private FrameLayout queueBrowseTextFrame, queueSearchTextFrame, queueYourMusicTextFrame, queueOverlayFrame;
+    private TextView songCountText;
     private Drawer particDrawerResult;
     private boolean particDrawerOpen;
 
@@ -77,6 +87,8 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         mainActivity = (MainActivity) getActivity();
         playqueue = mainActivity.playQueue;
         isDestroyed = false;
+
+        songListRA = new SonglistRecyclerAdapter(playqueue);
 
         queuegroupRef = mainActivity.myFirebaseRef.child("queuegroups/" + groupSettings.getString(MainActivity.PREF_GROUP_NAME, ""));
         trackListChangeListener = new ValueEventListener() {
@@ -95,9 +107,15 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                     //Log.d("MyFirebase", "Song added: " + playqueue.getLast().getAdded());
                 }
                 Collections.sort(playqueue);
-                if (nowPlayingSS != null) {
-                    playqueue.addFirst(nowPlayingSS);
+                if (songListRA != null) {
+                    songListRA.notifyDataSetChanged();
                 }
+                if (songCountText != null) {
+                    songCountText.setText("" + playqueue.size());
+                }
+//                if (nowPlayingSS != null) {
+//                    playqueue.addFirst(nowPlayingSS);
+//                }
                 //refreshQueueList();
             }
 
@@ -139,15 +157,34 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.queue_fragment,
                 container, false);
 
-        groupSettings = getActivity().getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
-
         mainActivity.toolbar.setBackgroundColor(getResources().getColor(R.color.primaryColor));
         mainActivity.getSupportActionBar().setTitle(groupSettings.getString(MainActivity.PREF_GROUP_NAME, "error"));
 
         setHasOptionsMenu(true);
 
-        mainActivity = (MainActivity) getActivity();
         isDestroyed = false;
+
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.queuedSongsRecyclerView);
+        mRecyclerView.setNestedScrollingEnabled(false);
+        mLayoutManager = new NestedRVLinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+
+        mCurrentLayoutManagerType = LayoutManagerType.LINEAR_LAYOUT_MANAGER;
+
+        if (savedInstanceState != null) {
+            // Restore saved layout manager type.
+            mCurrentLayoutManagerType = (LayoutManagerType) savedInstanceState
+                    .getSerializable(KEY_LAYOUT_MANAGER);
+        }
+        setRecyclerViewLayoutManager(mCurrentLayoutManagerType);
+
+//        songListRA.setOnSongClickListener(new SonglistRecyclerAdapter.OnSongClickListener() {
+//            @Override
+//            public void onSongClick(SonglistRecyclerAdapter.ViewHolder viewHolder) {
+//                viewHolder.itemView.setBackgroundColor(Color.GRAY);
+//                FirebaseCommon.addSong(viewHolder.trackId, mainActivity);
+//            }
+//        });
+        mRecyclerView.setAdapter(songListRA);
 
         Bundle startingIntentBundle = this.getArguments();
         if (startingIntentBundle != null) {
@@ -169,6 +206,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         }
         ((TextView) view.findViewById(R.id.groupIdText)).setText(groupSettings.getString(MainActivity.PREF_GROUP_OWNER_USERNAME, "error"));
 
+        songCountText = (TextView) view.findViewById(R.id.queueGroupNowPlayingSongCount);
         fab = (FloatingActionButton) view.findViewById(R.id.groupAddSongFab);
         fab1 = (FloatingActionButton) view.findViewById(R.id.groupAddSongFab1);
         fab2 = (FloatingActionButton) view.findViewById(R.id.groupAddSongFab2);
@@ -459,5 +497,32 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                 break;
 
         }
+    }
+
+    public void setRecyclerViewLayoutManager(LayoutManagerType layoutManagerType) {
+        int scrollPosition = 0;
+
+        // If a layout manager has already been set, get current scroll position.
+        if (mRecyclerView.getLayoutManager() != null) {
+            scrollPosition = ((LinearLayoutManager) mRecyclerView.getLayoutManager())
+                    .findFirstCompletelyVisibleItemPosition();
+        }
+
+        switch (layoutManagerType) {
+            case GRID_LAYOUT_MANAGER:
+                mLayoutManager = new GridLayoutManager(getActivity(), SPAN_COUNT);
+                mCurrentLayoutManagerType = LayoutManagerType.GRID_LAYOUT_MANAGER;
+                break;
+            case LINEAR_LAYOUT_MANAGER:
+                mLayoutManager = new LinearLayoutManager(getActivity());
+                mCurrentLayoutManagerType = LayoutManagerType.LINEAR_LAYOUT_MANAGER;
+                break;
+            default:
+                mLayoutManager = new LinearLayoutManager(getActivity());
+                mCurrentLayoutManagerType = LayoutManagerType.LINEAR_LAYOUT_MANAGER;
+        }
+
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.scrollToPosition(scrollPosition);
     }
 }

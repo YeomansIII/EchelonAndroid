@@ -22,9 +22,11 @@ import kaaes.spotify.webapi.android.models.Track;
 public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecyclerAdapter.ViewHolder> {
 
     List<Track> mTracks;
+    List<SpotifySong> sTracks;
     Context context;
     OnSongClickListener mOnSongClickListener;
     char what;
+    boolean isSpotifySong = false;
 
     public SonglistRecyclerAdapter() {
         mTracks = new ArrayList<>();
@@ -33,6 +35,11 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
     public SonglistRecyclerAdapter(List<Track> tracks, char what) {
         mTracks = tracks;
         this.what = what;
+    }
+
+    public SonglistRecyclerAdapter(List<SpotifySong> tracks) {
+        sTracks = tracks;
+        isSpotifySong = true;
     }
 
     @Override
@@ -50,7 +57,12 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
 
     @Override
     public void onBindViewHolder(SonglistRecyclerAdapter.ViewHolder holder, int position) {
-        Track curTrack = mTracks.get(position);
+        Track curTrack;
+        if (isSpotifySong) {
+            curTrack = sTracks.get(position);
+        } else {
+            curTrack = mTracks.get(position);
+        }
         String imgUrl;
         try {
             imgUrl = curTrack.album.images.get(2).url;
@@ -109,6 +121,9 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
 
     @Override
     public int getItemCount() {
+        if (isSpotifySong) {
+            return sTracks.size();
+        }
         return mTracks.size();
     }
 

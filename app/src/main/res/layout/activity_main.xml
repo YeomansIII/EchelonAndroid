@@ -17,52 +17,12 @@
         <android.support.design.widget.AppBarLayout
             android:id="@+id/appbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true">
 
-            <android.support.design.widget.CollapsingToolbarLayout
-                android:id="@+id/collapsing_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:fitsSystemWindows="true"
-                app:contentScrim="?attr/colorPrimary"
-                app:expandedTitleMarginEnd="64dp"
-                app:expandedTitleMarginStart="48dp"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed">
-
-                <RelativeLayout
-                    android:id="@+id/collapseGroupNowPlaying"
-                    android:layout_width="match_parent"
-                    android:layout_height="300dp"
-                    android:layout_alignParentTop="true"
-                    android:background="#444">
-
-                    <RelativeLayout
-                        android:id="@+id/queueGroupNowPlayingBottom"
-                        android:layout_width="match_parent"
-                        android:layout_height="85dp"
-                        android:layout_alignParentBottom="true">
-
-                        <ImageView
-                            android:id="@+id/collapseGroupNowPlayingBottomBG"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="fitStart"
-                            app:srcCompat="@drawable/now_playing_triangle_vec"
-                            tools:src="@drawable/now_playing_triangle_vec" />
-                    </RelativeLayout>
-                </RelativeLayout>
-
-                <android.support.v7.widget.Toolbar
-                    android:id="@+id/toolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
-                    android:title="Collapsing Toolbar"
-                    app:layout_collapseMode="pin" />
-                <!--<include-->
-                <!--android:id="@+id/toolbar"-->
-                <!--layout="@layout/toolbar" />-->
-            </android.support.design.widget.CollapsingToolbarLayout>
+            <include
+                android:id="@+id/toolbar"
+                layout="@layout/toolbar" />
         </android.support.design.widget.AppBarLayout>
 
         <FrameLayout
@@ -85,16 +45,5 @@
             tools:layout="@layout/control_bar_fragment" />
 
     </RelativeLayout>
-
-    <!--<android.support.design.widget.NavigationView-->
-    <!--android:id="@+id/navigation_drawer"-->
-    <!--android:name="io.yeomans.groupqueue.NavigationDrawerFragment"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:layout_gravity="start"-->
-    <!--app:headerLayout="@layout/nav_header"-->
-    <!--app:itemIconTint="#8b8b8b"-->
-    <!--app:itemTextColor="#666666"-->
-    <!--app:menu="@menu/drawer_menu" />-->
 
 </android.support.design.widget.CoordinatorLayout>

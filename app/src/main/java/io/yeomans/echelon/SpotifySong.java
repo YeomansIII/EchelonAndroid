@@ -1,6 +1,7 @@
 package io.yeomans.echelon;
 
 import android.os.AsyncTask;
+import android.os.Parcel;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -10,12 +11,21 @@ import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+
+import kaaes.spotify.webapi.android.models.AlbumSimple;
+import kaaes.spotify.webapi.android.models.ArtistSimple;
+import kaaes.spotify.webapi.android.models.Image;
+import kaaes.spotify.webapi.android.models.LinkedTrack;
+import kaaes.spotify.webapi.android.models.Track;
 
 /**
  * Created by jason on 6/26/15.
  */
-public class SpotifySong implements Comparable<SpotifySong> {
+public class SpotifySong extends Track implements Comparable<SpotifySong> {
 
     private String key;
     private Long added;
@@ -25,7 +35,6 @@ public class SpotifySong implements Comparable<SpotifySong> {
     private String uri;
     private String title;
     private String artist;
-    private String album;
     private int lengthMs;
     private String albumArtSmall;
     private String albumArtMedium;
@@ -36,39 +45,17 @@ public class SpotifySong implements Comparable<SpotifySong> {
     private Map<String, Object> votedDown;
 
     public SpotifySong() {
-
+        album = new AlbumSimple();
+        List<Image> temp = new ArrayList<>();
+        temp.add(new Image());
+        temp.add(new Image());
+        temp.add(new Image());
+        album.images = temp;
+        artists = new ArrayList<>();
     }
 
-    public SpotifySong(String key, Long added, String songId, String uri, String title, String artist, String album, int lengthMs, String albumArtSmall, String albumArtMedium, String albumArtLarge) {
-        this.key = key;
-        this.added = added;
-        this.backStack = false;
-        this.songId = songId;
-        this.uri = uri;
-        this.title = title;
-        this.artist = artist;
-        this.album = album;
-        this.lengthMs = lengthMs;
-        this.albumArtSmall = albumArtSmall;
-        this.albumArtMedium = albumArtMedium;
-        this.albumArtLarge = albumArtLarge;
-        this.rating = 0;
-        this.nowPlaying = false;
-    }
-
-    public SpotifySong(boolean backStack, String songId, String uri, String title, String artist, String album, int lengthMs, String albumArtSmall, String albumArtMedium, String albumArtLarge, int rating, boolean nowPlaying) {
-        this.backStack = backStack;
-        this.songId = songId;
-        this.uri = uri;
-        this.title = title;
-        this.artist = artist;
-        this.album = album;
-        this.lengthMs = lengthMs;
-        this.albumArtSmall = albumArtSmall;
-        this.albumArtMedium = albumArtMedium;
-        this.albumArtLarge = albumArtLarge;
-        this.rating = rating;
-        this.nowPlaying = nowPlaying;
+    protected SpotifySong(Parcel in) {
+        super(in);
     }
 
     public String getKey() {
@@ -96,11 +83,11 @@ public class SpotifySong implements Comparable<SpotifySong> {
     }
 
     public String getSongId() {
-        return songId;
+        return id;
     }
 
     public void setSongId(String songId) {
-        this.songId = songId;
+        this.id = songId;
     }
 
     public String getUri() {
@@ -112,11 +99,11 @@ public class SpotifySong implements Comparable<SpotifySong> {
     }
 
     public String getTitle() {
-        return title;
+        return name;
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        this.name = title;
     }
 
     public String getArtist() {
@@ -124,47 +111,55 @@ public class SpotifySong implements Comparable<SpotifySong> {
     }
 
     public void setArtist(String artist) {
-        this.artist = artist;
+        ArtistSimple temp = new ArtistSimple();
+        temp.name = artist;
+        this.artists.add(temp);
     }
 
     public String getAlbum() {
-        return album;
+        return album.name;
     }
 
     public void setAlbum(String album) {
-        this.album = album;
+        this.album.name = album;
     }
 
-    public int getLengthMs() {
-        return lengthMs;
+    public long getLengthMs() {
+        return duration_ms;
     }
 
     public void setLengthMs(int lengthMs) {
-        this.lengthMs = lengthMs;
+        this.duration_ms = lengthMs;
     }
 
-    public String getAlbumArtSmall() {
-        return albumArtSmall;
+    public Image getAlbumArtSmall() {
+        return album.images.get(2);
     }
 
     public void setAlbumArtSmall(String albumArtSmall) {
-        this.albumArtSmall = albumArtSmall;
+        Image temp = new Image();
+        temp.url = albumArtSmall;
+        this.album.images.set(2, temp);
     }
 
-    public String getAlbumArtMedium() {
-        return albumArtMedium;
+    public Image getAlbumArtMedium() {
+        return album.images.get(1);
     }
 
     public void setAlbumArtMedium(String albumArtMedium) {
-        this.albumArtMedium = albumArtMedium;
+        Image temp = new Image();
+        temp.url = albumArtMedium;
+        this.album.images.set(1, temp);
     }
 
-    public String getAlbumArtLarge() {
-        return albumArtLarge;
+    public Image getAlbumArtLarge() {
+        return album.images.get(0);
     }
 
     public void setAlbumArtLarge(String albumArtLarge) {
-        this.albumArtLarge = albumArtLarge;
+        Image temp = new Image();
+        temp.url = albumArtLarge;
+        this.album.images.set(0, temp);
     }
 
     public boolean isBackStack() {
@@ -176,11 +171,11 @@ public class SpotifySong implements Comparable<SpotifySong> {
     }
 
     public int getRating() {
-        return rating;
+        return popularity;
     }
 
     public void setRating(int rating) {
-        this.rating = rating;
+        this.popularity = rating;
     }
 
     public boolean isNowPlaying() {
@@ -207,6 +202,118 @@ public class SpotifySong implements Comparable<SpotifySong> {
         this.votedDown = votedDown;
     }
 
+    public List<ArtistSimple> getArtists() {
+        return artists;
+    }
+
+    public void setArtists(List<ArtistSimple> artists) {
+        this.artists = artists;
+    }
+
+    public List<String> getAvailable_markets() {
+        return available_markets;
+    }
+
+    public void setAvailable_markets(List<String> available_markets) {
+        this.available_markets = available_markets;
+    }
+
+    public Boolean getIs_playable() {
+        return is_playable;
+    }
+
+    public void setIs_playable(Boolean is_playable) {
+        this.is_playable = is_playable;
+    }
+
+    public LinkedTrack getLinked_from() {
+        return linked_from;
+    }
+
+    public void setLinked_from(LinkedTrack linked_from) {
+        this.linked_from = linked_from;
+    }
+
+    public int getDisc_number() {
+        return disc_number;
+    }
+
+    public void setDisc_number(int disc_number) {
+        this.disc_number = disc_number;
+    }
+
+    public long getDuration_ms() {
+        return duration_ms;
+    }
+
+    public void setDuration_ms(long duration_ms) {
+        this.duration_ms = duration_ms;
+    }
+
+    public Boolean getExplicit() {
+        return explicit;
+    }
+
+    public void setExplicit(Boolean explicit) {
+        this.explicit = explicit;
+    }
+
+    public Map<String, String> getExternal_urls() {
+        return external_urls;
+    }
+
+    public void setExternal_urls(Map<String, String> external_urls) {
+        this.external_urls = external_urls;
+    }
+
+    public String getHref() {
+        return href;
+    }
+
+    public void setHref(String href) {
+        this.href = href;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPreview_url() {
+        return preview_url;
+    }
+
+    public void setPreview_url(String preview_url) {
+        this.preview_url = preview_url;
+    }
+
+    public int getTrack_number() {
+        return track_number;
+    }
+
+    public void setTrack_number(int track_number) {
+        this.track_number = track_number;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     private void fillSongData() {
         AsyncTask<String, Void, String> get = new AsyncTask<String, Void, String>() {
             @Override
@@ -218,7 +325,7 @@ public class SpotifySong implements Comparable<SpotifySong> {
                     URL urlget = new URL(params[0]);
                     urlConnection = (HttpURLConnection) urlget.openConnection();
                     InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                    java.util.Scanner s = new java.util.Scanner(in).useDelimiter("\\A");
+                    Scanner s = new Scanner(in).useDelimiter("\\A");
 
                     //return "works";
                     String returner = s.hasNext() ? s.next() : "";
@@ -239,9 +346,11 @@ public class SpotifySong implements Comparable<SpotifySong> {
                     title = json.getString("name");
                     artist = json.getJSONArray("artists").getJSONObject(0).getString("name");
                     JSONObject jsonAlbum = json.getJSONObject("album");
-                    album = jsonAlbum.getString("name");
-                    albumArtSmall = jsonAlbum.getJSONArray("images").getJSONObject(2).getString("url");
-                    lengthMs = json.getInt("duration_ms");
+                    album.name = jsonAlbum.getString("name");
+                    Image temp = new Image();
+                    temp.url = jsonAlbum.getJSONArray("images").getJSONObject(2).getString("url");
+                    album.images.set(2, temp);
+                    duration_ms = json.getInt("duration_ms");
                 } catch (JSONException je) {
                     je.printStackTrace();
                 }
@@ -271,4 +380,14 @@ public class SpotifySong implements Comparable<SpotifySong> {
         }
         return result;
     }
+
+    public static final Creator<SpotifySong> CREATOR = new Creator<SpotifySong>() {
+        public SpotifySong createFromParcel(Parcel source) {
+            return new SpotifySong(source);
+        }
+
+        public SpotifySong[] newArray(int size) {
+            return new SpotifySong[size];
+        }
+    };
 }

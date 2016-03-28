@@ -59,6 +59,7 @@ import com.squareup.picasso.Picasso;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -128,7 +129,7 @@ public class MainActivity extends AppCompatActivity
     public boolean playerReady;
     public boolean loggedIn;
     public LinkedList<SpotifySong> backStack;
-    public LinkedList<SpotifySong> playQueue;
+    public List<SpotifySong> playQueue;
     private OnPlayerControlCallback mPlayerControlCallback;
 
     //GCM
