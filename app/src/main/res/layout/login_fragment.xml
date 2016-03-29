@@ -33,14 +33,14 @@
             android:layout_height="wrap_content"
             android:textColor="@color/full_red" />
 
-        <io.yeomans.echelon.ButtonRectangle
+        <io.yeomans.echelon.ui.views.ButtonRectangle
             android:id="@+id/spotifyLoginButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="Login With Spotify" />
 
-        <io.yeomans.echelon.ButtonFlat
+        <io.yeomans.echelon.ui.views.ButtonFlat
             android:id="@+id/anonymousLoginButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

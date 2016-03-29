@@ -56,7 +56,7 @@
                 android:inputType="text" />
         </android.support.design.widget.TextInputLayout>
 
-        <io.yeomans.echelon.ButtonRectangle
+        <io.yeomans.echelon.ui.views.ButtonRectangle
             android:id="@+id/joinGroupCreateButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -62,7 +62,7 @@
                 android:inputType="text" />
         </android.support.design.widget.TextInputLayout>
 
-        <io.yeomans.echelon.ButtonFlat
+        <io.yeomans.echelon.ui.ButtonFlat
             android:id="@+id/accountLogoutButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

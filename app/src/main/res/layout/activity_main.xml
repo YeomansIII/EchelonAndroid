@@ -7,7 +7,7 @@
     android:layout_alignParentLeft="true"
     android:layout_alignParentStart="true"
     android:layout_alignParentTop="true"
-    tools:context="io.yeomans.echelon.MainActivity">
+    tools:context="io.yeomans.echelon.ui.activities.MainActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -34,7 +34,7 @@
 
         <fragment
             android:id="@+id/control_bar"
-            android:name="io.yeomans.echelon.ControlBarFragment"
+            android:name="io.yeomans.echelon.ui.fragments.ControlBarFragment"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_alignParentBottom="true"
