@@ -158,7 +158,9 @@ public class MainActivity extends AppCompatActivity
     public static final String PREF_FIREBASE_UID = "firebase_uid";
     public static final String PROD_FIREBASE_URL = "https://flickering-heat-6442.firebaseio.com/";
     public static final String DEV_FIREBASE_URL = "https://echelon-dev.firebaseio.com/";
-    public static final String ECHELONADO_URL = "https://api.echelonapp.io:8081/";
+    public static final String ECHELON_PROD_WORKER_URL = "https://api.echelonapp.io/";
+    public static final String ECHELON_DEV_WORKER_URL = "https://worker-dev-dot-echelon-1000.appspot.com/";
+    //public static final String ECHELON_DEV_WORKER_URL = "http://192.168.0.204:8080/";
 
     //COMMON
     SharedPreferences pref, groupPref;
@@ -176,10 +178,10 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         if (BuildConfig.DEBUG_MODE) {
-            Log.i("MainActivity","Debug Mode");
+            Log.i("MainActivity", "Debug Mode");
             myFirebaseRef = new Firebase(DEV_FIREBASE_URL);
         } else {
-            Log.i("MainActivity","Production Mode");
+            Log.i("MainActivity", "Production Mode");
             myFirebaseRef = new Firebase(PROD_FIREBASE_URL);
         }
         api = new SpotifyApi();
@@ -386,7 +388,25 @@ public class MainActivity extends AppCompatActivity
                         return false;
                     }
                 }).build();
-        myFirebaseRef.child("users").child(myFirebaseRef.getAuth().getUid())
+        myFirebaseRef.child("users/" + myFirebaseRef.getAuth().getUid())
+                .addValueEventListener(
+                        new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                String email = (String) dataSnapshot.child("email").getValue();
+                                if (email != null && !email.equals("null")) {
+                                    profile.withEmail(email);
+                                }
+                                headerResult.updateProfile(profile);
+                            }
+
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
+
+                            }
+                        }
+                );
+        myFirebaseRef.child("participants/" + myFirebaseRef.getAuth().getUid())
                 .addValueEventListener(
                         new ValueEventListener() {
                             @Override
@@ -397,10 +417,6 @@ public class MainActivity extends AppCompatActivity
                                     pref.edit().putString(MainActivity.PREF_USER_DISPLAY_NAME, displayName).apply();
                                 } else {
                                     profile.withName((String) dataSnapshot.child("id").getValue());
-                                }
-                                String email = (String) dataSnapshot.child("email").getValue();
-                                if (email != null && !email.equals("null")) {
-                                    profile.withEmail(email);
                                 }
                                 String imgUrl = (String) dataSnapshot.child("image_url").getValue();
                                 if (imgUrl != null) {
@@ -471,10 +487,12 @@ public class MainActivity extends AppCompatActivity
 
         //pref.edit().remove("token").putBoolean("logged_in", false).commit();
         Firebase thisUserRef = myFirebaseRef.child("users/" + pref.getString(MainActivity.PREF_FIREBASE_UID, null));
+        Firebase thisParticipantRef = myFirebaseRef.child("participants/" + pref.getString(MainActivity.PREF_FIREBASE_UID, null));
         if (pref.getString(MainActivity.PREF_USER_AUTH_TYPE, "").equals("anonymous")) {
             thisUserRef.removeValue();
+            thisParticipantRef.removeValue();
         } else {
-            thisUserRef.child("online").setValue(false);
+            thisParticipantRef.child("online").setValue(false);
         }
         myFirebaseRef.unauth();
         pref.edit().clear().apply();
@@ -483,7 +501,8 @@ public class MainActivity extends AppCompatActivity
         //spotifyLogout();
         FragmentManager fragmentManager = getSupportFragmentManager();
         ((ControlBarFragment) fragmentManager.findFragmentByTag("CONTROL_FRAG")).unReady();
-        fragmentManager.beginTransaction().replace(R.id.container, new LoginFragment()).addToBackStack(null).commit();
+        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        fragmentManager.beginTransaction().replace(R.id.container, new LoginFragment()).commit();
     }
 
     public boolean onLeaveGroupClick(MenuItem item) {
@@ -715,10 +734,10 @@ public class MainActivity extends AppCompatActivity
         myFirebaseRef.authAnonymously(new Firebase.AuthResultHandler() {
             @Override
             public void onAuthenticated(AuthData authData) {
-                Firebase thisUserRef = myFirebaseRef.child("users/" + authData.getUid());
-                thisUserRef.child("online").onDisconnect().setValue(false);
-                thisUserRef.child("online").setValue(true);
-                thisUserRef.child("display_name").setValue("Anonymous");
+                Firebase thisParticipantRef = myFirebaseRef.child("participants/" + authData.getUid());
+                thisParticipantRef.child("online").onDisconnect().setValue(false);
+                thisParticipantRef.child("online").setValue(true);
+                thisParticipantRef.child("display_name").setValue("Anonymous");
                 pref.edit().putString(MainActivity.PREF_FIREBASE_UID, authData.getUid())
                         .putString(MainActivity.PREF_USER_AUTH_TYPE, "anonymous")
                         .putString(MainActivity.PREF_USER_DISPLAY_NAME, "Anonymous")

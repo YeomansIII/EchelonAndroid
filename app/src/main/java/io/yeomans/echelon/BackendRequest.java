@@ -3,6 +3,7 @@ package io.yeomans.echelon;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
@@ -139,7 +140,7 @@ public class BackendRequest {
                         JSONObject tokenAuth = new JSONObject();
                         tokenAuth.put("uid", spotify.getString("id") + "_spotify");
                         tokenAuth.put("access_token", activity.spotifyAuthToken);
-                        BackendRequest bee = new BackendRequest("POST", MainActivity.ECHELONADO_URL + "spotify-auth/", tokenAuth.toString(), activity);
+                        BackendRequest bee = new BackendRequest("POST", (BuildConfig.DEBUG_MODE ? MainActivity.ECHELON_DEV_WORKER_URL : MainActivity.ECHELON_PROD_WORKER_URL) + "spotify-auth/", tokenAuth.toString(), activity);
                         BackendRequest.getFirebaseSpotifyToken(bee);
                     } catch (JSONException je) {
                         je.printStackTrace();
@@ -232,12 +233,12 @@ public class BackendRequest {
                                         userInfo.put("type", pref.getString(MainActivity.PREF_SPOTIFY_TYPE, null));
 
                                         Map<String, Object> participantInfo = new HashMap<>();
-                                        participantInfo.put("id", pref.getString(MainActivity.PREF_SPOTIFY_UID, null));
-                                        participantInfo.put("display_name", pref.getString(MainActivity.PREF_SPOTIFY_DISPLAY_NAME, null));
                                         participantInfo.put("country", pref.getString(MainActivity.PREF_SPOTIFY_COUNTRY, null));
+                                        participantInfo.put("display_name", pref.getString(MainActivity.PREF_SPOTIFY_DISPLAY_NAME, null));
+                                        participantInfo.put("id", pref.getString(MainActivity.PREF_SPOTIFY_UID, null));
                                         participantInfo.put("ext_url", pref.getString(MainActivity.PREF_SPOTIFY_EXT_URL, null));
-                                        participantInfo.put("image_url", pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, null));
                                         participantInfo.put("uri", pref.getString(MainActivity.PREF_SPOTIFY_URI, null));
+                                        participantInfo.put("image_url", pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, null));
 
 
                                         if (uid != null) {

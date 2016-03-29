@@ -127,8 +127,8 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
     @Override
     public void onClick(View v) {
         if (v == view.findViewById(R.id.createGroupCreateButton)) {
-            String name = createGroupNameEditWrapper.getEditText().getText().toString();
-            Firebase refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups/" + name);
+            final String name = createGroupNameEditWrapper.getEditText().getText().toString();
+            Firebase refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups/" + name + "/name");
             refQueueGroups.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -136,29 +136,23 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
                         createGroupNameEditWrapper.setErrorEnabled(true);
                         createGroupNameEditWrapper.setError("That group name is already taken, try another one");
                     } else {
-                        String name2 = dataSnapshot.getKey();
                         String fUid2 = mainPref.getString(MainActivity.PREF_FIREBASE_UID, null);
                         if (fUid2 != null) {
-                            mainActivity.myFirebaseRef.child("users/" + fUid2 + "/cur_group").setValue(name2);
+                            mainActivity.myFirebaseRef.child("users/" + fUid2 + "/cur_group").setValue(name);
                             Firebase ref = mainActivity.myFirebaseRef.child("queuegroups");
                             Map<String, Object> map = new HashMap<>();
-                            map.put("name", name2);
+                            map.put("name", name);
                             map.put("created", ServerValue.TIMESTAMP);
                             map.put("leader", fUid2);
-                            map.put("privacy", selectedPrivacy);
+                            // map.put("privacy", selectedPrivacy);
 //                        if (selectedPrivacy.equals("password")) {
 //                            map.put("password", createGroupPasswordEditWrapper.getEditText().getText().toString());
 //                        }
-                            ref.child(name2).setValue(map);
-                            Map<String, Object> map2 = new HashMap<>();
-                            map2.put("active", true);
-                            map2.put("displayName", mainPref.getString(MainActivity.PREF_USER_DISPLAY_NAME, null));
-                            map2.put("extUrl", mainPref.getString(MainActivity.PREF_USER_EXT_URL, null));
-                            map2.put("imageUrl", mainPref.getString(MainActivity.PREF_USER_IMAGE_URL, null));
-                            ref.child(name2 + "/participants/" + fUid2).setValue(map2);
+                            ref.child(name).setValue(map);
+                            ref.child(name + "/participants/" + fUid2).setValue(true);
 
                             SharedPreferences groupSettings = mainActivity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
-                            groupSettings.edit().putString(MainActivity.PREF_GROUP_NAME, name2).putString(MainActivity.PREF_GROUP_LEADER_UID, fUid2).apply();
+                            groupSettings.edit().putString(MainActivity.PREF_GROUP_NAME, name).putString(MainActivity.PREF_GROUP_LEADER_UID, fUid2).apply();
                             View view = mainActivity.getCurrentFocus();
                             if (view != null) {
                                 InputMethodManager imm = (InputMethodManager) mainActivity.getSystemService(

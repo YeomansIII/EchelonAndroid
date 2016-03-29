@@ -4,48 +4,48 @@ package io.yeomans.echelon;
  * Created by jason on 10/5/15.
  */
 public class Participant {
-    private boolean active;
-    private String displayName, extUrl, imageUrl;
+    private boolean online;
+    private String display_name, ext_url, image_url;
 
     public Participant() {
 
     }
 
-    public Participant(String displayName, String extUrl, String imageUrl) {
-        this.displayName = displayName;
-        this.extUrl = extUrl;
-        this.imageUrl = imageUrl;
+    public Participant(String display_name, String ext_url, String image_url) {
+        this.display_name = display_name;
+        this.ext_url = ext_url;
+        this.image_url = image_url;
     }
 
-    public boolean isActive() {
-        return active;
+    public boolean isOnline() {
+        return online;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
+    public void setOnline(boolean online) {
+        this.online = online;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getDisplay_name() {
+        return display_name;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+    public void setDisplay_name(String display_name) {
+        this.display_name = display_name;
     }
 
-    public String getExtUrl() {
-        return extUrl;
+    public String getExt_url() {
+        return ext_url;
     }
 
-    public void setExtUrl(String extUrl) {
-        this.extUrl = extUrl;
+    public void setExt_url(String ext_url) {
+        this.ext_url = ext_url;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getImage_url() {
+        return image_url;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setImage_url(String image_url) {
+        this.image_url = image_url;
     }
 }

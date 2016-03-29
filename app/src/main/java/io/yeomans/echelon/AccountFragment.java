@@ -33,7 +33,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     //private RadioButton rbPublic, rbPassword, rbFriends, rbInvite;
     private TextInputLayout accountDisplayNameEditWrapper;
     //String selectedPrivacy;
-    private Firebase thisUserRef;
+    private Firebase thisUserRef, thisParticipantRef;
     private String uid;
     private String accountType;
 
@@ -47,6 +47,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         uid = mainPref.getString(MainActivity.PREF_FIREBASE_UID, null);
         accountType = mainPref.getString(MainActivity.PREF_USER_AUTH_TYPE, "none");
         thisUserRef = mainActivity.myFirebaseRef.child("users/" + uid);
+        thisParticipantRef = mainActivity.myFirebaseRef.child("participants/" + uid);
     }
 
     @Override
@@ -76,27 +77,39 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
                         if (dataSnapshot.hasChild("email")) {
                             ((TextView) view.findViewById(R.id.accountEmailText)).setText((String) dataSnapshot.child("email").getValue());
                         }
-                        if (dataSnapshot.hasChild("display_name")) {
-                            accountDisplayNameEditWrapper.getEditText().setText((String) dataSnapshot.child("display_name").getValue());
-                        }
                     } else {
                         ((TextView) view.findViewById(R.id.accountIdText)).setText(mainPref.getString(MainActivity.PREF_FIREBASE_UID, "error"));
                     }
-                    accountDisplayNameEditWrapper.getEditText().addTextChangedListener(new TextWatcher() {
-                        @Override
-                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
 
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                    Toast.makeText(mainActivity.getApplicationContext(), "Error getting data", Toast.LENGTH_SHORT).show();
+                }
+            });
+            thisParticipantRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot != null) {
+                        if (dataSnapshot.hasChild("display_name")) {
+                            accountDisplayNameEditWrapper.getEditText().setText((String) dataSnapshot.child("display_name").getValue());
                         }
+                        accountDisplayNameEditWrapper.getEditText().addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-                        @Override
-                        public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        }
+                            }
 
-                        @Override
-                        public void afterTextChanged(Editable s) {
-                            thisUserRef.child("display_name").setValue(s.toString());
-                        }
-                    });
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {
+                                thisUserRef.child("display_name").setValue(s.toString());
+                            }
+                        });
+                    }
                 }
 
                 @Override
@@ -109,11 +122,6 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         }
 
         return view;
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
     }
 
     @Override

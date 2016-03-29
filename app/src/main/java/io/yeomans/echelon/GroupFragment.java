@@ -97,7 +97,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         playqueue = mainActivity.playQueue;
         isDestroyed = false;
 
-        songListRA = new SonglistRecyclerAdapter(playqueue);
+        songListRA = new SonglistRecyclerAdapter(playqueue, true);
 
         queuegroupRef = mainActivity.myFirebaseRef.child("queuegroups/" + groupSettings.getString(MainActivity.PREF_GROUP_NAME, ""));
         trackListChangeListener = new ValueEventListener() {
@@ -142,14 +142,30 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                 particDrawerResult.removeAllItems();
                 for (DataSnapshot o : dataSnapshot.getChildren()) {
                     //participantsArray.add(o.getValue(Participant.class));
-                    Participant p = o.getValue(Participant.class);
-                    ProfileDrawerItem dItem = new ProfileDrawerItem().withName(p.getDisplayName());
-                    if (p.getImageUrl() != null) {
-                        dItem.withIcon(p.getImageUrl());
-                    } else {
-                        dItem.withIcon(R.drawable.ic_account_grey600_24dp);
-                    }
-                    particDrawerResult.addItem(dItem);
+                    //Participant p = o.getValue(Participant.class);
+                    mainActivity.myFirebaseRef.child("participants/" + o.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            String name;
+                            if (dataSnapshot.hasChild("display_name")) {
+                                name = dataSnapshot.child("display_name").getValue().toString();
+                            } else {
+                                name = dataSnapshot.child("id").getValue().toString();
+                            }
+                            ProfileDrawerItem dItem = new ProfileDrawerItem().withName(name);
+                            if (dataSnapshot.hasChild("image_url")) {
+                                dItem.withIcon(dataSnapshot.child("image_url").getValue().toString());
+                            } else {
+                                dItem.withIcon(R.drawable.ic_account_grey600_24dp);
+                            }
+                            particDrawerResult.addItem(dItem);
+                        }
+
+                        @Override
+                        public void onCancelled(FirebaseError firebaseError) {
+
+                        }
+                    });
                 }
             }
 

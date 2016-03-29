@@ -90,8 +90,8 @@ public class FirebaseCommon {
                         toAdd.put("album", album.getString("name"));
                         toAdd.put("lengthMs", spotifyTrackJson.getInt("duration_ms"));
                         toAdd.put("albumArtSmall", images.getJSONObject(2).getString("url"));
-                        toAdd.put("albumArtSmall", images.getJSONObject(1).getString("url"));
-                        toAdd.put("albumArtSmall", images.getJSONObject(0).getString("url"));
+                        toAdd.put("albumArtMedium", images.getJSONObject(1).getString("url"));
+                        toAdd.put("albumArtLarge", images.getJSONObject(0).getString("url"));
                         push.setValue(toAdd);
                         FragmentManager fragmentManager = main.getSupportFragmentManager();
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

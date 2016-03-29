@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -26,7 +27,7 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
     Context context;
     OnSongClickListener mOnSongClickListener;
     char what;
-    boolean isSpotifySong = false;
+    boolean isSpotifySong = false, vote = false;
 
     public SonglistRecyclerAdapter() {
         mTracks = new ArrayList<>();
@@ -37,9 +38,10 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
         this.what = what;
     }
 
-    public SonglistRecyclerAdapter(List<SpotifySong> tracks) {
+    public SonglistRecyclerAdapter(List<SpotifySong> tracks, boolean vote) {
         sTracks = tracks;
         isSpotifySong = true;
+        this.vote = vote;
     }
 
     @Override
@@ -84,6 +86,10 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
         holder.artist.setText(artistText.replaceAll(", $", ""));
         holder.trackId = curTrack.id;
 
+        if(vote) {
+            holder.voteBox.setVisibility(View.VISIBLE);
+        }
+
         if (mOnSongClickListener != null) {
             holder.mOnSongClick = mOnSongClickListener;
         }
@@ -95,6 +101,7 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
         public TextView title, artist;
         public ImageView image;
         public String trackId;
+        public RelativeLayout voteBox;
         public OnSongClickListener mOnSongClick;
 
         // We also create a constructor that accepts the entire item row
@@ -107,6 +114,7 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
             title = (TextView) itemView.findViewById(R.id.songTitleText);
             artist = (TextView) itemView.findViewById(R.id.songArtistText);
             image = (ImageView) itemView.findViewById(R.id.songAlbumArtImage);
+            voteBox = (RelativeLayout) itemView.findViewById(R.id.songItemVoterLayout);
             itemView.setOnClickListener(this);
         }
 
