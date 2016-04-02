@@ -12,6 +12,7 @@
     <color name="ech_con_seafrost">#FF8F19</color>
     <color name="transparent">#00000000</color>
     <color name="white">#FFFFFF</color>
-
+    <color name="albumCoverTint">#88000000</color>
+    <color name="toolbarTransparent">#00FFFFFF</color>
 
 </resources>

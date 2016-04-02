@@ -1,36 +1,27 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/coordinator_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_alignParentLeft="true"
-    android:layout_alignParentStart="true"
-    android:layout_alignParentTop="true"
-    tools:context="io.yeomans.echelon.ui.activities.MainActivity">
+                                                 xmlns:tools="http://schemas.android.com/tools"
+                                                 android:id="@+id/coordinator_layout"
+                                                 android:layout_width="match_parent"
+                                                 android:layout_height="match_parent"
+                                                 android:layout_alignParentLeft="true"
+                                                 android:layout_alignParentStart="true"
+                                                 android:layout_alignParentTop="true"
+                                                 tools:context="io.yeomans.echelon.ui.activities.MainActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <android.support.design.widget.AppBarLayout
-            android:id="@+id/appbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fitsSystemWindows="true">
-
-            <include
-                android:id="@+id/toolbar"
-                layout="@layout/toolbar" />
-        </android.support.design.widget.AppBarLayout>
-
         <FrameLayout
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/control_bar"
-            android:layout_below="@+id/appbar" />
+            android:layout_above="@+id/control_bar"/>
+
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar"/>
 
         <fragment
             android:id="@+id/control_bar"
@@ -42,7 +33,7 @@
             android:layout_alignParentStart="true"
             android:layout_gravity="bottom"
             android:tag="CONTROL_FRAG"
-            tools:layout="@layout/control_bar_fragment" />
+            tools:layout="@layout/control_bar_fragment"/>
 
     </RelativeLayout>
 

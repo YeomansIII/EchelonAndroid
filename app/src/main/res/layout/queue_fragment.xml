@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/queueGroupRootView"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#7dffffff">
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/queueGroupRootView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#7dffffff">
 
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -19,18 +19,23 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <RelativeLayout
+            <io.yeomans.echelon.ui.views.SquareRelativeLayout
                 android:id="@+id/queueGroupNowPlaying"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
                 android:layout_alignParentTop="true"
-                android:background="#444">
+                android:background="#444"
+                android:layout_height="wrap_content">
 
                 <ImageView
                     android:id="@+id/queueGroupNowPlayingAlbumCover"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:scaleType="fitXY" />
+                    android:scaleType="centerCrop"/>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/albumCoverTint"/>
 
                 <RelativeLayout
                     android:id="@+id/queueGroupNowPlayingBottom"
@@ -44,7 +49,7 @@
                         android:layout_height="match_parent"
                         android:scaleType="fitXY"
                         app:srcCompat="@drawable/now_playing_triangle_vec"
-                        tools:src="@drawable/now_playing_triangle_vec" />
+                        tools:src="@drawable/now_playing_triangle_vec"/>
 
                     <TextView
                         android:id="@+id/queueGroupNowPlayingSongCount"
@@ -57,7 +62,7 @@
                         android:text="##"
                         android:textColor="@color/full_red"
                         android:textSize="25sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -68,16 +73,16 @@
                         android:layout_toRightOf="@id/queueGroupNowPlayingSongCount"
                         android:text="Songs"
                         android:textColor="@color/full_red"
-                        android:textSize="20sp" />
+                        android:textSize="20sp"/>
                 </RelativeLayout>
-            </RelativeLayout>
+            </io.yeomans.echelon.ui.views.SquareRelativeLayout>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/queuedSongsRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/white"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
         </LinearLayout>
 
     </android.support.v4.widget.NestedScrollView>
@@ -88,7 +93,7 @@
         android:layout_height="match_parent"
         android:animateLayoutChanges="true"
         android:background="#acdcdcdc"
-        android:visibility="invisible" />
+        android:visibility="invisible"/>
 
     <TextView
         android:id="@+id/groupIdText"
@@ -104,7 +109,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@android:color/black"
         android:textSize="20pt"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/groupAddSongFab3"
@@ -116,7 +121,7 @@
         android:layout_marginBottom="10dp"
         android:src="@drawable/ic_album_white_36dp"
         android:visibility="invisible"
-        app:elevation="4dp" />
+        app:elevation="4dp"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/groupAddSongFab2"
@@ -128,7 +133,7 @@
         android:layout_marginBottom="10dp"
         android:src="@drawable/ic_library_music_white_36dp"
         android:visibility="invisible"
-        app:elevation="4dp" />
+        app:elevation="4dp"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/groupAddSongFab1"
@@ -140,7 +145,7 @@
         android:layout_marginBottom="10dp"
         android:src="@drawable/ic_magnify_white_36dp"
         android:visibility="invisible"
-        app:elevation="4dp" />
+        app:elevation="4dp"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/groupAddSongFab"
@@ -152,7 +157,7 @@
         android:layout_marginBottom="20dp"
         android:layout_marginRight="20dp"
         android:src="@drawable/ic_add_white_36dp"
-        app:elevation="4dp" />
+        app:elevation="4dp"/>
 
     <FrameLayout
         android:id="@+id/queueSearchTextFrame"
@@ -182,7 +187,7 @@
             android:paddingTop="2dp"
             android:text="Search"
             android:textColor="@android:color/black"
-            android:textSize="18sp" />
+            android:textSize="18sp"/>
     </FrameLayout>
 
     <FrameLayout
@@ -214,7 +219,7 @@
             android:paddingTop="2dp"
             android:text="Your Music"
             android:textColor="@android:color/black"
-            android:textSize="18sp" />
+            android:textSize="18sp"/>
     </FrameLayout>
 
     <FrameLayout
@@ -246,7 +251,7 @@
             android:paddingTop="2dp"
             android:text="Browse"
             android:textColor="@android:color/black"
-            android:textSize="18sp" />
+            android:textSize="18sp"/>
     </FrameLayout>
 
 </RelativeLayout>

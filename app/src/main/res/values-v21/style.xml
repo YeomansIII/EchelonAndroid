@@ -9,6 +9,8 @@
         <item name="android:imageButtonStyle">@style/ClearImageButton</item>
         <item name="android:statusBarColor">@color/primaryColorDark</item>
         <item name="android:navigationBarColor">@color/primaryColorDark</item>
+        <item name="windowActionBarOverlay">true</item>
+        <item name="android:windowContentOverlay">@null</item>
     </style>
 
     <style name="ThemeActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid">

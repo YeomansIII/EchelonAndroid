@@ -1,5 +1,6 @@
 package io.yeomans.echelon.ui.fragments;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -70,6 +71,9 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.browse_songs_fragment,
                 container, false);
+
+        //mainActivity.actionBar.setElevation(0);
+        mainActivity.toolbar.setBackgroundColor(getResources().getColor(R.color.primaryColor));
 
         //mLayoutManager = new GridLayoutManager(getActivity(), 2);
         if (message != null) {

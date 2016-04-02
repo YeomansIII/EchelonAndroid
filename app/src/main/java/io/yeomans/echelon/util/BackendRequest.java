@@ -143,7 +143,10 @@ public class BackendRequest {
                         JSONObject tokenAuth = new JSONObject();
                         tokenAuth.put("uid", spotify.getString("id") + "_spotify");
                         tokenAuth.put("access_token", activity.spotifyAuthToken);
-                        BackendRequest bee = new BackendRequest("POST", (BuildConfig.DEBUG_MODE ? MainActivity.ECHELON_DEV_WORKER_URL : MainActivity.ECHELON_PROD_WORKER_URL) + "spotify-auth/", tokenAuth.toString(), activity);
+                        if (BuildConfig.DEBUG_MODE) {
+                            tokenAuth.put("development", true);
+                        }
+                        BackendRequest bee = new BackendRequest("POST", MainActivity.ECHELON_PROD_WORKER_URL + "spotify-auth/", tokenAuth.toString(), activity);
                         BackendRequest.getFirebaseSpotifyToken(bee);
                     } catch (JSONException je) {
                         je.printStackTrace();

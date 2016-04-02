@@ -91,6 +91,8 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
         final View view = inflater.inflate(R.layout.list_song_fragment,
                 container, false);
 
+        mainActivity.toolbar.setBackgroundColor(getResources().getColor(R.color.primaryColor));
+
         loadOverlay = view.findViewById(R.id.songListLoadOverlay);
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.songListRecyclerView);

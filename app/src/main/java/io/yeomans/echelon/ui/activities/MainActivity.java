@@ -1,13 +1,18 @@
 package io.yeomans.echelon.ui.activities;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
@@ -15,12 +20,21 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.ColorableActionBarDrawerToggle;
+import android.support.v7.view.menu.ActionMenuItemView;
+import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -57,6 +71,7 @@ import com.spotify.sdk.android.player.Spotify;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -90,6 +105,7 @@ public class MainActivity extends AppCompatActivity
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     public Toolbar toolbar;
+    public ActionBar actionBar;
     private NavigationView navigationView;
     public CoordinatorLayout coordinatorLayout;
     public static final String MAIN_PREFS_NAME = "basic_pref";
@@ -187,7 +203,7 @@ public class MainActivity extends AppCompatActivity
 
         Fabric.with(this, new Crashlytics());
         Firebase.setAndroidContext(this);
-
+        supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         setContentView(R.layout.activity_main);
 
         if (BuildConfig.DEBUG_MODE) {
@@ -260,7 +276,9 @@ public class MainActivity extends AppCompatActivity
         backStack = new LinkedList<>();
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+        colorizeToolbar(toolbar, Color.WHITE, this);
         setSupportActionBar(toolbar);
+        actionBar = getSupportActionBar();
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
 
 
@@ -908,6 +926,91 @@ public class MainActivity extends AppCompatActivity
 //                Toast.makeText(getApplicationContext(),"Please log into Spotify",Toast.LENGTH_SHORT).show();
 //            }
 //        }
+    }
+
+    /**
+     * Use this method to colorize toolbar icons to the desired target color
+     *
+     * @param toolbarView       toolbar view being colored
+     * @param toolbarIconsColor the target color of toolbar icons
+     * @param activity          reference to activity needed to register observers
+     */
+    public static void colorizeToolbar(Toolbar toolbarView, int toolbarIconsColor, Activity activity) {
+        final PorterDuffColorFilter colorFilter
+                = new PorterDuffColorFilter(toolbarIconsColor, PorterDuff.Mode.MULTIPLY);
+
+        for (int i = 0; i < toolbarView.getChildCount(); i++) {
+            final View v = toolbarView.getChildAt(i);
+
+            //Step 1 : Changing the color of back button (or open drawer button).
+            if (v instanceof ImageButton) {
+                //Action Bar back button
+                ((ImageButton) v).getDrawable().setColorFilter(colorFilter);
+            }
+
+            if (v instanceof ActionMenuView) {
+                for (int j = 0; j < ((ActionMenuView) v).getChildCount(); j++) {
+
+                    //Step 2: Changing the color of any ActionMenuViews - icons that
+                    //are not back button, nor text, nor overflow menu icon.
+                    final View innerView = ((ActionMenuView) v).getChildAt(j);
+
+                    if (innerView instanceof ActionMenuItemView) {
+                        int drawablesCount = ((ActionMenuItemView) innerView).getCompoundDrawables().length;
+                        for (int k = 0; k < drawablesCount; k++) {
+                            if (((ActionMenuItemView) innerView).getCompoundDrawables()[k] != null) {
+                                final int finalK = k;
+
+                                //Important to set the color filter in seperate thread,
+                                //by adding it to the message queue
+                                //Won't work otherwise.
+                                innerView.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        ((ActionMenuItemView) innerView).getCompoundDrawables()[finalK].setColorFilter(colorFilter);
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Step 3: Changing the color of title and subtitle.
+            toolbarView.setTitleTextColor(toolbarIconsColor);
+            toolbarView.setSubtitleTextColor(toolbarIconsColor);
+
+            //Step 4: Changing the color of the Overflow Menu icon.
+            setOverflowButtonColor(activity, colorFilter);
+        }
+    }
+
+    private static void setOverflowButtonColor(final Activity activity, final PorterDuffColorFilter colorFilter) {
+        final String overflowDescription = activity.getString(R.string.abc_action_menu_overflow_description);
+        final ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
+        final ViewTreeObserver viewTreeObserver = decorView.getViewTreeObserver();
+        viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                final ArrayList<View> outViews = new ArrayList<View>();
+                decorView.findViewsWithText(outViews, overflowDescription,
+                        View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION);
+                if (outViews.isEmpty()) {
+                    return;
+                }
+                ImageView overflow = (ImageView) outViews.get(0);
+                overflow.setColorFilter(colorFilter);
+                removeOnGlobalLayoutListener(decorView, this);
+            }
+        });
+    }
+
+    private static void removeOnGlobalLayoutListener(View v, ViewTreeObserver.OnGlobalLayoutListener listener) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            v.getViewTreeObserver().removeGlobalOnLayoutListener(listener);
+        } else {
+            v.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
+        }
     }
 
     public boolean onPlayControlSelected() {

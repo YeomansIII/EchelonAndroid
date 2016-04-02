@@ -1,11 +1,14 @@
 package io.yeomans.echelon.ui.fragments;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,6 +23,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -30,6 +34,7 @@ import com.firebase.client.ValueEventListener;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,6 +78,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     private ArrayList<RelativeLayout> songListArr;
     Firebase queuegroupRef;
     List<SpotifySong> playqueue;
+    SpotifySong nowPlaying;
     private ValueEventListener trackListChangeListener;
     private ValueEventListener participantListener;
 
@@ -87,6 +93,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     @Bind(R.id.queueYourMusicTextFrame) protected FrameLayout queueYourMusicTextFrame;
     @Bind(R.id.queueOverlayFrame) protected FrameLayout queueOverlayFrame;
     @Bind(R.id.queueGroupNowPlayingSongCount) protected TextView songCountText;
+    @Bind(R.id.queueGroupNowPlayingAlbumCover) protected ImageView nowPlayingAlbumCover;
     private Drawer particDrawerResult;
     private boolean particDrawerOpen;
 
@@ -114,7 +121,10 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                     if (!ss.isNowPlaying() && !ss.isPlayed()) {
                         playqueue.add(ss);
                     } else if (ss.isNowPlaying()) {
-                        nowPlayingSS = ss;
+                        if (nowPlaying == null || !ss.getKey().equals(nowPlaying.getKey())) {
+                            nowPlaying = ss;
+                            Picasso.with(mainActivity).load(nowPlaying.getAlbumArtLarge().url).placeholder(R.drawable.ic_music_circle_black_48dp).into(nowPlayingAlbumCover);
+                        }
                     }
                     //Log.d("MyFirebase", "Song added: " + playqueue.getLast().getAdded());
                 }
@@ -186,8 +196,9 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                 container, false);
         ButterKnife.bind(this, view);
 
-        mainActivity.toolbar.setBackgroundColor(getResources().getColor(R.color.primaryColor));
-        mainActivity.getSupportActionBar().setTitle(groupSettings.getString(MainActivity.PREF_GROUP_NAME, "error"));
+        //mainActivity.actionBar.setElevation(0);
+        mainActivity.toolbar.setBackgroundColor(Color.TRANSPARENT);
+        mainActivity.actionBar.setTitle(groupSettings.getString(MainActivity.PREF_GROUP_NAME, "error"));
 
         setHasOptionsMenu(true);
 
