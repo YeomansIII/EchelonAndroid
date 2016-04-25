@@ -2,9 +2,11 @@ package io.yeomans.echelon.ui.activities;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -14,6 +16,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.DialogFragment;
@@ -21,9 +24,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.ColorableActionBarDrawerToggle;
 import android.support.v7.view.menu.ActionMenuItemView;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
@@ -82,6 +83,7 @@ import io.fabric.sdk.android.Fabric;
 import io.yeomans.echelon.BuildConfig;
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.models.SpotifySong;
+import io.yeomans.echelon.services.PlayerService;
 import io.yeomans.echelon.ui.fragments.AboutFragment;
 import io.yeomans.echelon.ui.fragments.AccountFragment;
 import io.yeomans.echelon.ui.fragments.ControlBarFragment;
@@ -151,6 +153,7 @@ public class MainActivity extends AppCompatActivity
     public String spotifyAuthToken;
     public SpotifyApi api;
     public SpotifyService spotify;
+    public PlayerService playerService;
 
     public Player mPlayer;
     public boolean mPlayerPlaying;
@@ -160,6 +163,23 @@ public class MainActivity extends AppCompatActivity
     public LinkedList<SpotifySong> backStack;
     public List<SpotifySong> playQueue;
     private OnPlayerControlCallback mPlayerControlCallback;
+
+    private ServiceConnection playerConn = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            playerService = ((PlayerService.MyBinder) service).getService();
+            playerService.setFirebaseRef(myFirebaseRef);
+            playerService.configPlayer(spotifyAuthToken, CLIENT_ID);
+            Log.i("PlayerService", "Connected to MainActivity");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
+
 
     //GCM
     public static final String EXTRA_MESSAGE = "message";
@@ -236,6 +256,7 @@ public class MainActivity extends AppCompatActivity
         pref = getSharedPreferences(MAIN_PREFS_NAME, 0);
         groupPref = getSharedPreferences(GROUP_PREFS_NAME, 0);
 
+        this.bindService(new Intent(this, PlayerService.class), playerConn, Context.BIND_AUTO_CREATE);
         //String token = pref.getString(PREF_ECHELON_API_TOKEN, null);
 
 
@@ -736,7 +757,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        Spotify.destroyPlayer(this);
+        unbindService(playerConn);
+        //Spotify.destroyPlayer(this);
         super.onDestroy();
     }
 
@@ -1014,20 +1036,22 @@ public class MainActivity extends AppCompatActivity
     }
 
     public boolean onPlayControlSelected() {
-        if (!mPlayerPlaying && mPlayerCherry) {
-            configPlayer();
+        if (!playerService.mPlayerPlaying && playerService.mPlayerCherry) {
+            //configPlayer();
             //playFirstSong();
+            playerService.playFirstSong();
             return true;
-        } else if (!mPlayerPlaying) {
-            mPlayer.resume();
+        } else if (!playerService.mPlayerPlaying) {
+            //mPlayer.resume();
+            playerService.mPlayer.resume();
             return true;
         }
         return false;
     }
 
     public boolean onPauseControlSelected() {
-        if (mPlayerPlaying) {
-            mPlayer.pause();
+        if (playerService.mPlayerPlaying) {
+            playerService.mPlayer.pause();
             return true;
         }
         return false;

@@ -288,6 +288,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                     }
                 })
                 .buildForFragment();
+        particDrawerResult.getDrawerLayout().bringToFront();
         particDrawerResult.getDrawerLayout().setFitsSystemWindows(false);
         particDrawerResult.getSlider().setFitsSystemWindows(false);
         particDrawerOpen = false;
