@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            playerService = ((PlayerService.MyBinder) service).getService();
+            playerService = ((PlayerService.PlayerBinder) service).getService();
             playerService.setFirebaseRef(myFirebaseRef);
             playerService.configPlayer(spotifyAuthToken, CLIENT_ID);
             Log.i("PlayerService", "Connected to MainActivity");
@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity
         pref = getSharedPreferences(MAIN_PREFS_NAME, 0);
         groupPref = getSharedPreferences(GROUP_PREFS_NAME, 0);
 
-        this.bindService(new Intent(this, PlayerService.class), playerConn, Context.BIND_AUTO_CREATE);
+        getApplicationContext().bindService(new Intent(this, PlayerService.class), playerConn, Context.BIND_AUTO_CREATE);
         //String token = pref.getString(PREF_ECHELON_API_TOKEN, null);
 
 

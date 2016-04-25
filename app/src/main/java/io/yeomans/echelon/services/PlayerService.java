@@ -18,7 +18,6 @@ import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerNotificationCallback;
 import com.spotify.sdk.android.player.PlayerState;
 import com.spotify.sdk.android.player.Spotify;
-import com.squareup.picasso.Picasso;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,7 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import io.yeomans.echelon.R;
 import io.yeomans.echelon.models.SpotifySong;
 import io.yeomans.echelon.ui.activities.MainActivity;
 
@@ -40,6 +38,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
     public Firebase firebaseRef;
     SharedPreferences pref, groupPref;
     private ValueEventListener trackListChangeListener;
+    private PlayerBinder playerBinder;
 
     public Player mPlayer;
     public boolean mPlayerPlaying;
@@ -53,12 +52,14 @@ public class PlayerService extends Service implements PlayerNotificationCallback
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return playerBinder;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.i(TAG,"Creating PlayerService");
+        playerBinder = new PlayerBinder();
         playQueue = new LinkedList<>();
         backStack = new LinkedList<>();
         pref = getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
@@ -250,7 +251,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
         this.mPlayerControlCallback = mPlayerControlCallback;
     }
 
-    public class MyBinder extends Binder {
+    public class PlayerBinder extends Binder {
         public PlayerService getService() {
             return PlayerService.this;
         }
