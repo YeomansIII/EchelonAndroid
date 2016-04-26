@@ -107,10 +107,20 @@ public class SpotifySong extends Track implements Comparable<SpotifySong> {
     }
 
     public String getArtist() {
-        return artist;
+        String artistas = "";
+        for (ArtistSimple artista : artists) {
+            artistas += artista.name + ", ";
+        }
+        return artistas.replaceAll(", $", "");
     }
 
     public void setArtist(String artist) {
+        ArtistSimple temp = new ArtistSimple();
+        temp.name = artist;
+        this.artists.add(temp);
+    }
+
+    public void addArtist(String artist) {
         ArtistSimple temp = new ArtistSimple();
         temp.name = artist;
         this.artists.add(temp);

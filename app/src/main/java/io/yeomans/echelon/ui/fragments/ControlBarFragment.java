@@ -77,7 +77,7 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
         Log.d("Control", "click");
         if (v == getView().findViewById(R.id.controlPlayButton)) {
             //Log.d("Control", "playlist from ControlFrag: " + mCallback.playQueue);
-            if (mainActivity.mPlayerPlaying) {
+            if (mainActivity.playerService.mPlayerPlaying) {
                 mainActivity.onPauseControlSelected();
                 //playing = false;
             } else {

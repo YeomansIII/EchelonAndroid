@@ -94,6 +94,7 @@ import io.yeomans.echelon.ui.fragments.HomeFragment;
 import io.yeomans.echelon.ui.fragments.LoginFragment;
 import io.yeomans.echelon.ui.fragments.SettingsFragment;
 import io.yeomans.echelon.util.BackendRequest;
+import io.yeomans.echelon.util.EchelonUtils;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import retrofit.RequestInterceptor;
@@ -101,7 +102,7 @@ import retrofit.RestAdapter;
 
 
 public class MainActivity extends AppCompatActivity
-        implements View.OnClickListener, PlayerNotificationCallback, ConnectionStateCallback {
+        implements View.OnClickListener, ConnectionStateCallback {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -154,11 +155,8 @@ public class MainActivity extends AppCompatActivity
     public SpotifyApi api;
     public SpotifyService spotify;
     public PlayerService playerService;
+    public boolean playerConnBound;
 
-    public Player mPlayer;
-    public boolean mPlayerPlaying;
-    public boolean mPlayerCherry;
-    public boolean playerReady;
     public boolean loggedIn;
     public LinkedList<SpotifySong> backStack;
     public List<SpotifySong> playQueue;
@@ -169,8 +167,10 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             playerService = ((PlayerService.PlayerBinder) service).getService();
-            playerService.setFirebaseRef(myFirebaseRef);
-            playerService.configPlayer(spotifyAuthToken, CLIENT_ID);
+            if (!playerService.isInitiated()) {
+                playerService.setFirebaseRef(myFirebaseRef);
+                playerService.configPlayer(spotifyAuthToken, CLIENT_ID);
+            }
             Log.i("PlayerService", "Connected to MainActivity");
         }
 
@@ -251,12 +251,10 @@ public class MainActivity extends AppCompatActivity
         context = getApplicationContext();
         mainActivity = this;
         mainActivityClass = MainActivity.this;
-        mPlayerCherry = true;
 
         pref = getSharedPreferences(MAIN_PREFS_NAME, 0);
         groupPref = getSharedPreferences(GROUP_PREFS_NAME, 0);
 
-        getApplicationContext().bindService(new Intent(this, PlayerService.class), playerConn, Context.BIND_AUTO_CREATE);
         //String token = pref.getString(PREF_ECHELON_API_TOKEN, null);
 
 
@@ -626,25 +624,15 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void configPlayer() {
-        Config playerConfig = new Config(this, spotifyAuthToken, CLIENT_ID);
-        mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
-            @Override
-            public void onInitialized(Player player) {
-                mPlayer.addConnectionStateCallback(MainActivity.this);
-                mPlayer.addPlayerNotificationCallback(MainActivity.this);
-                playerReady = true;
-                mPlayerPlaying = false;
-                mPlayerCherry = true;
-                Log.d("Player", "Player Ready");
-                playFirstSong();
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                Log.e("MainActivity", "Could not initialize player: " + throwable.getMessage());
-            }
-        });
+    public void completeLogin() {
+        Intent playerIntent = new Intent(this, PlayerService.class);
+        if (EchelonUtils.isServiceRunning(this, PlayerService.class)) {
+            playerConnBound = getApplicationContext().bindService(playerIntent, playerConn, 0);
+        } else {
+            getApplicationContext().startService(playerIntent);
+            playerConnBound = getApplicationContext().bindService(playerIntent, playerConn, 0);
+        }
+        checkGroup();
     }
 
     @Override
@@ -683,63 +671,6 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    @Override
-    public void onPlaybackEvent(EventType eventType, PlayerState playerState) {
-        if (eventType == EventType.TRACK_END) {
-            SpotifySong old = playQueue.get(0);
-            old.setBackStack(true);
-            Map<String, Object> oldMap = new HashMap<>();
-            oldMap.put("nowPlaying", false);
-            oldMap.put("played", true);
-            myFirebaseRef.child("queuegroups")
-                    .child(groupPref.getString(MainActivity.PREF_GROUP_NAME, null))
-                    .child("tracks")
-                    .child(old.getKey())
-                    .updateChildren(oldMap);
-            backStack.add(old);
-            playQueue.remove(0);
-            if (playQueue.size() > 0) {
-                SpotifySong toPlay = playQueue.get(0);
-                mPlayer.play(toPlay.getUri());
-                myFirebaseRef.child("queuegroups")
-                        .child(groupPref.getString(MainActivity.PREF_GROUP_NAME, null))
-                        .child("tracks")
-                        .child(toPlay.getKey())
-                        .child("nowPlaying")
-                        .setValue(true);
-            } else {
-                mPlayerCherry = true;
-                mPlayerPlaying = false;
-            }
-        } else if (eventType == EventType.PLAY) {
-            mPlayerPlaying = true;
-            mPlayerControlCallback.onPlayerPlay();
-        } else if (eventType == EventType.PAUSE) {
-            mPlayerPlaying = false;
-            mPlayerControlCallback.onPlayerPause();
-        }
-    }
-
-    @Override
-    public void onPlaybackError(ErrorType errorType, String s) {
-
-    }
-
-    public void playFirstSong() {
-        Log.d("Play", "PlayQueue: " + playQueue);
-        if (playQueue.size() > 0) {
-            SpotifySong toPlay = playQueue.get(0);
-            mPlayer.play(toPlay.getUri());
-            mPlayerCherry = false;
-            myFirebaseRef.child("queuegroups")
-                    .child(groupPref.getString(MainActivity.PREF_GROUP_NAME, null))
-                    .child("tracks")
-                    .child(toPlay.getKey())
-                    .child("nowPlaying")
-                    .setValue(true);
-        }
-    }
-
     //register your activity onResume()
     @Override
     public void onResume() {
@@ -757,8 +688,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        unbindService(playerConn);
-        //Spotify.destroyPlayer(this);
+        if (playerConnBound) {
+            getApplicationContext().unbindService(playerConn);
+        }
         super.onDestroy();
     }
 
@@ -1036,25 +968,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     public boolean onPlayControlSelected() {
-        if (!playerService.mPlayerPlaying && playerService.mPlayerCherry) {
-            //configPlayer();
-            //playFirstSong();
-            playerService.playFirstSong();
-            return true;
-        } else if (!playerService.mPlayerPlaying) {
-            //mPlayer.resume();
-            playerService.mPlayer.resume();
-            return true;
-        }
-        return false;
+        return playerService.play();
     }
 
     public boolean onPauseControlSelected() {
-        if (playerService.mPlayerPlaying) {
-            playerService.mPlayer.pause();
-            return true;
-        }
-        return false;
+        return playerService.pause();
     }
 
     public interface OnPlayerControlCallback {

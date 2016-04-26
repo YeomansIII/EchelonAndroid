@@ -263,10 +263,10 @@ public class BackendRequest {
                                         prefEdit.putString(MainActivity.PREF_USER_IMAGE_URL, pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, null));
 
                                         prefEdit.apply();
-                                        activity.checkGroup();
                                     }
                                     participant.child("online").onDisconnect().setValue(false);
                                     participant.child("online").setValue(true);
+                                    activity.completeLogin();
                                 }
 
                                 @Override

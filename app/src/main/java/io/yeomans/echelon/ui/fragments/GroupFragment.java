@@ -79,8 +79,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     Firebase queuegroupRef;
     List<SpotifySong> playqueue;
     SpotifySong nowPlaying;
-    private ValueEventListener trackListChangeListener;
-    private ValueEventListener participantListener;
+    private ValueEventListener trackListChangeListener, participantListener, nowPlayingChangeListener;
 
     private Boolean isFabOpen = false;
     @Bind(R.id.groupAddSongFab) protected FloatingActionButton fab;
@@ -120,13 +119,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                     SpotifySong ss = dataSnapshot1.getValue(SpotifySong.class);
                     if (!ss.isNowPlaying() && !ss.isPlayed()) {
                         playqueue.add(ss);
-                    } else if (ss.isNowPlaying()) {
-                        if (nowPlaying == null || !ss.getKey().equals(nowPlaying.getKey())) {
-                            nowPlaying = ss;
-                            Picasso.with(mainActivity).load(nowPlaying.getAlbumArtLarge().url).placeholder(R.drawable.ic_music_circle_black_48dp).into(nowPlayingAlbumCover);
-                        }
                     }
-                    //Log.d("MyFirebase", "Song added: " + playqueue.getLast().getAdded());
                 }
                 Collections.sort(playqueue);
                 if (songListRA != null) {
@@ -135,10 +128,24 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                 if (songCountText != null) {
                     songCountText.setText("" + playqueue.size());
                 }
-//                if (nowPlayingSS != null) {
-//                    playqueue.addFirst(nowPlayingSS);
-//                }
-                //refreshQueueList();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+
+        };
+
+        nowPlayingChangeListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("MyFirebase", "Track data changed!");
+                SpotifySong ss = dataSnapshot.getValue(SpotifySong.class);
+                if (nowPlaying == null || !ss.getKey().equals(nowPlaying.getKey())) {
+                    nowPlaying = ss;
+                    Picasso.with(mainActivity).load(nowPlaying.getAlbumArtLarge().url).placeholder(R.drawable.ic_music_circle_black_48dp).into(nowPlayingAlbumCover);
+                }
             }
 
             @Override
@@ -237,9 +244,6 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         if (controlBar != null) {
             if (leader) {
                 controlBar.ready(true);
-                if (!mainActivity.playerReady) {
-                    //mainActivity.configPlayer();
-                }
             } else {
                 Log.d("Group", "Not leader");
             }
@@ -339,9 +343,8 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     }
 
     public void leaveGroup() {
-        if (mainActivity.mPlayer != null) {
-            mainActivity.mPlayer.pause();
-            mainActivity.mPlayerCherry = true;
+        if (mainActivity.playerService != null) {
+            mainActivity.playerService.stop();
         }
         groupSettings.edit().clear().commit();
         controlBar.getView().setVisibility(View.GONE);
