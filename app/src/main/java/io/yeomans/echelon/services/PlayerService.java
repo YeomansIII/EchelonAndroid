@@ -1,7 +1,10 @@
 package io.yeomans.echelon.services;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
@@ -30,6 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import io.yeomans.echelon.R;
 import io.yeomans.echelon.models.SpotifySong;
 import io.yeomans.echelon.ui.activities.MainActivity;
 
@@ -70,6 +74,13 @@ public class PlayerService extends Service implements PlayerNotificationCallback
         backStack = new LinkedList<>();
         pref = getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
         groupPref = getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("io.yeomans.echelon.STOP_SERVICE");
+        filter.addAction("io.yeomans.echelon.PLAY");
+        filter.addAction("io.yeomans.echelon.PAUSE");
+
+        registerReceiver(receiver, filter);
 
         trackListChangeListener = new ValueEventListener() {
             @Override
@@ -219,6 +230,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
     public void onDestroy() {
         queuegroupRef.child("tracks").removeEventListener(trackListChangeListener);
         Spotify.destroyPlayer(mPlayer);
+        unregisterReceiver(receiver);
     }
 
     @Override
@@ -305,9 +317,10 @@ public class PlayerService extends Service implements PlayerNotificationCallback
             mPlayer.play(toPlay.getUri());
             mPlayerCherry = false;
             android.support.v4.app.NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(this)
-                            .setContentTitle("Echelon Player")
-                            .setContentText("Playing music");
+                    new android.support.v4.app.NotificationCompat.Builder(this)
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setContentTitle("Echelon")
+                            .setContentText("Playing Music");
             startForeground(1, mBuilder.build());
         }
     }
@@ -327,5 +340,13 @@ public class PlayerService extends Service implements PlayerNotificationCallback
             return PlayerService.this;
         }
     }
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+        }
+    };
 
 }
