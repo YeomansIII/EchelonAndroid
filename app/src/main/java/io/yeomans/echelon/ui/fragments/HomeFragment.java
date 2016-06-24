@@ -72,7 +72,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
             if (groupPref.getString(MainActivity.PREF_GROUP_NAME, null) == null) {
                 if (mainPref.getBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false) && mainPref.getString(MainActivity.PREF_SPOTIFY_PRODUCT, "").equalsIgnoreCase("premium")) {
-//                    Firebase refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups");
+//                    DatabaseReference refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups");
 //                    Map<String, Object> map = new HashMap<>();
 //                    map.put("name", "testname");
 //                    refQueueGroups.push().setValue(map);

@@ -15,11 +15,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ServerValue;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.DatabaseError ;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -131,7 +131,7 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
     public void onClick(View v) {
         if (v == view.findViewById(R.id.createGroupCreateButton)) {
             final String name = createGroupNameEditWrapper.getEditText().getText().toString();
-            Firebase refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups/" + name + "/name");
+            DatabaseReference refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups/" + name + "/name");
             refQueueGroups.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -142,7 +142,7 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
                         String fUid2 = mainPref.getString(MainActivity.PREF_FIREBASE_UID, null);
                         if (fUid2 != null) {
                             mainActivity.myFirebaseRef.child("users/" + fUid2 + "/cur_group").setValue(name);
-                            Firebase ref = mainActivity.myFirebaseRef.child("queuegroups");
+                            DatabaseReference ref = mainActivity.myFirebaseRef.child("queuegroups");
                             Map<String, Object> map = new HashMap<>();
                             map.put("name", name);
                             map.put("created", ServerValue.TIMESTAMP);
@@ -176,7 +176,7 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
                 }
 
                 @Override
-                public void onCancelled(FirebaseError firebaseError) {
+                public void onCancelled(DatabaseError  firebaseError) {
 
                 }
             });

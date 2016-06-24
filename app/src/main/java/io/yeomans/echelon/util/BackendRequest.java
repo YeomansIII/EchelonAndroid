@@ -3,15 +3,21 @@ package io.yeomans.echelon.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
+import android.widget.Toast;
 
-import com.firebase.client.AuthData;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -202,17 +208,18 @@ public class BackendRequest {
                 @Override
                 protected void onPostExecute(String msg) {
                     Log.d("GetFirebaseSpotifyToken", msg);
-                    activity.myFirebaseRef.authWithCustomToken(msg, new Firebase.AuthResultHandler() {
+                    FirebaseAuth auth;
+                    if (BuildConfig.DEBUG) {
+                        auth = FirebaseAuth.getInstance(activity.firebaseApp);
+                    } else {
+                        auth = FirebaseAuth.getInstance();
+                    }
+                    auth.signInWithCustomToken(msg).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                         @Override
-                        public void onAuthenticationError(FirebaseError error) {
-                            Log.d("GetFirebaseSpotifyToken", "Login Failed! " + error.getMessage());
-                        }
-
-                        @Override
-                        public void onAuthenticated(AuthData authData) {
+                        public void onSuccess(AuthResult authResult) {
                             Log.d("GetFirebaseSpotifyToken", "Login Succeeded!");
-                            String fUid = authData.getUid();
-                            Firebase user = activity.myFirebaseRef.child("users/" + fUid);
+                            String fUid = authResult.getUser().getUid();
+                            DatabaseReference user = activity.myFirebaseRef.child("users/" + fUid);
                             SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
                             pref.edit().putString(MainActivity.PREF_FIREBASE_UID, fUid).putString(MainActivity.PREF_USER_AUTH_TYPE, "spotify").commit();
                             FragmentManager fragmentManager = activity.getSupportFragmentManager();
@@ -229,8 +236,8 @@ public class BackendRequest {
                                     Log.d("GetFirebaseSpotifyToken", "DATA CHANGED");
                                     SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
                                     String uid = pref.getString(MainActivity.PREF_FIREBASE_UID, null);
-                                    Firebase user = activity.myFirebaseRef.child("users/" + uid);
-                                    Firebase participant = activity.myFirebaseRef.child("participants/" + uid);
+                                    DatabaseReference user = activity.myFirebaseRef.child("users/" + uid);
+                                    DatabaseReference participant = activity.myFirebaseRef.child("participants/" + uid);
                                     if (dataSnapshot.getValue() == null) {
                                         Log.d("GetFirebaseSpotifyToken", "New User, creating in DB");
                                         Map<String, Object> userInfo = new HashMap<>();
@@ -270,16 +277,18 @@ public class BackendRequest {
                                 }
 
                                 @Override
-                                public void onCancelled(FirebaseError firebaseError) {
-
+                                public void onCancelled(DatabaseError databaseError) {
+                                    Toast.makeText(activity, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
                             });
+
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d("GetFirebaseSpotifyToken", "Login Failed! " + e.getMessage());
                         }
                     });
-//                    AlertDialog.Builder builder = new AlertDialog.Builder(activity.mainActivityClass);
-//                    builder.setTitle("Title");
-//                    builder.setMessage(msg);
-//                    AlertDialog dialog = builder.show();
                 }
             }.execute(be, null, null);
         }

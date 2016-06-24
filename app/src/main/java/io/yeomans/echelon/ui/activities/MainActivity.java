@@ -13,10 +13,10 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.DialogFragment;
@@ -40,14 +40,19 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import com.firebase.client.AuthData;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -63,20 +68,12 @@ import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
-import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
-import com.spotify.sdk.android.player.Player;
-import com.spotify.sdk.android.player.PlayerNotificationCallback;
-import com.spotify.sdk.android.player.PlayerState;
-import com.spotify.sdk.android.player.Spotify;
 import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.fabric.sdk.android.Fabric;
@@ -152,7 +149,7 @@ public class MainActivity extends AppCompatActivity
     public boolean spotifyAuthenticated;
     public AuthenticationResponse authResponse;
     public String spotifyAuthToken;
-    public SpotifyApi api;
+    public SpotifyApi spotifyApi;
     public SpotifyService spotify;
     public PlayerService playerService;
     public boolean playerConnBound;
@@ -198,12 +195,13 @@ public class MainActivity extends AppCompatActivity
      */
     static final String TAG = "GCM Demo";
 
-    GoogleCloudMessaging gcm;
     String regid;
     AtomicInteger msgId = new AtomicInteger();
 
     //FIREBASE
-    public Firebase myFirebaseRef;
+    public DatabaseReference myFirebaseRef;
+    public FirebaseAuth firebaseAuth;
+    public FirebaseApp firebaseApp;
     public static final String PREF_FIREBASE_UID = "firebase_uid";
     public static final String PROD_FIREBASE_URL = "https://flickering-heat-6442.firebaseio.com/";
     public static final String DEV_FIREBASE_URL = "https://echelon-dev.firebaseio.com/";
@@ -222,18 +220,26 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         Fabric.with(this, new Crashlytics());
-        Firebase.setAndroidContext(this);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         setContentView(R.layout.activity_main);
 
         if (BuildConfig.DEBUG_MODE) {
             Log.i("MainActivity", "Debug Mode");
-            myFirebaseRef = new Firebase(DEV_FIREBASE_URL);
+            FirebaseOptions fbOptions = new FirebaseOptions.Builder()
+                    .setApiKey("AIzaSyA1AB-xEi2bRPKW3iazpUwMfObq1mSdo4Q")
+                    .setApplicationId("1:1000399740031:android:380bd9907ea4b0e6")
+                    .setDatabaseUrl("https://echelon-dev.firebaseio.com")
+                    .setStorageBucket("echelon-dev.appspot.com")
+                    .build();
+            firebaseApp = FirebaseApp.initializeApp(this, fbOptions, "Testing");
+            myFirebaseRef = FirebaseDatabase.getInstance(firebaseApp).getReference();
+            firebaseAuth = FirebaseAuth.getInstance(firebaseApp);
         } else {
-            Log.i("MainActivity", "Production Mode");
-            myFirebaseRef = new Firebase(PROD_FIREBASE_URL);
+            myFirebaseRef = FirebaseDatabase.getInstance().getReference();
+            firebaseAuth = FirebaseAuth.getInstance();
         }
-        api = new SpotifyApi();
+        spotifyApi = new SpotifyApi();
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint(SpotifyApi.SPOTIFY_WEB_API_ENDPOINT)
                 .setRequestInterceptor(new RequestInterceptor() {
@@ -258,11 +264,11 @@ public class MainActivity extends AppCompatActivity
         //String token = pref.getString(PREF_ECHELON_API_TOKEN, null);
 
 
-        if (myFirebaseRef.getAuth() == null) {
+        if (firebaseAuth.getCurrentUser() == null) {
             loggedIn = false;
         } else {
             loggedIn = true;
-            Firebase userRef = myFirebaseRef.child("users/" + myFirebaseRef.getAuth().getUid());
+            DatabaseReference userRef = myFirebaseRef.child("users/" + firebaseAuth.getCurrentUser().getUid());
             userRef.child("online").onDisconnect().setValue(false);
             userRef.child("online").setValue(true);
             userRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -282,7 +288,7 @@ public class MainActivity extends AppCompatActivity
                 }
 
                 @Override
-                public void onCancelled(FirebaseError firebaseError) {
+                public void onCancelled(DatabaseError firebaseError) {
                     Toast.makeText(getApplicationContext(), "Error accessing the database", Toast.LENGTH_SHORT).show();
                 }
             });
@@ -304,8 +310,8 @@ public class MainActivity extends AppCompatActivity
         // Check device for Play Services APK. If check succeeds, proceed with
         //  GCM registration.
         if (checkPlayServices()) {
-            gcm = GoogleCloudMessaging.getInstance(this);
-            registerInBackground();
+//            gcm = GoogleCloudMessaging.getInstance(this);
+//            registerInBackground();
         } else {
             Log.i(TAG, "No valid Google Play Services APK found.");
         }
@@ -438,49 +444,51 @@ public class MainActivity extends AppCompatActivity
                         return false;
                     }
                 }).build();
-        myFirebaseRef.child("users/" + myFirebaseRef.getAuth().getUid())
-                .addValueEventListener(
-                        new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                String email = (String) dataSnapshot.child("email").getValue();
-                                if (email != null && !email.equals("null")) {
-                                    profile.withEmail(email);
+        if (firebaseAuth.getCurrentUser() != null) {
+            myFirebaseRef.child("users/" + firebaseAuth.getCurrentUser().getUid())
+                    .addValueEventListener(
+                            new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    String email = (String) dataSnapshot.child("email").getValue();
+                                    if (email != null && !email.equals("null")) {
+                                        profile.withEmail(email);
+                                    }
+                                    headerResult.updateProfile(profile);
                                 }
-                                headerResult.updateProfile(profile);
-                            }
 
-                            @Override
-                            public void onCancelled(FirebaseError firebaseError) {
+                                @Override
+                                public void onCancelled(DatabaseError firebaseError) {
 
-                            }
-                        }
-                );
-        myFirebaseRef.child("participants/" + myFirebaseRef.getAuth().getUid())
-                .addValueEventListener(
-                        new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                String displayName = (String) dataSnapshot.child("display_name").getValue();
-                                if (displayName != null && !displayName.equals("null")) {
-                                    profile.withName(displayName);
-                                    pref.edit().putString(MainActivity.PREF_USER_DISPLAY_NAME, displayName).apply();
-                                } else {
-                                    profile.withName((String) dataSnapshot.child("id").getValue());
                                 }
-                                String imgUrl = (String) dataSnapshot.child("image_url").getValue();
-                                if (imgUrl != null) {
-                                    profile.withIcon(imgUrl);
+                            }
+                    );
+            myFirebaseRef.child("participants/" + firebaseAuth.getCurrentUser().getUid())
+                    .addValueEventListener(
+                            new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    String displayName = (String) dataSnapshot.child("display_name").getValue();
+                                    if (displayName != null && !displayName.equals("null")) {
+                                        profile.withName(displayName);
+                                        pref.edit().putString(MainActivity.PREF_USER_DISPLAY_NAME, displayName).apply();
+                                    } else {
+                                        profile.withName((String) dataSnapshot.child("id").getValue());
+                                    }
+                                    String imgUrl = (String) dataSnapshot.child("image_url").getValue();
+                                    if (imgUrl != null) {
+                                        profile.withIcon(imgUrl);
+                                    }
+                                    headerResult.updateProfile(profile);
                                 }
-                                headerResult.updateProfile(profile);
-                            }
 
-                            @Override
-                            public void onCancelled(FirebaseError firebaseError) {
+                                @Override
+                                public void onCancelled(DatabaseError firebaseError) {
 
+                                }
                             }
-                        }
-                );
+                    );
+        }
     }
 
     public void checkGroup() {
@@ -517,7 +525,7 @@ public class MainActivity extends AppCompatActivity
                                 }
 
                                 @Override
-                                public void onCancelled(FirebaseError firebaseError) {
+                                public void onCancelled(DatabaseError firebaseError) {
 
                                 }
                             });
@@ -525,7 +533,7 @@ public class MainActivity extends AppCompatActivity
                     }
 
                     @Override
-                    public void onCancelled(FirebaseError firebaseError) {
+                    public void onCancelled(DatabaseError firebaseError) {
 
                     }
                 });
@@ -536,15 +544,15 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences pref2 = getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
 
         //pref.edit().remove("token").putBoolean("logged_in", false).commit();
-        Firebase thisUserRef = myFirebaseRef.child("users/" + pref.getString(MainActivity.PREF_FIREBASE_UID, null));
-        Firebase thisParticipantRef = myFirebaseRef.child("participants/" + pref.getString(MainActivity.PREF_FIREBASE_UID, null));
+        DatabaseReference thisUserRef = myFirebaseRef.child("users/" + pref.getString(MainActivity.PREF_FIREBASE_UID, null));
+        DatabaseReference thisParticipantRef = myFirebaseRef.child("participants/" + pref.getString(MainActivity.PREF_FIREBASE_UID, null));
         if (pref.getString(MainActivity.PREF_USER_AUTH_TYPE, "").equals("anonymous")) {
             thisUserRef.removeValue();
             thisParticipantRef.removeValue();
         } else {
             thisParticipantRef.child("online").setValue(false);
         }
-        myFirebaseRef.unauth();
+        firebaseAuth.signOut();
         pref.edit().clear().apply();
         pref2.edit().clear().apply();
         AuthenticationClient.clearCookies(getApplicationContext());
@@ -556,7 +564,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public boolean onLeaveGroupClick(MenuItem item) {
-        Firebase thisGroupRef = myFirebaseRef.child("queuegroups/" + groupPref.getString(MainActivity.PREF_GROUP_NAME, null));
+        DatabaseReference thisGroupRef = myFirebaseRef.child("queuegroups/" + groupPref.getString(MainActivity.PREF_GROUP_NAME, null));
         String uid = pref.getString(MainActivity.PREF_FIREBASE_UID, null);
         if (uid != null) {
             if (groupPref.getString(MainActivity.PREF_GROUP_LEADER_UID, "").equals(uid)) {
@@ -716,14 +724,15 @@ public class MainActivity extends AppCompatActivity
 
     public void authenticateAnonymously() {
         Log.d("Authentication", "Authenticating Anonymously");
-        myFirebaseRef.authAnonymously(new Firebase.AuthResultHandler() {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        auth.signInAnonymously().addOnSuccessListener(new OnSuccessListener<AuthResult>() {
             @Override
-            public void onAuthenticated(AuthData authData) {
-                Firebase thisParticipantRef = myFirebaseRef.child("participants/" + authData.getUid());
+            public void onSuccess(AuthResult authResult) {
+                DatabaseReference thisParticipantRef = myFirebaseRef.child("participants/" + authResult.getUser().getUid());
                 thisParticipantRef.child("online").onDisconnect().setValue(false);
                 thisParticipantRef.child("online").setValue(true);
                 thisParticipantRef.child("display_name").setValue("Anonymous");
-                pref.edit().putString(MainActivity.PREF_FIREBASE_UID, authData.getUid())
+                pref.edit().putString(MainActivity.PREF_FIREBASE_UID, authResult.getUser().getUid())
                         .putString(MainActivity.PREF_USER_AUTH_TYPE, "anonymous")
                         .putString(MainActivity.PREF_USER_DISPLAY_NAME, "Anonymous")
                         .apply();
@@ -734,12 +743,35 @@ public class MainActivity extends AppCompatActivity
                 }
                 setUpNavDrawerAndActionBar();
             }
-
+        }).addOnFailureListener(new OnFailureListener() {
             @Override
-            public void onAuthenticationError(FirebaseError firebaseError) {
-                Toast.makeText(getApplicationContext(), "Error authenticating", Toast.LENGTH_SHORT).show();
+            public void onFailure(@NonNull Exception e) {
+
             }
         });
+//            @Override
+//            public void onAuthenticated(AuthData authData) {
+//                DatabaseReference thisParticipantRef = myFirebaseRef.child("participants/" + authData.getUid());
+//                thisParticipantRef.child("online").onDisconnect().setValue(false);
+//                thisParticipantRef.child("online").setValue(true);
+//                thisParticipantRef.child("display_name").setValue("Anonymous");
+//                pref.edit().putString(MainActivity.PREF_FIREBASE_UID, authData.getUid())
+//                        .putString(MainActivity.PREF_USER_AUTH_TYPE, "anonymous")
+//                        .putString(MainActivity.PREF_USER_DISPLAY_NAME, "Anonymous")
+//                        .apply();
+//                FragmentManager fragmentManager = getSupportFragmentManager();
+//                Fragment groupFragment = fragmentManager.findFragmentByTag("GROUP_FRAGMENT");
+//                if (groupFragment == null || !groupFragment.isVisible()) {
+//                    fragmentManager.beginTransaction().replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
+//                }
+//                setUpNavDrawerAndActionBar();
+//            }
+//
+//            @Override
+//            public void onAuthenticationError(DatabaseError firebaseError) {
+//                Toast.makeText(getApplicationContext(), "Error authenticating", Toast.LENGTH_SHORT).show();
+//            }
+//        });
     }
 
     /**
@@ -760,96 +792,6 @@ public class MainActivity extends AppCompatActivity
             return false;
         }
         return true;
-    }
-
-    /**
-     * Stores the registration ID and the app versionCode in the application's
-     * {@code SharedPreferences}.
-     *
-     * @param context application's context.
-     * @param regId   registration ID
-     */
-    private void storeRegistrationId(Context context, String regId) {
-        //int appVersion = getAppVersion(context);
-        Log.i(TAG, "Saving regId on app version " + regId);
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putString(PROPERTY_REG_ID, regId);
-        //editor.putInt(PROPERTY_APP_VERSION, appVersion);
-        editor.commit();
-    }
-
-    /**
-     * Gets the current registration ID for application on GCM service, if there is one.
-     * <p/>
-     * If result is empty, the app needs to register.
-     *
-     * @return registration ID, or empty string if there is no existing
-     * registration ID.
-     */
-    private String getRegistrationId(Context context) {
-        String registrationId = pref.getString(PROPERTY_REG_ID, "");
-        if (registrationId.isEmpty()) {
-            Log.i(TAG, "Registration not found.");
-            return "";
-        }
-        // Check if app was updated; if so, it must clear the registration ID
-        // since the existing regID is not guaranteed to work with the new
-        // app version.
-        //int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
-        //int currentVersion = getAppVersion(context);
-        //if (registeredVersion != currentVersion) {
-        //    Log.i(TAG, "App version changed.");
-        //    return "";
-        // }
-        return registrationId;
-    }
-
-    /**
-     * Registers the application with GCM servers asynchronously.
-     * <p/>
-     * Stores the registration ID and the app versionCode in the application's
-     * shared preferences.
-     */
-    public void registerInBackground() {
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-                String msg = "";
-                try {
-                    if (gcm == null) {
-                        gcm = GoogleCloudMessaging.getInstance(context);
-                    }
-                    regid = gcm.register(SENDER_ID);
-                    msg = "Device registered, registration ID=" + regid;
-
-                    // You should send the registration ID to your server over HTTP, so it
-                    // can use GCM/HTTP or CCS to send messages to your app.
-                    sendRegistrationIdToBackend();
-
-                    // For this demo: we don't need to send it because the device will send
-                    // upstream messages to a server that echo back the message using the
-                    // 'from' address in the message.
-
-                    // Persist the regID - no need to register again.
-                    storeRegistrationId(context, regid);
-                } catch (IOException ex) {
-                    msg = "Error :" + ex.getMessage();
-                    // If there is an error, don't just keep trying to register.
-                    // Require the user to click a button again, or perform
-                    // exponential back-off.
-                }
-                return msg;
-            }
-
-            @Override
-            protected void onPostExecute(String msg) {
-                //mDisplay.append(msg + "\n");
-            }
-        }.execute(null, null, null);
-    }
-
-    private void sendRegistrationIdToBackend() {
-        Log.d("GCM", "Send to backend");
     }
 
     //This is the handler that will manager to process the broadcast intent

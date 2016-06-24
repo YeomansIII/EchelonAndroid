@@ -9,8 +9,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
-import com.firebase.client.Firebase;
-import com.firebase.client.ServerValue;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ServerValue;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -82,7 +82,7 @@ public class FirebaseCommon {
                         JSONObject album = spotifyTrackJson.getJSONObject("album");
                         JSONArray images = album.getJSONArray("images");
                         SharedPreferences groupPrefs = main.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
-                        Firebase push = mainActivity.myFirebaseRef.child("queuegroups").child(groupPrefs.getString(MainActivity.PREF_GROUP_NAME, "")).child("tracks").push();
+                        DatabaseReference push = mainActivity.myFirebaseRef.child("queuegroups").child(groupPrefs.getString(MainActivity.PREF_GROUP_NAME, "")).child("tracks").push();
                         Map<String, Object> toAdd = new HashMap<>();
                         toAdd.put("key", push.getKey());
                         toAdd.put("added", ServerValue.TIMESTAMP);
@@ -119,11 +119,11 @@ public class FirebaseCommon {
     static public void rankSong(String key, final int upDown, MainActivity mainActivity) {
         SharedPreferences prefs = mainActivity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
         SharedPreferences groupPrefs = mainActivity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
-        Firebase ref = mainActivity.myFirebaseRef.child("/queuegroups/"
+        DatabaseReference ref = mainActivity.myFirebaseRef.child("/queuegroups/"
                 + groupPrefs.getString(MainActivity.PREF_GROUP_NAME, null) +
                 "/tracks/" + key);
 
-        String uid = ref.getAuth().getUid();
+        String uid = mainActivity.firebaseAuth.getCurrentUser().getUid();
 
         if (upDown > 0) {
             ref.child("votedUp").child(uid).setValue(true);

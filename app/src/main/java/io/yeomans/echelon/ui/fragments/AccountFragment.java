@@ -12,10 +12,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.DatabaseError ;
+import com.google.firebase.database.ValueEventListener;
 
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.ui.activities.MainActivity;
@@ -31,7 +31,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     //private RadioButton rbPublic, rbPassword, rbFriends, rbInvite;
     private TextInputLayout accountDisplayNameEditWrapper;
     //String selectedPrivacy;
-    private Firebase thisUserRef, thisParticipantRef;
+    private DatabaseReference thisUserRef, thisParticipantRef;
     private String uid;
     private String accountType;
 
@@ -81,7 +81,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
                 }
 
                 @Override
-                public void onCancelled(FirebaseError firebaseError) {
+                public void onCancelled(DatabaseError  firebaseError) {
                     Toast.makeText(mainActivity.getApplicationContext(), "Error getting data", Toast.LENGTH_SHORT).show();
                 }
             });
@@ -111,7 +111,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
                 }
 
                 @Override
-                public void onCancelled(FirebaseError firebaseError) {
+                public void onCancelled(DatabaseError  firebaseError) {
                     Toast.makeText(mainActivity.getApplicationContext(), "Error getting data", Toast.LENGTH_SHORT).show();
                 }
             });

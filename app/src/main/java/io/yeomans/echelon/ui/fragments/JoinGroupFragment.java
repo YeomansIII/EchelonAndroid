@@ -13,10 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.DatabaseError ;
+import com.google.firebase.database.ValueEventListener;
 
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.ui.activities.MainActivity;
@@ -70,7 +70,7 @@ public class JoinGroupFragment extends Fragment implements View.OnClickListener 
     public void onClick(View v) {
         if (v == view.findViewById(R.id.joinGroupCreateButton)) {
             String name = joinGroupNameEditWrapper.getEditText().getText().toString();
-            Firebase refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups/" + name);
+            DatabaseReference refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups/" + name);
             refQueueGroups.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -82,7 +82,7 @@ public class JoinGroupFragment extends Fragment implements View.OnClickListener 
                         String fUid2 = mainPref.getString(MainActivity.PREF_FIREBASE_UID, null);
                         String leaderUid = (String) dataSnapshot.child("leader").getValue();
                         mainActivity.myFirebaseRef.child("users/" + fUid2 + "/cur_group").setValue(name2);
-                        Firebase ref = mainActivity.myFirebaseRef.child("queuegroups/" + name2);
+                        DatabaseReference ref = mainActivity.myFirebaseRef.child("queuegroups/" + name2);
                         ref.child("participants/" + fUid2).setValue(true);
                         groupPref.edit().putString(MainActivity.PREF_GROUP_NAME, name2).putString(MainActivity.PREF_GROUP_LEADER_UID, leaderUid).apply();
 
@@ -108,7 +108,7 @@ public class JoinGroupFragment extends Fragment implements View.OnClickListener 
                 }
 
                 @Override
-                public void onCancelled(FirebaseError firebaseError) {
+                public void onCancelled(DatabaseError  firebaseError) {
 
                 }
             });

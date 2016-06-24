@@ -27,10 +27,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.DatabaseError ;
+import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
@@ -76,7 +76,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
 
     private View view;
     private ArrayList<RelativeLayout> songListArr;
-    Firebase queuegroupRef;
+    DatabaseReference queuegroupRef;
     List<SpotifySong> playqueue;
     SpotifySong nowPlaying;
     private ValueEventListener trackListChangeListener, participantListener, nowPlayingChangeListener;
@@ -131,7 +131,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError  firebaseError) {
 
             }
 
@@ -149,7 +149,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError  firebaseError) {
 
             }
 
@@ -182,7 +182,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                         }
 
                         @Override
-                        public void onCancelled(FirebaseError firebaseError) {
+                        public void onCancelled(DatabaseError  firebaseError) {
 
                         }
                     });
@@ -190,7 +190,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError  firebaseError) {
 
             }
         };

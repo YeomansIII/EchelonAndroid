@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "715574811680",
+    "firebase_url": "https://flickering-heat-6442.firebaseio.com",
+    "project_id": "flickering-heat-6442",
+    "storage_bucket": "flickering-heat-6442.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:715574811680:android:380bd9907ea4b0e6",
+        "android_client_info": {
+          "package_name": "io.yeomans.echelon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "715574811680-ohmf8oumpj5rj4lsh2f64e6dr5e6ibgd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.yeomans.echelon",
+            "certificate_hash": "72E87A678F42050933A5325C67F1AE2F8BF5FF91"
+          }
+        },
+        {
+          "client_id": "715574811680-4apjp1vd9mvvp5d33v0oql7s6ibmhbvq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOAuOOzGEWPGRUOYqoAMurFekJC1-lXH4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "715574811680-4apjp1vd9mvvp5d33v0oql7s6ibmhbvq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

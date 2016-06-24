@@ -13,11 +13,12 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ServerValue;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Player;
@@ -44,7 +45,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
     private static final String TAG = "PlayerService";
 
     public boolean playerSetup = false, firebaseSetup = false;
-    public Firebase firebaseRef, queuegroupRef;
+    public DatabaseReference firebaseRef, queuegroupRef;
     SharedPreferences pref, groupPref;
     private ValueEventListener trackListChangeListener;
     private PlayerBinder playerBinder;
@@ -114,7 +115,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
 
@@ -146,11 +147,11 @@ public class PlayerService extends Service implements PlayerNotificationCallback
         toAdd.put("albumArtMedium", nowPlaying.getAlbumArtMedium());
         toAdd.put("albumArtLarge", nowPlaying.getAlbumArtLarge());
         Log.d(TAG, (new JSONObject(toAdd).toString()));
-        queuegroupRef.child("nowPlaying").setValue(toAdd, new Firebase.CompletionListener() {
+        queuegroupRef.child("nowPlaying").setValue(toAdd, new DatabaseReference.CompletionListener() {
             @Override
-            public void onComplete(FirebaseError firebaseError, Firebase firebase) {
-                if (firebaseError != null) {
-                    System.out.println("Data could not be saved. " + firebaseError.getCode());
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError != null) {
+                    System.out.println("Data could not be saved. " + databaseError.getMessage());
                 } else {
                     System.out.println("Data saved successfully.");
                 }
@@ -180,12 +181,17 @@ public class PlayerService extends Service implements PlayerNotificationCallback
         });
     }
 
-    public void setFirebaseRef(Firebase ref) {
-        firebaseRef = ref;
-        queuegroupRef = firebaseRef.child("queuegroups/" + groupPref.getString(MainActivity.PREF_GROUP_NAME, ""));
-        queuegroupRef.child("tracks").addValueEventListener(trackListChangeListener);
-        firebaseSetup = true;
-        Toast.makeText(PlayerService.this, firebaseRef.getAuth().getUid(), Toast.LENGTH_SHORT).show();
+    public void setFirebaseRef(DatabaseReference ref) {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() != null) {
+            firebaseRef = ref;
+            queuegroupRef = firebaseRef.child("queuegroups/" + groupPref.getString(MainActivity.PREF_GROUP_NAME, ""));
+            queuegroupRef.child("tracks").addValueEventListener(trackListChangeListener);
+            firebaseSetup = true;
+            Toast.makeText(PlayerService.this, auth.getCurrentUser().getUid(), Toast.LENGTH_SHORT).show();
+        } else {
+            Log.d(TAG, "Service not authed");
+        }
     }
 
     public boolean isInitiated() {
