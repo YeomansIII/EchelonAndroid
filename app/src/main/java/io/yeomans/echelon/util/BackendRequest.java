@@ -208,12 +208,7 @@ public class BackendRequest {
                 @Override
                 protected void onPostExecute(String msg) {
                     Log.d("GetFirebaseSpotifyToken", msg);
-                    FirebaseAuth auth;
-                    if (BuildConfig.DEBUG) {
-                        auth = FirebaseAuth.getInstance(activity.firebaseApp);
-                    } else {
-                        auth = FirebaseAuth.getInstance();
-                    }
+                    FirebaseAuth auth = FirebaseAuth.getInstance();
                     auth.signInWithCustomToken(msg).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                         @Override
                         public void onSuccess(AuthResult authResult) {

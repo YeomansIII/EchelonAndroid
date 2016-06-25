@@ -223,22 +223,8 @@ public class MainActivity extends AppCompatActivity
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         setContentView(R.layout.activity_main);
-
-        if (BuildConfig.DEBUG_MODE) {
-            Log.i("MainActivity", "Debug Mode");
-            FirebaseOptions fbOptions = new FirebaseOptions.Builder()
-                    .setApiKey("AIzaSyA1AB-xEi2bRPKW3iazpUwMfObq1mSdo4Q")
-                    .setApplicationId("1:1000399740031:android:380bd9907ea4b0e6")
-                    .setDatabaseUrl("https://echelon-dev.firebaseio.com")
-                    .setStorageBucket("echelon-dev.appspot.com")
-                    .build();
-            firebaseApp = FirebaseApp.initializeApp(this, fbOptions, "Testing");
-            myFirebaseRef = FirebaseDatabase.getInstance(firebaseApp).getReference();
-            firebaseAuth = FirebaseAuth.getInstance(firebaseApp);
-        } else {
-            myFirebaseRef = FirebaseDatabase.getInstance().getReference();
-            firebaseAuth = FirebaseAuth.getInstance();
-        }
+        myFirebaseRef = FirebaseDatabase.getInstance().getReference();
+        firebaseAuth = FirebaseAuth.getInstance();
         spotifyApi = new SpotifyApi();
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint(SpotifyApi.SPOTIFY_WEB_API_ENDPOINT)
@@ -724,8 +710,7 @@ public class MainActivity extends AppCompatActivity
 
     public void authenticateAnonymously() {
         Log.d("Authentication", "Authenticating Anonymously");
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        auth.signInAnonymously().addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+        firebaseAuth.signInAnonymously().addOnSuccessListener(new OnSuccessListener<AuthResult>() {
             @Override
             public void onSuccess(AuthResult authResult) {
                 DatabaseReference thisParticipantRef = myFirebaseRef.child("participants/" + authResult.getUser().getUid());
