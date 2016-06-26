@@ -44,7 +44,7 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
         super.onCreate(savedInstanceState);
 
         mainActivity = (MainActivity) getActivity();
-        mainPref = mainActivity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
+        mainPref = mainActivity.getSharedPreferences(PreferenceNames.MAIN_PREFS_NAME, 0);
     }
 
     @Override
@@ -139,7 +139,7 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
                         createGroupNameEditWrapper.setErrorEnabled(true);
                         createGroupNameEditWrapper.setError("That group name is already taken, try another one");
                     } else {
-                        String fUid2 = mainPref.getString(MainActivity.PREF_FIREBASE_UID, null);
+                        String fUid2 = mainPref.getString(PreferenceNames.PREF_FIREBASE_UID, null);
                         if (fUid2 != null) {
                             mainActivity.myFirebaseRef.child("users/" + fUid2 + "/cur_group").setValue(name);
                             DatabaseReference ref = mainActivity.myFirebaseRef.child("queuegroups");
@@ -154,8 +154,8 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
                             ref.child(name).setValue(map);
                             ref.child(name + "/participants/" + fUid2).setValue(true);
 
-                            SharedPreferences groupSettings = mainActivity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
-                            groupSettings.edit().putString(MainActivity.PREF_GROUP_NAME, name).putString(MainActivity.PREF_GROUP_LEADER_UID, fUid2).apply();
+                            SharedPreferences groupSettings = mainActivity.getSharedPreferences(PreferenceNames.GROUP_PREFS_NAME, 0);
+                            groupSettings.edit().putString(PreferenceNames.PREF_GROUP_NAME, name).putString(PreferenceNames.PREF_GROUP_LEADER_UID, fUid2).apply();
                             View view = mainActivity.getCurrentFocus();
                             if (view != null) {
                                 InputMethodManager imm = (InputMethodManager) mainActivity.getSystemService(

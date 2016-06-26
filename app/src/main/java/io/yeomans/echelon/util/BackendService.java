@@ -1,16 +1,18 @@
 package io.yeomans.echelon.util;
 
-import retrofit.http.POST;
+
+import io.yeomans.echelon.models.BackendSpotifyAuth;
+import io.yeomans.echelon.models.Token;
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.POST;
 
 /**
  * Created by jason on 6/25/16.
  */
-public class BackendService {
-//
-//        @POST("auth/sign_up")
-//        Call<CreateUser_> createUser(@Body CreateUser_ createUser);
-//
-//        @POST("auth/sign_in")
-//        Call<AuthedUser> loginUser(@Body LoginUser_ loginUser);
+public interface BackendService {
 
-    }
+    @POST("spotify-auth")
+    Call<Token> authSpotify(@Body BackendSpotifyAuth createUser);
+
+}

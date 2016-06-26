@@ -1,7 +1,5 @@
 package io.yeomans.echelon.services;
 
-import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;

@@ -13,10 +13,9 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONException;
@@ -131,19 +130,19 @@ public class BackendRequest {
                     try {
                         JSONObject spotify = new JSONObject(msg);
 
-                        SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
+                        SharedPreferences pref = activity.getSharedPreferences(PreferenceNames.MAIN_PREFS_NAME, 0);
                         SharedPreferences.Editor editor = pref.edit();
-                        editor.putString(MainActivity.PREF_SPOTIFY_UID, spotify.getString("id"));
-                        editor.putString(MainActivity.PREF_SPOTIFY_DISPLAY_NAME, spotify.getString("display_name"));
-                        editor.putString(MainActivity.PREF_SPOTIFY_EMAIL, spotify.getString("email"));
-                        editor.putString(MainActivity.PREF_SPOTIFY_EXT_URL, spotify.getJSONObject("external_urls").getString("spotify"));
-                        editor.putString(MainActivity.PREF_SPOTIFY_COUNTRY, spotify.getString("country"));
+                        editor.putString(PreferenceNames.PREF_SPOTIFY_UID, spotify.getString("id"));
+                        editor.putString(PreferenceNames.PREF_SPOTIFY_DISPLAY_NAME, spotify.getString("display_name"));
+                        editor.putString(PreferenceNames.PREF_SPOTIFY_EMAIL, spotify.getString("email"));
+                        editor.putString(PreferenceNames.PREF_SPOTIFY_EXT_URL, spotify.getJSONObject("external_urls").getString("spotify"));
+                        editor.putString(PreferenceNames.PREF_SPOTIFY_COUNTRY, spotify.getString("country"));
                         if (spotify.getJSONArray("images").length() > 0) {
-                            editor.putString(MainActivity.PREF_SPOTIFY_IMAGE_URL, spotify.getJSONArray("images").getJSONObject(0).getString("url"));
+                            editor.putString(PreferenceNames.PREF_SPOTIFY_IMAGE_URL, spotify.getJSONArray("images").getJSONObject(0).getString("url"));
                         }
-                        editor.putString(MainActivity.PREF_SPOTIFY_PRODUCT, spotify.getString("product"));
-                        editor.putString(MainActivity.PREF_SPOTIFY_TYPE, spotify.getString("type"));
-                        editor.putString(MainActivity.PREF_SPOTIFY_URI, spotify.getString("uri"));
+                        editor.putString(PreferenceNames.PREF_SPOTIFY_PRODUCT, spotify.getString("product"));
+                        editor.putString(PreferenceNames.PREF_SPOTIFY_TYPE, spotify.getString("type"));
+                        editor.putString(PreferenceNames.PREF_SPOTIFY_URI, spotify.getString("uri"));
                         editor.apply();
 
                         JSONObject tokenAuth = new JSONObject();
@@ -215,8 +214,8 @@ public class BackendRequest {
                             Log.d("GetFirebaseSpotifyToken", "Login Succeeded!");
                             String fUid = authResult.getUser().getUid();
                             DatabaseReference user = activity.myFirebaseRef.child("users/" + fUid);
-                            SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
-                            pref.edit().putString(MainActivity.PREF_FIREBASE_UID, fUid).putString(MainActivity.PREF_USER_AUTH_TYPE, "spotify").commit();
+                            SharedPreferences pref = activity.getSharedPreferences(PreferenceNames.MAIN_PREFS_NAME, 0);
+                            pref.edit().putString(PreferenceNames.PREF_FIREBASE_UID, fUid).putString(PreferenceNames.PREF_USER_AUTH_TYPE, "spotify").commit();
                             FragmentManager fragmentManager = activity.getSupportFragmentManager();
                             Fragment groupFragment = fragmentManager.findFragmentByTag("GROUP_FRAGMENT");
                             if (groupFragment == null || !groupFragment.isVisible()) {
@@ -229,24 +228,24 @@ public class BackendRequest {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     Log.d("GetFirebaseSpotifyToken", "DATA CHANGED");
-                                    SharedPreferences pref = activity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
-                                    String uid = pref.getString(MainActivity.PREF_FIREBASE_UID, null);
+                                    SharedPreferences pref = activity.getSharedPreferences(PreferenceNames.MAIN_PREFS_NAME, 0);
+                                    String uid = pref.getString(PreferenceNames.PREF_FIREBASE_UID, null);
                                     DatabaseReference user = activity.myFirebaseRef.child("users/" + uid);
                                     DatabaseReference participant = activity.myFirebaseRef.child("participants/" + uid);
                                     if (dataSnapshot.getValue() == null) {
                                         Log.d("GetFirebaseSpotifyToken", "New User, creating in DB");
                                         Map<String, Object> userInfo = new HashMap<>();
-                                        userInfo.put("email", pref.getString(MainActivity.PREF_SPOTIFY_EMAIL, null));
-                                        userInfo.put("product", pref.getString(MainActivity.PREF_SPOTIFY_PRODUCT, null));
-                                        userInfo.put("type", pref.getString(MainActivity.PREF_SPOTIFY_TYPE, null));
+                                        userInfo.put("email", pref.getString(PreferenceNames.PREF_SPOTIFY_EMAIL, null));
+                                        userInfo.put("product", pref.getString(PreferenceNames.PREF_SPOTIFY_PRODUCT, null));
+                                        userInfo.put("type", pref.getString(PreferenceNames.PREF_SPOTIFY_TYPE, null));
 
                                         Map<String, Object> participantInfo = new HashMap<>();
-                                        participantInfo.put("country", pref.getString(MainActivity.PREF_SPOTIFY_COUNTRY, null));
-                                        participantInfo.put("display_name", pref.getString(MainActivity.PREF_SPOTIFY_DISPLAY_NAME, null));
-                                        participantInfo.put("id", pref.getString(MainActivity.PREF_SPOTIFY_UID, null));
-                                        participantInfo.put("ext_url", pref.getString(MainActivity.PREF_SPOTIFY_EXT_URL, null));
-                                        participantInfo.put("uri", pref.getString(MainActivity.PREF_SPOTIFY_URI, null));
-                                        participantInfo.put("image_url", pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, null));
+                                        participantInfo.put("country", pref.getString(PreferenceNames.PREF_SPOTIFY_COUNTRY, null));
+                                        participantInfo.put("display_name", pref.getString(PreferenceNames.PREF_SPOTIFY_DISPLAY_NAME, null));
+                                        participantInfo.put("id", pref.getString(PreferenceNames.PREF_SPOTIFY_UID, null));
+                                        participantInfo.put("ext_url", pref.getString(PreferenceNames.PREF_SPOTIFY_EXT_URL, null));
+                                        participantInfo.put("uri", pref.getString(PreferenceNames.PREF_SPOTIFY_URI, null));
+                                        participantInfo.put("image_url", pref.getString(PreferenceNames.PREF_SPOTIFY_IMAGE_URL, null));
 
 
                                         if (uid != null) {
@@ -256,13 +255,13 @@ public class BackendRequest {
                                     } else {
                                         SharedPreferences.Editor prefEdit = pref.edit();
                                         if (dataSnapshot.hasChild("display_name")) {
-                                            prefEdit.putString(MainActivity.PREF_USER_DISPLAY_NAME, (String) dataSnapshot.child("display_name").getValue());
+                                            prefEdit.putString(PreferenceNames.PREF_USER_DISPLAY_NAME, (String) dataSnapshot.child("display_name").getValue());
                                         }
-                                        participant.child("ext_url").setValue(pref.getString(MainActivity.PREF_SPOTIFY_EXT_URL, null));
-                                        prefEdit.putString(MainActivity.PREF_USER_EXT_URL, pref.getString(MainActivity.PREF_SPOTIFY_EXT_URL, null));
+                                        participant.child("ext_url").setValue(pref.getString(PreferenceNames.PREF_SPOTIFY_EXT_URL, null));
+                                        prefEdit.putString(PreferenceNames.PREF_USER_EXT_URL, pref.getString(PreferenceNames.PREF_SPOTIFY_EXT_URL, null));
 
-                                        participant.child("image_url").setValue(pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, null));
-                                        prefEdit.putString(MainActivity.PREF_USER_IMAGE_URL, pref.getString(MainActivity.PREF_SPOTIFY_IMAGE_URL, null));
+                                        participant.child("image_url").setValue(pref.getString(PreferenceNames.PREF_SPOTIFY_IMAGE_URL, null));
+                                        prefEdit.putString(PreferenceNames.PREF_USER_IMAGE_URL, pref.getString(PreferenceNames.PREF_SPOTIFY_IMAGE_URL, null));
 
                                         prefEdit.apply();
                                     }

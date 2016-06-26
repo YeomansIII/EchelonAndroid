@@ -9,14 +9,13 @@ import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.spotify.sdk.android.player.Config;
@@ -36,7 +35,7 @@ import java.util.Map;
 
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.models.SpotifySong;
-import io.yeomans.echelon.ui.activities.MainActivity;
+import io.yeomans.echelon.util.PreferenceNames;
 
 /**
  * Created by jason on 4/25/16.
@@ -73,8 +72,8 @@ public class PlayerService extends Service implements PlayerNotificationCallback
         playerBinder = new PlayerBinder();
         playQueue = new LinkedList<>();
         backStack = new LinkedList<>();
-        pref = getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
-        groupPref = getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
+        pref = getSharedPreferences(PreferenceNames.MAIN_PREFS_NAME, 0);
+        groupPref = getSharedPreferences(PreferenceNames.GROUP_PREFS_NAME, 0);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("io.yeomans.echelon.STOP_SERVICE");
@@ -185,7 +184,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() != null) {
             firebaseRef = ref;
-            queuegroupRef = firebaseRef.child("queuegroups/" + groupPref.getString(MainActivity.PREF_GROUP_NAME, ""));
+            queuegroupRef = firebaseRef.child("queuegroups/" + groupPref.getString(PreferenceNames.PREF_GROUP_NAME, ""));
             queuegroupRef.child("tracks").addValueEventListener(trackListChangeListener);
             firebaseSetup = true;
             Toast.makeText(PlayerService.this, auth.getCurrentUser().getUid(), Toast.LENGTH_SHORT).show();
@@ -278,7 +277,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
             oldMap.put("nowPlaying", false);
             oldMap.put("played", true);
             firebaseRef.child("queuegroups")
-                    .child(groupPref.getString(MainActivity.PREF_GROUP_NAME, null))
+                    .child(groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null))
                     .child("tracks")
                     .child(old.getKey())
                     .updateChildren(oldMap);
@@ -288,7 +287,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
                 SpotifySong toPlay = playQueue.get(0);
                 mPlayer.play(toPlay.getUri());
                 firebaseRef.child("queuegroups")
-                        .child(groupPref.getString(MainActivity.PREF_GROUP_NAME, null))
+                        .child(groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null))
                         .child("tracks")
                         .child(toPlay.getKey())
                         .child("nowPlaying")

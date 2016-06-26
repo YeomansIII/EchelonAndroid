@@ -17,17 +17,18 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.kaaes.spotify.webapi.core.models.Playlist;
+import io.github.kaaes.spotify.webapi.core.models.PlaylistTrack;
+import io.github.kaaes.spotify.webapi.core.models.Track;
+import io.github.kaaes.spotify.webapi.core.models.TracksPager;
 import io.yeomans.echelon.R;
+import io.yeomans.echelon.callbacks.AddSongCallback;
 import io.yeomans.echelon.ui.activities.MainActivity;
 import io.yeomans.echelon.ui.adapters.SonglistRecyclerAdapter;
-import io.yeomans.echelon.util.FirebaseCommon;
-import kaaes.spotify.webapi.android.models.Playlist;
-import kaaes.spotify.webapi.android.models.PlaylistTrack;
-import kaaes.spotify.webapi.android.models.Track;
-import kaaes.spotify.webapi.android.models.TracksPager;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import io.yeomans.echelon.util.Dependencies;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by jason on 7/10/15.
@@ -63,10 +64,12 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
     RecyclerView.LayoutManager mLayoutManager;
     List<Track> tracks;
 
+    Dependencies dependencies;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setHasOptionsMenu(true);
+        dependencies = Dependencies.INSTANCE;
         mainActivity = (MainActivity) getActivity();
         what = getArguments().getChar("what");
         Log.d("WhatList", "" + what);
@@ -112,7 +115,8 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onSongClick(SonglistRecyclerAdapter.ViewHolder viewHolder) {
                 viewHolder.itemView.setBackgroundColor(Color.GRAY);
-                FirebaseCommon.addSong(viewHolder.trackId, mainActivity);
+                Call<Track> call = dependencies.getSpotify().getTrack(viewHolder.trackId);
+                call.enqueue(new AddSongCallback(mainActivity));
             }
         });
         mRecyclerView.setAdapter(songListRA);
@@ -132,25 +136,28 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
     public void getSongs() {
         if (what == SEARCH) {
             Log.d("WhatList", "Search");
-            mainActivity.spotify.searchTracks(searchQuery, new Callback<TracksPager>() {
+            Call<TracksPager> call = dependencies.getSpotify().searchTracks(searchQuery);
+            call.enqueue(new Callback<TracksPager>() {
                 @Override
-                public void success(TracksPager tracksPager, Response response) {
+                public void onResponse(Call<TracksPager> call, Response<TracksPager> response) {
                     mainActivity.toolbar.setTitle(searchQuery);
-                    tracks.addAll(tracksPager.tracks.items);
+                    tracks.addAll(response.body().tracks.items);
                     songListRA.notifyDataSetChanged();
                     loadOverlay.setVisibility(View.GONE);
                 }
 
                 @Override
-                public void failure(RetrofitError error) {
-                    Log.wtf("WhatList", error.toString() + "   " + error.getMessage());
+                public void onFailure(Call<TracksPager> call, Throwable t) {
+                    Log.wtf("WhatList", t.toString() + "   " + t.getMessage());
                 }
             });
         } else if (what == PLAYLIST) {
             Log.d("WhatList", "Playlist");
-            mainActivity.spotify.getPlaylist(userId, playlistId, new Callback<Playlist>() {
+            Call<Playlist> call = dependencies.getSpotify().getPlaylist(userId, playlistId);
+            call.enqueue(new Callback<Playlist>() {
                 @Override
-                public void success(Playlist playlist, Response response) {
+                public void onResponse(Call<Playlist> call, Response<Playlist> response) {
+                    Playlist playlist = response.body();
                     mainActivity.toolbar.setTitle(playlist.name);
                     for (PlaylistTrack t : playlist.tracks.items) {
                         tracks.add(t.track);
@@ -160,8 +167,8 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
                 }
 
                 @Override
-                public void failure(RetrofitError error) {
-                    Log.wtf("WhatList", error.toString() + "   " + error.getMessage());
+                public void onFailure(Call<Playlist> call, Throwable t) {
+                    Log.wtf("WhatList", t.toString() + "   " + t.getMessage());
                 }
             });
         }

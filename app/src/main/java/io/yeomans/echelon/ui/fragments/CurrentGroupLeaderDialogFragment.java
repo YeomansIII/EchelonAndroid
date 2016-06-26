@@ -11,26 +11,25 @@ import android.support.v7.app.AlertDialog;
 
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.ui.activities.MainActivity;
+import io.yeomans.echelon.util.Dependencies;
+import io.yeomans.echelon.util.PreferenceNames;
 
 /**
  * Created by jason on 10/5/15.
  */
 public class CurrentGroupLeaderDialogFragment extends DialogFragment {
-    SharedPreferences mainPref, groupPref;
-    MainActivity mainActivity;
+    Dependencies dependencies;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        mainActivity = (MainActivity) getActivity();
-        mainPref = mainActivity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
-        groupPref = mainActivity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
+        dependencies = Dependencies.INSTANCE;
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Active Group");
         builder.setMessage("You are currently the leader of a group, what would you like to do?")
                 .setPositiveButton("Go To Group", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                         Fragment fragment = new GroupFragment();
                         Bundle bundle = new Bundle();
                         bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
@@ -42,12 +41,12 @@ public class CurrentGroupLeaderDialogFragment extends DialogFragment {
                 })
                 .setNegativeButton("Destroy Group", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        String fUid = mainPref.getString(MainActivity.PREF_FIREBASE_UID, null);
-                        String groupName = groupPref.getString(MainActivity.PREF_GROUP_NAME, null);
+                        String fUid = dependencies.getPreferences().getString(PreferenceNames.PREF_FIREBASE_UID, null);
+                        String groupName = dependencies.getGroupPreferences().getString(PreferenceNames.PREF_GROUP_NAME, null);
                         if (fUid != null && groupName != null) {
-                            mainActivity.myFirebaseRef.child("users/" + fUid + "/cur_group").removeValue();
-                            mainActivity.myFirebaseRef.child("queuegroups/" + groupName).removeValue();
-                            groupPref.edit().clear().apply();
+                            dependencies.getDatabase().getReference("users/" + fUid + "/cur_group").removeValue();
+                            dependencies.getDatabase().getReference("queuegroups/" + groupName).removeValue();
+                            dependencies.getGroupPreferences().edit().clear().apply();
                         }
                     }
                 });

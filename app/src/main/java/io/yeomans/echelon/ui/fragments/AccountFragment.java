@@ -40,10 +40,10 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
 
         mainActivity = (MainActivity) getActivity();
-        mainPref = mainActivity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
-        groupPref = mainActivity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
-        uid = mainPref.getString(MainActivity.PREF_FIREBASE_UID, null);
-        accountType = mainPref.getString(MainActivity.PREF_USER_AUTH_TYPE, "none");
+        mainPref = mainActivity.getSharedPreferences(PreferenceNames.MAIN_PREFS_NAME, 0);
+        groupPref = mainActivity.getSharedPreferences(PreferenceNames.GROUP_PREFS_NAME, 0);
+        uid = mainPref.getString(PreferenceNames.PREF_FIREBASE_UID, null);
+        accountType = mainPref.getString(PreferenceNames.PREF_USER_AUTH_TYPE, "none");
         thisUserRef = mainActivity.myFirebaseRef.child("users/" + uid);
         thisParticipantRef = mainActivity.myFirebaseRef.child("participants/" + uid);
     }
@@ -76,7 +76,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
                             ((TextView) view.findViewById(R.id.accountEmailText)).setText((String) dataSnapshot.child("email").getValue());
                         }
                     } else {
-                        ((TextView) view.findViewById(R.id.accountIdText)).setText(mainPref.getString(MainActivity.PREF_FIREBASE_UID, "error"));
+                        ((TextView) view.findViewById(R.id.accountIdText)).setText(mainPref.getString(PreferenceNames.PREF_FIREBASE_UID, "error"));
                     }
                 }
 

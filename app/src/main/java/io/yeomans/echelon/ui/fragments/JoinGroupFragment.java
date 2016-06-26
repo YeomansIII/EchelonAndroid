@@ -1,6 +1,5 @@
 package io.yeomans.echelon.ui.fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -14,12 +13,14 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.DatabaseError ;
 import com.google.firebase.database.ValueEventListener;
 
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.ui.activities.MainActivity;
+import io.yeomans.echelon.util.Dependencies;
+import io.yeomans.echelon.util.PreferenceNames;
 
 /**
  * Created by jason on 7/1/15.
@@ -29,6 +30,7 @@ public class JoinGroupFragment extends Fragment implements View.OnClickListener 
     private View view;
     private MainActivity mainActivity;
     private SharedPreferences mainPref, groupPref;
+    private Dependencies dependencies;
     //private RadioButton rbPublic, rbPassword, rbFriends, rbInvite;
     private TextInputLayout joinGroupNameEditWrapper, joinGroupPasswordEditWrapper;
     //String selectedPrivacy;
@@ -37,9 +39,11 @@ public class JoinGroupFragment extends Fragment implements View.OnClickListener 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        dependencies = Dependencies.INSTANCE;
+
         mainActivity = (MainActivity) getActivity();
-        mainPref = mainActivity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
-        groupPref = mainActivity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
+        mainPref = mainActivity.getSharedPreferences(PreferenceNames.MAIN_PREFS_NAME, 0);
+        groupPref = mainActivity.getSharedPreferences(PreferenceNames.GROUP_PREFS_NAME, 0);
     }
 
     @Override
@@ -62,15 +66,10 @@ public class JoinGroupFragment extends Fragment implements View.OnClickListener 
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-    }
-
-    @Override
     public void onClick(View v) {
         if (v == view.findViewById(R.id.joinGroupCreateButton)) {
             String name = joinGroupNameEditWrapper.getEditText().getText().toString();
-            DatabaseReference refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups/" + name);
+            DatabaseReference refQueueGroups = dependencies.getDatabase().getReference("queuegroups/" + name);
             refQueueGroups.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -79,12 +78,12 @@ public class JoinGroupFragment extends Fragment implements View.OnClickListener 
                         joinGroupNameEditWrapper.setError("That group does not exist");
                     } else {
                         String name2 = joinGroupNameEditWrapper.getEditText().getText().toString();
-                        String fUid2 = mainPref.getString(MainActivity.PREF_FIREBASE_UID, null);
+                        String fUid2 = mainPref.getString(PreferenceNames.PREF_FIREBASE_UID, null);
                         String leaderUid = (String) dataSnapshot.child("leader").getValue();
-                        mainActivity.myFirebaseRef.child("users/" + fUid2 + "/cur_group").setValue(name2);
-                        DatabaseReference ref = mainActivity.myFirebaseRef.child("queuegroups/" + name2);
+                        Dependencies.INSTANCE.getDatabase().getReference("users/" + fUid2 + "/cur_group").setValue(name2);
+                        DatabaseReference ref = dependencies.getDatabase().getReference("queuegroups/" + name2);
                         ref.child("participants/" + fUid2).setValue(true);
-                        groupPref.edit().putString(MainActivity.PREF_GROUP_NAME, name2).putString(MainActivity.PREF_GROUP_LEADER_UID, leaderUid).apply();
+                        groupPref.edit().putString(PreferenceNames.PREF_GROUP_NAME, name2).putString(PreferenceNames.PREF_GROUP_LEADER_UID, leaderUid).apply();
 
                         View view = mainActivity.getCurrentFocus();
                         if (view != null) {
@@ -108,7 +107,7 @@ public class JoinGroupFragment extends Fragment implements View.OnClickListener 
                 }
 
                 @Override
-                public void onCancelled(DatabaseError  firebaseError) {
+                public void onCancelled(DatabaseError firebaseError) {
 
                 }
             });

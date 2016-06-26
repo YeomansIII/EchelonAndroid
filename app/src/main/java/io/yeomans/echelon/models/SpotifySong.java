@@ -16,11 +16,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import kaaes.spotify.webapi.android.models.AlbumSimple;
-import kaaes.spotify.webapi.android.models.ArtistSimple;
-import kaaes.spotify.webapi.android.models.Image;
-import kaaes.spotify.webapi.android.models.LinkedTrack;
-import kaaes.spotify.webapi.android.models.Track;
+import io.github.kaaes.spotify.webapi.core.models.AlbumSimple;
+import io.github.kaaes.spotify.webapi.core.models.ArtistSimple;
+import io.github.kaaes.spotify.webapi.core.models.Image;
+import io.github.kaaes.spotify.webapi.core.models.LinkedTrack;
+import io.github.kaaes.spotify.webapi.core.models.Track;
 
 /**
  * Created by jason on 6/26/15.

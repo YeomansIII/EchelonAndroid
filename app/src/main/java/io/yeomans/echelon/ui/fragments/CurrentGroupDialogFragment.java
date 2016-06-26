@@ -22,8 +22,8 @@ public class CurrentGroupDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         mainActivity = (MainActivity) getActivity();
-        mainPref = mainActivity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
-        groupPref = mainActivity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
+        mainPref = mainActivity.getSharedPreferences(PreferenceNames.MAIN_PREFS_NAME, 0);
+        groupPref = mainActivity.getSharedPreferences(PreferenceNames.GROUP_PREFS_NAME, 0);
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Active Group");
@@ -42,8 +42,8 @@ public class CurrentGroupDialogFragment extends DialogFragment {
                 })
                 .setNegativeButton("Leave Group", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        String fUid = mainPref.getString(MainActivity.PREF_FIREBASE_UID, null);
-                        String groupName = groupPref.getString(MainActivity.PREF_GROUP_NAME, null);
+                        String fUid = mainPref.getString(PreferenceNames.PREF_FIREBASE_UID, null);
+                        String groupName = groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null);
                         if (fUid != null && groupName != null) {
                             mainActivity.myFirebaseRef.child("users/" + fUid + "/cur_group").removeValue();
                             mainActivity.myFirebaseRef.child("queuegroups/" + groupName + "/participants/" + fUid).removeValue();

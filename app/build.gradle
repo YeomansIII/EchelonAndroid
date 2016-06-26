@@ -1,14 +1,4 @@
-buildscript {
-    repositories {
-        maven { url 'https://maven.fabric.io/public' }
-    }
-
-    dependencies {
-        classpath 'io.fabric.tools:gradle:1.+'
-    }
-}
 apply plugin: 'com.android.application'
-apply plugin: 'io.fabric'
 
 android {
     compileSdkVersion 24
@@ -84,7 +74,7 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.4.0@aar') {
         transitive = true;
     }
-    compile('com.mikepenz:materialdrawer:5.0.4@aar') {
+    compile('com.mikepenz:materialdrawer:5.3.1@aar') {
         transitive = true
     }
     compile 'com.android.support:appcompat-v7:24.0.0'
@@ -97,9 +87,14 @@ dependencies {
     compile 'com.google.firebase:firebase-messaging:9.0.2'
     compile 'com.google.firebase:firebase-database:9.0.2'
     compile 'com.google.firebase:firebase-auth:9.0.2'
+    compile 'com.google.firebase:firebase-crash:9.0.2'
+    compile 'com.google.firebase:firebase-config:9.0.2'
     compile 'com.squareup.okhttp3:okhttp:3.1.1'
     compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.github.kaaes.spotify-web-api-android:api-retrofit2:0.4.1'
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
+    compile 'com.spotify.webapi.android:spotify-api-core:0.4.1@aar'
+    compile 'com.spotify.webapi.android:spotify-api-retrofit2:0.4.1@aar'
 }
 
 apply plugin: 'com.google.gms.google-services'

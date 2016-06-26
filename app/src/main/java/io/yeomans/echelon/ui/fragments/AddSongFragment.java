@@ -40,7 +40,7 @@ public class AddSongFragment extends Fragment {
         View view = inflater.inflate(R.layout.add_song_fragment,
                 container, false);
 
-        groupSettings = getActivity().getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
+        groupSettings = getActivity().getSharedPreferences(PreferenceNames.GROUP_PREFS_NAME, 0);
 
         mainActivity.toolbar.setBackgroundColor(getResources().getColor(R.color.primaryColor));
         mainActivity.getSupportActionBar().setTitle("Echelon");

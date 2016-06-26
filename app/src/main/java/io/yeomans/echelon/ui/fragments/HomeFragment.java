@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.ui.activities.MainActivity;
+import io.yeomans.echelon.util.PreferenceNames;
 
 /**
  * Created by jason on 7/1/15.
@@ -29,8 +30,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
 
         mainActivity = (MainActivity) getActivity();
-        mainPref = mainActivity.getSharedPreferences(MainActivity.MAIN_PREFS_NAME, 0);
-        groupPref = mainActivity.getSharedPreferences(MainActivity.GROUP_PREFS_NAME, 0);
+        mainPref = mainActivity.getSharedPreferences(PreferenceNames.MAIN_PREFS_NAME, 0);
+        groupPref = mainActivity.getSharedPreferences(PreferenceNames.GROUP_PREFS_NAME, 0);
     }
 
     @Override
@@ -39,7 +40,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.home_fragment,
                 container, false);
         View createButton = view.findViewById(R.id.createGroupButton);
-        if (mainPref.getString(MainActivity.PREF_USER_AUTH_TYPE, "").equals("spotify") && mainPref.getBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false) && mainPref.getString(MainActivity.PREF_SPOTIFY_PRODUCT, "").equals("premium")) {
+        if (mainPref.getString(PreferenceNames.PREF_USER_AUTH_TYPE, "").equals("spotify") && mainPref.getBoolean(PreferenceNames.PREF_SPOTIFY_AUTHENTICATED, false) && mainPref.getString(PreferenceNames.PREF_SPOTIFY_PRODUCT, "").equals("premium")) {
             createButton.setOnClickListener(this);
         } else {
             createButton.setVisibility(View.GONE);
@@ -70,22 +71,22 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             boolean leader = true;
             Log.d("Button", "Create Button");
             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-            if (groupPref.getString(MainActivity.PREF_GROUP_NAME, null) == null) {
-                if (mainPref.getBoolean(MainActivity.PREF_SPOTIFY_AUTHENTICATED, false) && mainPref.getString(MainActivity.PREF_SPOTIFY_PRODUCT, "").equalsIgnoreCase("premium")) {
+            if (groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null) == null) {
+                if (mainPref.getBoolean(PreferenceNames.PREF_SPOTIFY_AUTHENTICATED, false) && mainPref.getString(PreferenceNames.PREF_SPOTIFY_PRODUCT, "").equalsIgnoreCase("premium")) {
 //                    DatabaseReference refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups");
 //                    Map<String, Object> map = new HashMap<>();
 //                    map.put("name", "testname");
 //                    refQueueGroups.push().setValue(map);
                     fragmentManager.beginTransaction().replace(R.id.container, new CreateGroupFragment(), "CREATE_GROUP_FRAG").addToBackStack(null).commit();
                 } else {
-                    Toast.makeText(getActivity().getApplicationContext(), "Please login to your Spotify Premium account under settings", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity().getApplicationContext(), "A Spotify Premium account is required", Toast.LENGTH_LONG).show();
                 }
             } else {
                 Toast.makeText(getActivity().getApplicationContext(), "You are already in a group", Toast.LENGTH_SHORT).show();
             }
         } else if (v == view.findViewById(R.id.joinGroupButton)) {
             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-            if (groupPref.getString(MainActivity.PREF_GROUP_NAME, null) == null) {
+            if (groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null) == null) {
                 Log.d("Button", "Join Group Button");
                 fragmentManager.beginTransaction().replace(R.id.container, new JoinGroupFragment(), "JOIN_GROUP_FRAG").addToBackStack(null).commit();
             } else {

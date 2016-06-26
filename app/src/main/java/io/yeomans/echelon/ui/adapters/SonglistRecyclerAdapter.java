@@ -14,10 +14,10 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.kaaes.spotify.webapi.core.models.ArtistSimple;
+import io.github.kaaes.spotify.webapi.core.models.Track;
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.models.SpotifySong;
-import kaaes.spotify.webapi.android.models.ArtistSimple;
-import kaaes.spotify.webapi.android.models.Track;
 
 /**
  * Created by jason on 2/9/16.

@@ -14,9 +14,9 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.kaaes.spotify.webapi.core.models.PlaylistSimple;
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.ui.fragments.ListSongFragment;
-import kaaes.spotify.webapi.android.models.PlaylistSimple;
 
 /**
  * Created by jason on 2/9/16.

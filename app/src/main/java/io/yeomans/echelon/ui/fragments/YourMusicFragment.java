@@ -15,14 +15,16 @@ import android.widget.RelativeLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.kaaes.spotify.webapi.core.models.Pager;
+import io.github.kaaes.spotify.webapi.core.models.PlaylistSimple;
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.ui.activities.MainActivity;
 import io.yeomans.echelon.ui.adapters.PlaylistRecyclerAdapter;
-import kaaes.spotify.webapi.android.models.Pager;
-import kaaes.spotify.webapi.android.models.PlaylistSimple;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import io.yeomans.echelon.util.Dependencies;
+import io.yeomans.echelon.util.PreferenceNames;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by jason on 7/10/15.
@@ -49,11 +51,13 @@ public class YourMusicFragment extends Fragment implements View.OnClickListener 
     PlaylistRecyclerAdapter playlistRA;
     RecyclerView.LayoutManager mLayoutManager;
     List<PlaylistSimple> playlists;
+    Dependencies dependencies;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setHasOptionsMenu(true);
+        dependencies = Dependencies.INSTANCE;
         mainActivity = (MainActivity) getActivity();
         selected = false;
         playlists = new ArrayList<>();
@@ -150,19 +154,20 @@ public class YourMusicFragment extends Fragment implements View.OnClickListener 
     }
 
     public void getYourPlaylists() {
-        String sUid = mainActivity.pref.getString(MainActivity.PREF_SPOTIFY_UID, null);
+        String sUid = mainActivity.pref.getString(PreferenceNames.PREF_SPOTIFY_UID, null);
         if (sUid != null) {
-            mainActivity.spotify.getPlaylists(sUid, new Callback<Pager<PlaylistSimple>>() {
+            Call<Pager<PlaylistSimple>> call = dependencies.getSpotify().getPlaylists(sUid);
+            call.enqueue(new Callback<Pager<PlaylistSimple>>() {
                 @Override
-                public void success(Pager<PlaylistSimple> playlistSimplePager, Response response) {
+                public void onResponse(Call<Pager<PlaylistSimple>> call, Response<Pager<PlaylistSimple>> response) {
                     Log.i("Playlists", "Get playlist results");
-                    playlists.addAll(playlistSimplePager.items);
+                    playlists.addAll(response.body().items);
                     playlistRA.notifyDataSetChanged();
                     loadOverlay.setVisibility(View.GONE);
                 }
 
                 @Override
-                public void failure(RetrofitError error) {
+                public void onFailure(Call<Pager<PlaylistSimple>> call, Throwable t) {
 
                 }
             });
