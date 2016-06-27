@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/joinGroupFragmentLayout"
@@ -16,7 +16,7 @@
             android:layout_marginBottom="10dp"
             android:layout_marginTop="10dp"
             android:text="Join a Group"
-            android:textSize="25sp" />
+            android:textSize="25sp"/>
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/joinGroupNameEditWrapper"
@@ -33,7 +33,7 @@
                 android:drawableStart="@drawable/ic_library_music_black_24dp"
                 android:ems="10"
                 android:hint="Group Name"
-                android:inputType="text" />
+                android:inputType="text"/>
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
@@ -53,16 +53,14 @@
                 android:drawableStart="@drawable/ic_lock_outline_black_24dp"
                 android:ems="10"
                 android:hint="Group Password"
-                android:inputType="text" />
+                android:inputType="text"/>
         </android.support.design.widget.TextInputLayout>
 
-        <io.yeomans.echelon.ui.views.ButtonRectangle
+        <Button
             android:id="@+id/joinGroupCreateButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:text="Join Group" />
+            android:text="Join Group"
+            android:theme="@style/EchelonRaisedButton"/>
     </LinearLayout>
 </RelativeLayout>

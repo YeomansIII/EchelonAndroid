@@ -11,6 +11,8 @@ import android.support.v7.app.AlertDialog;
 
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.ui.activities.MainActivity;
+import io.yeomans.echelon.util.Dependencies;
+import io.yeomans.echelon.util.PreferenceNames;
 
 /**
  * Created by jason on 10/5/15.
@@ -18,9 +20,11 @@ import io.yeomans.echelon.ui.activities.MainActivity;
 public class CurrentGroupDialogFragment extends DialogFragment {
     SharedPreferences mainPref, groupPref;
     MainActivity mainActivity;
+    Dependencies dependencies;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        dependencies = Dependencies.INSTANCE;
         mainActivity = (MainActivity) getActivity();
         mainPref = mainActivity.getSharedPreferences(PreferenceNames.MAIN_PREFS_NAME, 0);
         groupPref = mainActivity.getSharedPreferences(PreferenceNames.GROUP_PREFS_NAME, 0);
@@ -45,8 +49,8 @@ public class CurrentGroupDialogFragment extends DialogFragment {
                         String fUid = mainPref.getString(PreferenceNames.PREF_FIREBASE_UID, null);
                         String groupName = groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null);
                         if (fUid != null && groupName != null) {
-                            mainActivity.myFirebaseRef.child("users/" + fUid + "/cur_group").removeValue();
-                            mainActivity.myFirebaseRef.child("queuegroups/" + groupName + "/participants/" + fUid).removeValue();
+                            dependencies.getCurrentUserReference().child("/cur_group").removeValue();
+                            dependencies.getCurrentGroupReference().child("participants/" + fUid).removeValue();
                             groupPref.edit().clear().apply();
                         }
                     }

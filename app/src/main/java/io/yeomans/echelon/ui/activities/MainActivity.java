@@ -4,28 +4,23 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.menu.ActionMenuItemView;
-import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -34,16 +29,11 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -62,7 +52,6 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
-import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.squareup.picasso.Picasso;
 
@@ -71,7 +60,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.fabric.sdk.android.Fabric;
 import io.github.kaaes.spotify.webapi.retrofit.v2.SpotifyService;
 import io.yeomans.echelon.BuildConfig;
 import io.yeomans.echelon.R;
@@ -129,8 +117,7 @@ public class MainActivity extends AppCompatActivity
         public void onServiceConnected(ComponentName name, IBinder service) {
             playerService = ((PlayerService.PlayerBinder) service).getService();
             if (!playerService.isInitiated()) {
-                playerService.setFirebaseRef(dependencies.getDatabase().getReference());
-                playerService.configPlayer(spotifyAuthToken, CLIENT_ID);
+                playerService.configPlayer();
             }
             Log.i("PlayerService", "Connected to MainActivity");
         }
@@ -167,7 +154,6 @@ public class MainActivity extends AppCompatActivity
     public static final String PROD_FIREBASE_URL = "https://flickering-heat-6442.firebaseio.com/";
     public static final String DEV_FIREBASE_URL = "https://echelon-dev.firebaseio.com/";
     public static final String ECHELON_PROD_WORKER_URL = "https://api.echelonapp.io/";
-    public static final String ECHELON_DEV_WORKER_URL = "https://worker-dev-dot-echelon-1000.appspot.com/";
     //public static final String ECHELON_DEV_WORKER_URL = "http://192.168.0.204:8080/";
 
     //COMMON
@@ -180,32 +166,22 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Fabric.with(this, new Crashlytics());
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         setContentView(R.layout.activity_main);
-        Dependencies.INSTANCE.init(this);
+        Dependencies.INSTANCE.init(getApplicationContext());
         dependencies = Dependencies.INSTANCE;
-
-        spotify = io.github.kaaes.spotify.webapi.retrofit.v2.Spotify.createAuthenticatedService(spotifyAuthToken);
-        Picasso.with(getApplicationContext()).setIndicatorsEnabled(BuildConfig.DEBUG);
-        context = getApplicationContext();
-        mainActivity = this;
-        mainActivityClass = MainActivity.this;
-
-        pref = getSharedPreferences(MAIN_PREFS_NAME, 0);
-        groupPref = getSharedPreferences(GROUP_PREFS_NAME, 0);
 
         //String token = pref.getString(PREF_ECHELON_API_TOKEN, null);
 
 
         if (dependencies.getAuth().getCurrentUser() == null) {
             loggedIn = false;
+            Intent intent = new Intent(MainActivity.this, WelcomeActivity.class);
+            startActivity(intent);
+            MainActivity.this.finish();
         } else {
             loggedIn = true;
             DatabaseReference userRef = dependencies.getDatabase().getReference("users/" + dependencies.getAuth().getCurrentUser().getUid());
-            userRef.child("online").onDisconnect().setValue(false);
-            userRef.child("online").setValue(true);
             userRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -227,16 +203,21 @@ public class MainActivity extends AppCompatActivity
                     Toast.makeText(getApplicationContext(), "Error accessing the database", Toast.LENGTH_SHORT).show();
                 }
             });
-            if (pref.getBoolean(PreferenceNames.PREF_SPOTIFY_AUTHENTICATED, false)) {
-                authenticateSpotify();
-            }
         }
+
+        spotify = io.github.kaaes.spotify.webapi.retrofit.v2.Spotify.createAuthenticatedService(spotifyAuthToken);
+        Picasso.with(getApplicationContext()).setIndicatorsEnabled(BuildConfig.DEBUG);
+        context = getApplicationContext();
+        mainActivity = this;
+        mainActivityClass = MainActivity.this;
+
+        pref = dependencies.getPreferences();
+        groupPref = dependencies.getGroupPreferences();
 
         playQueue = new LinkedList<>();
         backStack = new LinkedList<>();
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        colorizeToolbar(toolbar, Color.WHITE, this);
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
@@ -251,12 +232,15 @@ public class MainActivity extends AppCompatActivity
             Log.i(TAG, "No valid Google Play Services APK found.");
         }
 
-        if (!loggedIn) {
-            setContentViewLogin();
-        } else {
-            setContentViewHome();
-            setUpNavDrawerAndActionBar();
-        }
+//        if (!loggedIn) {
+//            setContentViewLogin();
+//        } else {
+//            setContentViewHome();
+//            setUpNavDrawerAndActionBar();
+//        }
+        setContentViewHome();
+        setUpNavDrawerAndActionBar();
+        startup();
 
         setOnPlayerControlCallback(((OnPlayerControlCallback) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")));
     }
@@ -345,11 +329,9 @@ public class MainActivity extends AppCompatActivity
                                     }
                                     Fragment fragment = new GroupFragment();
                                     Bundle bundle = new Bundle();
-                                    if (groupPref.getString(PreferenceNames..PREF_GROUP_LEADER_UID,
-                                    "").
-                                    equals(pref.getString(PreferenceNames.PREF_FIREBASE_UID, "."))){
+                                    if (groupPref.getString(PreferenceNames.PREF_GROUP_LEADER_UID, "").equals(pref.getString(PreferenceNames.PREF_FIREBASE_UID, "."))) {
                                         bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
-                                    }else{
+                                    } else {
                                         bundle.putStringArray("extra_stuff", new String[]{"" + false, "" + false});
                                     }
                                     fragment.setArguments(bundle);
@@ -381,8 +363,8 @@ public class MainActivity extends AppCompatActivity
                         return false;
                     }
                 }).build();
-        if (firebaseAuth.getCurrentUser() != null) {
-            myFirebaseRef.child("users/" + firebaseAuth.getCurrentUser().getUid())
+        if (dependencies.getAuth().getCurrentUser() != null) {
+            dependencies.getCurrentUserReference()
                     .addValueEventListener(
                             new ValueEventListener() {
                                 @Override
@@ -400,7 +382,7 @@ public class MainActivity extends AppCompatActivity
                                 }
                             }
                     );
-            myFirebaseRef.child("participants/" + firebaseAuth.getCurrentUser().getUid())
+            dependencies.getCurrentParticipantReference()
                     .addValueEventListener(
                             new ValueEventListener() {
                                 @Override
@@ -429,12 +411,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void checkGroup() {
-        myFirebaseRef.child("users/" + pref.getString(PreferenceNames.PREF_FIREBASE_UID, null) + "/cur_group")
+        dependencies.getCurrentUserReference().child("cur_group")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot.getValue() != null) {
-                            myFirebaseRef.child("queuegroups/" + dataSnapshot.getValue()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            dependencies.getDatabase().getReference("queuegroups/" + dataSnapshot.getValue()).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     if (dataSnapshot.getValue() != null) {
@@ -457,7 +439,7 @@ public class MainActivity extends AppCompatActivity
                                         Log.d("Dialog", "Show group dialog");
                                         //fragmentTransaction.commitAllowingStateLoss();
                                     } else {
-                                        myFirebaseRef.child("users/" + pref.getString(PreferenceNames.PREF_FIREBASE_UID, null) + "/cur_group").removeValue();
+                                        dependencies.getCurrentUserReference().child("cur_group").removeValue();
                                     }
                                 }
 
@@ -477,23 +459,16 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void logout() {
-        SharedPreferences pref = getSharedPreferences(PreferenceNames.MAIN_PREFS_NAME, 0);
-        SharedPreferences pref2 = getSharedPreferences(PreferenceNames.GROUP_PREFS_NAME, 0);
-
-        //pref.edit().remove("token").putBoolean("logged_in", false).commit();
-        DatabaseReference thisUserRef = myFirebaseRef.child("users/" + pref.getString(PreferenceNames.PREF_FIREBASE_UID, null));
-        DatabaseReference thisParticipantRef = myFirebaseRef.child("participants/" + pref.getString(PreferenceNames.PREF_FIREBASE_UID, null));
         if (pref.getString(PreferenceNames.PREF_USER_AUTH_TYPE, "").equals("anonymous")) {
-            thisUserRef.removeValue();
-            thisParticipantRef.removeValue();
+            dependencies.getCurrentUserReference().removeValue();
+            dependencies.getCurrentParticipantReference().removeValue();
         } else {
-            thisParticipantRef.child("online").setValue(false);
+            dependencies.getCurrentParticipantReference().child("online").setValue(false);
         }
         dependencies.getAuth().signOut();
         pref.edit().clear().apply();
-        pref2.edit().clear().apply();
+        groupPref.edit().clear().apply();
         AuthenticationClient.clearCookies(getApplicationContext());
-        //spotifyLogout();
         FragmentManager fragmentManager = getSupportFragmentManager();
         ((ControlBarFragment) fragmentManager.findFragmentByTag("CONTROL_FRAG")).unReady();
         fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
@@ -501,20 +476,19 @@ public class MainActivity extends AppCompatActivity
     }
 
     public boolean onLeaveGroupClick(MenuItem item) {
-        DatabaseReference thisGroupRef = myFirebaseRef.child("queuegroups/" + groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null));
-        String uid = pref.getString(PreferenceNames.PREF_FIREBASE_UID, null);
-        if (uid != null) {
+        if (dependencies.getAuth().getCurrentUser() != null) {
+            String uid = dependencies.getAuth().getCurrentUser().getUid();
             if (groupPref.getString(PreferenceNames.PREF_GROUP_LEADER_UID, "").equals(uid)) {
-                thisGroupRef.removeValue();
+                dependencies.getCurrentGroupReference().removeValue();
             } else {
-                thisGroupRef.child("participants/" + uid).removeValue();
+                dependencies.getCurrentGroupReference().child("participants/" + uid).removeValue();
             }
             dependencies.getDatabase().getReference("users/" + uid + "/cur_group").removeValue();
             groupPref.edit().clear().apply();
             ((ControlBarFragment) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")).unReady();
             setContentViewHome();
         } else {
-            Toast.makeText(getApplicationContext(), "Error, not identified, please log in", Toast.LENGTH_SHORT).show();
+            Snackbar.make(findViewById(R.id.coordinator_layout), "Not identified, please log in", Snackbar.LENGTH_SHORT).show();
             logout();
         }
         return true;
@@ -531,7 +505,7 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    public void completeLogin() {
+    public void startup() {
         Intent playerIntent = new Intent(this, PlayerService.class);
         if (EchelonUtils.isServiceRunning(this, PlayerService.class)) {
             playerConnBound = getApplicationContext().bindService(playerIntent, playerConn, 0);
@@ -547,14 +521,14 @@ public class MainActivity extends AppCompatActivity
     public void onResume() {
         super.onResume();
         Log.d("Main", "Activity onResume()");
-        context.registerReceiver(actionGcmReceiver, new IntentFilter("gcm_intent"));
+        //context.registerReceiver(actionGcmReceiver, new IntentFilter("gcm_intent"));
     }
 
     //Must unregister onPause()
     @Override
     protected void onPause() {
         super.onPause();
-        context.unregisterReceiver(actionGcmReceiver);
+        //context.unregisterReceiver(actionGcmReceiver);
     }
 
     @Override
@@ -574,57 +548,6 @@ public class MainActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
-    }
-
-    public void authenticateAnonymously() {
-        Log.d("Authentication", "Authenticating Anonymously");
-        dependencies.getAuth().signInAnonymously().addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-            @Override
-            public void onSuccess(AuthResult authResult) {
-                DatabaseReference thisParticipantRef = myFirebaseRef.child("participants/" + authResult.getUser().getUid());
-                thisParticipantRef.child("online").onDisconnect().setValue(false);
-                thisParticipantRef.child("online").setValue(true);
-                thisParticipantRef.child("display_name").setValue("Anonymous");
-                pref.edit().putString(PreferenceNames.PREF_FIREBASE_UID, authResult.getUser().getUid())
-                        .putString(PreferenceNames.PREF_USER_AUTH_TYPE, "anonymous")
-                        .putString(PreferenceNames.PREF_USER_DISPLAY_NAME, "Anonymous")
-                        .apply();
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                Fragment groupFragment = fragmentManager.findFragmentByTag("GROUP_FRAGMENT");
-                if (groupFragment == null || !groupFragment.isVisible()) {
-                    fragmentManager.beginTransaction().replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
-                }
-                setUpNavDrawerAndActionBar();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-
-            }
-        });
-//            @Override
-//            public void onAuthenticated(AuthData authData) {
-//                DatabaseReference thisParticipantRef = myFirebaseRef.child("participants/" + authData.getUid());
-//                thisParticipantRef.child("online").onDisconnect().setValue(false);
-//                thisParticipantRef.child("online").setValue(true);
-//                thisParticipantRef.child("display_name").setValue("Anonymous");
-//                pref.edit().putString(PreferenceNames.PREF_FIREBASE_UID, authData.getUid())
-//                        .putString(PreferenceNames.PREF_USER_AUTH_TYPE, "anonymous")
-//                        .putString(PreferenceNames.PREF_USER_DISPLAY_NAME, "Anonymous")
-//                        .apply();
-//                FragmentManager fragmentManager = getSupportFragmentManager();
-//                Fragment groupFragment = fragmentManager.findFragmentByTag("GROUP_FRAGMENT");
-//                if (groupFragment == null || !groupFragment.isVisible()) {
-//                    fragmentManager.beginTransaction().replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
-//                }
-//                setUpNavDrawerAndActionBar();
-//            }
-//
-//            @Override
-//            public void onAuthenticationError(DatabaseError firebaseError) {
-//                Toast.makeText(getApplicationContext(), "Error authenticating", Toast.LENGTH_SHORT).show();
-//            }
-//        });
     }
 
     /**
@@ -650,63 +573,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onClick(View v) {
 
-    }
-
-    /**
-     * Use this method to colorize toolbar icons to the desired target color
-     *
-     * @param toolbarView       toolbar view being colored
-     * @param toolbarIconsColor the target color of toolbar icons
-     * @param activity          reference to activity needed to register observers
-     */
-    public static void colorizeToolbar(Toolbar toolbarView, int toolbarIconsColor, Activity activity) {
-        final PorterDuffColorFilter colorFilter
-                = new PorterDuffColorFilter(toolbarIconsColor, PorterDuff.Mode.MULTIPLY);
-
-        for (int i = 0; i < toolbarView.getChildCount(); i++) {
-            final View v = toolbarView.getChildAt(i);
-
-            //Step 1 : Changing the color of back button (or open drawer button).
-            if (v instanceof ImageButton) {
-                //Action Bar back button
-                ((ImageButton) v).getDrawable().setColorFilter(colorFilter);
-            }
-
-            if (v instanceof ActionMenuView) {
-                for (int j = 0; j < ((ActionMenuView) v).getChildCount(); j++) {
-
-                    //Step 2: Changing the color of any ActionMenuViews - icons that
-                    //are not back button, nor text, nor overflow menu icon.
-                    final View innerView = ((ActionMenuView) v).getChildAt(j);
-
-                    if (innerView instanceof ActionMenuItemView) {
-                        int drawablesCount = ((ActionMenuItemView) innerView).getCompoundDrawables().length;
-                        for (int k = 0; k < drawablesCount; k++) {
-                            if (((ActionMenuItemView) innerView).getCompoundDrawables()[k] != null) {
-                                final int finalK = k;
-
-                                //Important to set the color filter in seperate thread,
-                                //by adding it to the message queue
-                                //Won't work otherwise.
-                                innerView.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        ((ActionMenuItemView) innerView).getCompoundDrawables()[finalK].setColorFilter(colorFilter);
-                                    }
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-
-            //Step 3: Changing the color of title and subtitle.
-            toolbarView.setTitleTextColor(toolbarIconsColor);
-            toolbarView.setSubtitleTextColor(toolbarIconsColor);
-
-            //Step 4: Changing the color of the Overflow Menu icon.
-            setOverflowButtonColor(activity, colorFilter);
-        }
     }
 
     private static void setOverflowButtonColor(final Activity activity, final PorterDuffColorFilter colorFilter) {

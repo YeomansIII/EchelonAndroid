@@ -14,11 +14,13 @@ import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.DatabaseError ;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.ui.activities.MainActivity;
+import io.yeomans.echelon.util.Dependencies;
+import io.yeomans.echelon.util.PreferenceNames;
 
 /**
  * Created by jason on 7/1/15.
@@ -34,18 +36,18 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     private DatabaseReference thisUserRef, thisParticipantRef;
     private String uid;
     private String accountType;
+    Dependencies dependencies;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        dependencies = Dependencies.INSTANCE;
         mainActivity = (MainActivity) getActivity();
         mainPref = mainActivity.getSharedPreferences(PreferenceNames.MAIN_PREFS_NAME, 0);
         groupPref = mainActivity.getSharedPreferences(PreferenceNames.GROUP_PREFS_NAME, 0);
-        uid = mainPref.getString(PreferenceNames.PREF_FIREBASE_UID, null);
         accountType = mainPref.getString(PreferenceNames.PREF_USER_AUTH_TYPE, "none");
-        thisUserRef = mainActivity.myFirebaseRef.child("users/" + uid);
-        thisParticipantRef = mainActivity.myFirebaseRef.child("participants/" + uid);
+        thisUserRef = dependencies.getCurrentUserReference();
+        thisParticipantRef = dependencies.getCurrentParticipantReference();
     }
 
     @Override
@@ -58,7 +60,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
 
         mainActivity.toolbar.setBackgroundColor(getResources().getColor(R.color.primaryColor));
         mainActivity.getSupportActionBar().setTitle("Account");
-        if (uid != null) {
+        if (dependencies.getAuth().getCurrentUser() != null) {
             if (accountType.equals("anonymous")) {
                 view.findViewById(R.id.accountEmailStaticText).setVisibility(View.GONE);
                 view.findViewById(R.id.accountEmailText).setVisibility(View.GONE);
@@ -81,7 +83,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
                 }
 
                 @Override
-                public void onCancelled(DatabaseError  firebaseError) {
+                public void onCancelled(DatabaseError firebaseError) {
                     Toast.makeText(mainActivity.getApplicationContext(), "Error getting data", Toast.LENGTH_SHORT).show();
                 }
             });
@@ -111,7 +113,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
                 }
 
                 @Override
-                public void onCancelled(DatabaseError  firebaseError) {
+                public void onCancelled(DatabaseError firebaseError) {
                     Toast.makeText(mainActivity.getApplicationContext(), "Error getting data", Toast.LENGTH_SHORT).show();
                 }
             });

@@ -40,6 +40,7 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.models.SpotifySong;
 import io.yeomans.echelon.ui.activities.MainActivity;
@@ -71,8 +72,6 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     RecyclerView.LayoutManager mLayoutManager;
 
     public boolean isDestroyed;
-    private SharedPreferences groupSettings;
-    private SharedPreferences mainSettings;
 
     private View view;
     private ArrayList<RelativeLayout> songListArr;
@@ -91,8 +90,6 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     @Bind(R.id.queueSearchTextFrame) protected FrameLayout queueSearchTextFrame;
     @Bind(R.id.queueYourMusicTextFrame) protected FrameLayout queueYourMusicTextFrame;
     @Bind(R.id.queueOverlayFrame) protected FrameLayout queueOverlayFrame;
-    @Bind(R.id.queueGroupNowPlayingSongCount) protected TextView songCountText;
-    @Bind(R.id.queueGroupNowPlayingAlbumCover) protected ImageView nowPlayingAlbumCover;
     private Drawer particDrawerResult;
     private boolean particDrawerOpen;
 
@@ -109,7 +106,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
 
         songListRA = new SonglistRecyclerAdapter(playqueue, true);
 
-        queuegroupRef = dependencies.getDatabase().getReference("queuegroups/" + groupSettings.getString(PreferenceNames.PREF_GROUP_NAME, ""));
+        queuegroupRef = dependencies.getDatabase().getReference("queuegroups/" + dependencies.getGroupPreferences().getString(PreferenceNames.PREF_GROUP_NAME, ""));
         trackListChangeListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -118,16 +115,11 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                 SpotifySong nowPlayingSS = null;
                 for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
                     SpotifySong ss = dataSnapshot1.getValue(SpotifySong.class);
-                    if (!ss.isNowPlaying() && !ss.isPlayed()) {
-                        playqueue.add(ss);
-                    }
+                    playqueue.add(ss);
                 }
                 Collections.sort(playqueue);
                 if (songListRA != null) {
                     songListRA.notifyDataSetChanged();
-                }
-                if (songCountText != null) {
-                    songCountText.setText("" + playqueue.size());
                 }
             }
 
@@ -145,7 +137,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                 SpotifySong ss = dataSnapshot.getValue(SpotifySong.class);
                 if (nowPlaying == null || !ss.getKey().equals(nowPlaying.getKey())) {
                     nowPlaying = ss;
-                    Picasso.with(mainActivity).load(nowPlaying.getAlbumArtLarge().url).placeholder(R.drawable.ic_music_circle_black_48dp).into(nowPlayingAlbumCover);
+                    //Picasso.with(mainActivity).load(nowPlaying.getAlbumArtLarge().url).placeholder(R.drawable.ic_music_circle_black_48dp).into(nowPlayingAlbumCover);
                 }
             }
 
@@ -205,8 +197,8 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         ButterKnife.bind(this, view);
 
         //mainActivity.actionBar.setElevation(0);
-        mainActivity.toolbar.setBackgroundColor(Color.TRANSPARENT);
-        mainActivity.actionBar.setTitle(groupSettings.getString(PreferenceNames.PREF_GROUP_NAME, "error"));
+        mainActivity.toolbar.setBackgroundColor(getResources().getColor(R.color.primaryColor));
+        mainActivity.actionBar.setTitle(dependencies.getGroupPreferences().getString(PreferenceNames.PREF_GROUP_NAME, "error"));
 
         setHasOptionsMenu(true);
 
@@ -263,7 +255,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         fab3.setOnClickListener(this);
         view.findViewById(R.id.queueOverlayFrame).setOnClickListener(this);
 
-        if (!mainSettings.getString(PreferenceNames.PREF_USER_AUTH_TYPE, "").equals("spotify")) {
+        if (!dependencies.getPreferences().getString(PreferenceNames.PREF_USER_AUTH_TYPE, "").equals("spotify")) {
             fab2.setVisibility(View.GONE);
             queueYourMusicTextFrame.setVisibility(View.GONE);
         }
@@ -347,7 +339,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         if (mainActivity.playerService != null) {
             mainActivity.playerService.stop();
         }
-        groupSettings.edit().clear().commit();
+        dependencies.getGroupPreferences().edit().clear().commit();
         controlBar.getView().setVisibility(View.GONE);
         Log.d("Group", "Leaving Group");
         isDestroyed = true;

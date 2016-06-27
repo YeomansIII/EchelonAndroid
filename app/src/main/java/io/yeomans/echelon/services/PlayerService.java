@@ -12,11 +12,9 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
@@ -24,8 +22,6 @@ import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerNotificationCallback;
 import com.spotify.sdk.android.player.PlayerState;
 import com.spotify.sdk.android.player.Spotify;
-
-import org.json.JSONObject;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,6 +31,8 @@ import java.util.Map;
 
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.models.SpotifySong;
+import io.yeomans.echelon.ui.activities.MainActivity;
+import io.yeomans.echelon.util.Dependencies;
 import io.yeomans.echelon.util.PreferenceNames;
 
 /**
@@ -44,10 +42,12 @@ public class PlayerService extends Service implements PlayerNotificationCallback
     private static final String TAG = "PlayerService";
 
     public boolean playerSetup = false, firebaseSetup = false;
-    public DatabaseReference firebaseRef, queuegroupRef;
     SharedPreferences pref, groupPref;
-    private ValueEventListener trackListChangeListener;
+    private ValueEventListener trackListChangeListener, nowPlayingChangeListener;
     private PlayerBinder playerBinder;
+
+    private Intent playingIntent = new Intent("io.yeomans.echelon.PLAYING"),
+            pausingIntent = new Intent("io.yeomans.echelon.PAUSING");
 
     public Player mPlayer;
     public boolean mPlayerPlaying;
@@ -57,7 +57,8 @@ public class PlayerService extends Service implements PlayerNotificationCallback
     public LinkedList<SpotifySong> backStack;
     public List<SpotifySong> playQueue;
     public SpotifySong nowPlaying;
-    private OnPlayerControlCallback mPlayerControlCallback;
+
+    Dependencies dependencies;
 
     @Nullable
     @Override
@@ -68,17 +69,20 @@ public class PlayerService extends Service implements PlayerNotificationCallback
     @Override
     public void onCreate() {
         super.onCreate();
+        Dependencies.INSTANCE.init(getApplicationContext());
+        dependencies = Dependencies.INSTANCE;
         Log.i(TAG, "Creating PlayerService");
         playerBinder = new PlayerBinder();
         playQueue = new LinkedList<>();
         backStack = new LinkedList<>();
-        pref = getSharedPreferences(PreferenceNames.MAIN_PREFS_NAME, 0);
-        groupPref = getSharedPreferences(PreferenceNames.GROUP_PREFS_NAME, 0);
+        pref = dependencies.getPreferences();
+        groupPref = dependencies.getPreferences();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("io.yeomans.echelon.STOP_SERVICE");
         filter.addAction("io.yeomans.echelon.PLAY");
         filter.addAction("io.yeomans.echelon.PAUSE");
+        filter.addAction("io.yeomans.echelon.SKIP");
 
         registerReceiver(receiver, filter);
 
@@ -90,36 +94,34 @@ public class PlayerService extends Service implements PlayerNotificationCallback
                 SpotifySong nowPlayingSS = null;
                 for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
                     SpotifySong ss = dataSnapshot1.getValue(SpotifySong.class);
-                    if (!ss.isNowPlaying() && !ss.isPlayed()) {
-                        playQueue.add(ss);
-                    } else if (ss.isNowPlaying()) {
-//                        if (nowPlaying == null || !ss.getKey().equals(nowPlaying.getKey())) {
-//                            nowPlaying = ss;
-//                            //Picasso.with(mainActivity).load(nowPlaying.getAlbumArtLarge().url).placeholder(R.drawable.ic_music_circle_black_48dp).into(nowPlayingAlbumCover);
-//                        }
-                    }
-                    //Log.d("MyFirebase", "Song added: " + playqueue.getLast().getAdded());
+                    playQueue.add(ss);
                 }
                 Collections.sort(playQueue);
-//                if (songListRA != null) {
-//                    songListRA.notifyDataSetChanged();
-//                }
-//                if (songCountText != null) {
-//                    songCountText.setText("" + playQueue.size());
-//                }
-//                if (nowPlayingSS != null) {
-//                    playqueue.addFirst(nowPlayingSS);
-//                }
-                //refreshQueueList();
             }
 
             @Override
-            public void onCancelled(DatabaseError firebaseError) {
-
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
 
         };
+        nowPlayingChangeListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() == null) {
+                    nowPlaying = null;
+                } else {
+                    nowPlaying = dataSnapshot.getValue(SpotifySong.class);
+                }
+            }
 
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        };
+        dependencies.getCurrentGroupReference().child("tracks").addValueEventListener(trackListChangeListener);
+        dependencies.getCurrentGroupReference().child("nowPlaying").addValueEventListener(nowPlayingChangeListener);
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -132,64 +134,43 @@ public class PlayerService extends Service implements PlayerNotificationCallback
         return null;
     }
 
-    private void setNowPlaying(SpotifySong nowPlaying) {
-        Map<String, Object> toAdd = new HashMap<>();
-        toAdd.put("key", nowPlaying.getKey());
-        toAdd.put("added", ServerValue.TIMESTAMP);
-        toAdd.put("songId", nowPlaying.getId());
-        toAdd.put("uri", nowPlaying.getUri());
-        toAdd.put("title", nowPlaying.getTitle());
-        toAdd.put("artist", nowPlaying.getArtist());
-        toAdd.put("album", nowPlaying.getAlbum());
-        toAdd.put("lengthMs", nowPlaying.getLengthMs());
-        toAdd.put("albumArtSmall", nowPlaying.getAlbumArtSmall());
-        toAdd.put("albumArtMedium", nowPlaying.getAlbumArtMedium());
-        toAdd.put("albumArtLarge", nowPlaying.getAlbumArtLarge());
-        Log.d(TAG, (new JSONObject(toAdd).toString()));
-        queuegroupRef.child("nowPlaying").setValue(toAdd, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                if (databaseError != null) {
-                    System.out.println("Data could not be saved. " + databaseError.getMessage());
-                } else {
-                    System.out.println("Data saved successfully.");
-                }
-            }
-        });
-    }
-
-    public void configPlayer(String spotifyAuthToken, String CLIENT_ID) {
-        Config playerConfig = new Config(this, spotifyAuthToken, CLIENT_ID);
-        mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
-            @Override
-            public void onInitialized(Player player) {
-                mPlayer.addConnectionStateCallback(PlayerService.this);
-                mPlayer.addPlayerNotificationCallback(PlayerService.this);
-                playerReady = true;
-                mPlayerPlaying = false;
-                mPlayerCherry = true;
-                playerSetup = true;
-                Log.d("Player", "Player Ready");
-                //playFirstSong();
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                Log.e("MainActivity", "Could not initialize player: " + throwable.getMessage());
-            }
-        });
-    }
-
-    public void setFirebaseRef(DatabaseReference ref) {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() != null) {
-            firebaseRef = ref;
-            queuegroupRef = firebaseRef.child("queuegroups/" + groupPref.getString(PreferenceNames.PREF_GROUP_NAME, ""));
-            queuegroupRef.child("tracks").addValueEventListener(trackListChangeListener);
-            firebaseSetup = true;
-            Toast.makeText(PlayerService.this, auth.getCurrentUser().getUid(), Toast.LENGTH_SHORT).show();
+    private void setNowPlaying(SpotifySong toPlay) {
+        if (nowPlaying != null) {
+            DatabaseReference push = dependencies.getCurrentGroupReference().child("pastTracks").push();
+            push.setValue(nowPlaying.getMap());
+        }
+        if (toPlay == null) {
+            dependencies.getCurrentGroupReference().child("nowPlaying").removeValue();
         } else {
-            Log.d(TAG, "Service not authed");
+            dependencies.getCurrentGroupReference().child("nowPlaying").setValue(toPlay.getMap());
+            dependencies.getCurrentGroupReference().child("tracks/" + toPlay.getKey()).removeValue();
+        }
+    }
+
+    public void configPlayer() {
+        String authToken = pref.getString(PreferenceNames.PREF_SPOTIFY_AUTH_TOKEN, null);
+        if (authToken != null) {
+            Config playerConfig = new Config(this, authToken, MainActivity.CLIENT_ID);
+            mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
+                @Override
+                public void onInitialized(Player player) {
+                    mPlayer.addConnectionStateCallback(PlayerService.this);
+                    mPlayer.addPlayerNotificationCallback(PlayerService.this);
+                    playerReady = true;
+                    mPlayerPlaying = false;
+                    mPlayerCherry = true;
+                    playerSetup = true;
+                    Log.d("Player", "Player Ready");
+                    //playFirstSong();
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+                    Log.e("MainActivity", "Could not initialize player: " + throwable.getMessage());
+                }
+            });
+        } else {
+            Toast.makeText(getApplicationContext(), "Could not create player", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -233,7 +214,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
 
     @Override
     public void onDestroy() {
-        queuegroupRef.child("tracks").removeEventListener(trackListChangeListener);
+        dependencies.getCurrentGroupReference().child("tracks").removeEventListener(trackListChangeListener);
         Spotify.destroyPlayer(mPlayer);
         unregisterReceiver(receiver);
     }
@@ -271,41 +252,33 @@ public class PlayerService extends Service implements PlayerNotificationCallback
     @Override
     public void onPlaybackEvent(EventType eventType, PlayerState playerState) {
         if (eventType == EventType.TRACK_END) {
-            SpotifySong old = playQueue.get(0);
-            old.setBackStack(true);
-            Map<String, Object> oldMap = new HashMap<>();
-            oldMap.put("nowPlaying", false);
-            oldMap.put("played", true);
-            firebaseRef.child("queuegroups")
-                    .child(groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null))
-                    .child("tracks")
-                    .child(old.getKey())
-                    .updateChildren(oldMap);
-            backStack.add(old);
-            playQueue.remove(0);
             if (playQueue.size() > 0) {
-                SpotifySong toPlay = playQueue.get(0);
-                mPlayer.play(toPlay.getUri());
-                firebaseRef.child("queuegroups")
-                        .child(groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null))
-                        .child("tracks")
-                        .child(toPlay.getKey())
-                        .child("nowPlaying")
-                        .setValue(true);
+                SpotifySong old = playQueue.get(0);
+                old.setBackStack(true);
+                Map<String, Object> oldMap = new HashMap<>();
+                dependencies.getCurrentGroupReference().child("tracks")
+                        .child(old.getKey())
+                        .updateChildren(oldMap);
+                backStack.add(old);
+                playQueue.remove(0);
+                if (playQueue.size() > 0) {
+                    SpotifySong toPlay = playQueue.get(0);
+                    mPlayer.play(toPlay.getUri());
+                    setNowPlaying(toPlay);
+                } else {
+                    mPlayerCherry = true;
+                    mPlayerPlaying = false;
+                }
             } else {
-                mPlayerCherry = true;
-                mPlayerPlaying = false;
+                stop();
+                setNowPlaying(null);
             }
         } else if (eventType == EventType.PLAY) {
             mPlayerPlaying = true;
-            if (mPlayerControlCallback != null) {
-                mPlayerControlCallback.onPlayerPlay();
-            }
+            sendBroadcast(playingIntent);
         } else if (eventType == EventType.PAUSE) {
             mPlayerPlaying = false;
-            if (mPlayerControlCallback != null) {
-                mPlayerControlCallback.onPlayerPause();
-            }
+            sendBroadcast(pausingIntent);
         }
     }
 
@@ -330,16 +303,6 @@ public class PlayerService extends Service implements PlayerNotificationCallback
         }
     }
 
-    public interface OnPlayerControlCallback {
-        void onPlayerPlay();
-
-        void onPlayerPause();
-    }
-
-    public void setOnPlayerControlCallback(OnPlayerControlCallback mPlayerControlCallback) {
-        this.mPlayerControlCallback = mPlayerControlCallback;
-    }
-
     public class PlayerBinder extends Binder {
         public PlayerService getService() {
             return PlayerService.this;
@@ -350,7 +313,17 @@ public class PlayerService extends Service implements PlayerNotificationCallback
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-
+            if (action.equals("io.yeomans.echelon.SKIP")) {
+                mPlayer.skipToNext();
+            } else if (action.equals("io.yeomans.echelon.PLAY")) {
+                play();
+            } else if (action.equals("io.yeomans.echelon.PAUSE")) {
+                pause();
+            } else if (action.equals("io.yeomans.echelon.STOP_SERVICE")) {
+                pause();
+                stop();
+                stopSelf();
+            }
         }
     };
 

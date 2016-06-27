@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.ui.activities.MainActivity;
 import io.yeomans.echelon.ui.adapters.ViewPagerAdapter;
+import io.yeomans.echelon.util.PreferenceNames;
 
 /**
  * Created by jason on 8/10/15.

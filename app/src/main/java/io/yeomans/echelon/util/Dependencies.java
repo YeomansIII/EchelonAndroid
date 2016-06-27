@@ -7,6 +7,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import io.github.kaaes.spotify.webapi.retrofit.v2.Spotify;
@@ -87,6 +88,10 @@ public enum Dependencies {
         return spotify;
     }
 
+    public void authSpotify(String token) {
+        spotify = Spotify.createAuthenticatedService(token);
+    }
+
     public SharedPreferences getPreferences() {
         return preferences;
     }
@@ -94,4 +99,26 @@ public enum Dependencies {
     public SharedPreferences getGroupPreferences() {
         return groupPreferences;
     }
+
+    public DatabaseReference getUserReference(String user) {
+        return getDatabase().getReference("users/" + user);
+    }
+
+    public DatabaseReference getCurrentUserReference() {
+        return getDatabase().getReference("users/" + getAuth().getCurrentUser().getUid());
+    }
+
+    public DatabaseReference getParticipantReference(String user) {
+        return getDatabase().getReference("participants/" + user);
+    }
+
+    public DatabaseReference getCurrentParticipantReference() {
+        return getDatabase().getReference("participants/" + getAuth().getCurrentUser().getUid());
+    }
+
+    public DatabaseReference getCurrentGroupReference() {
+        return getDatabase().getReference("queuegroups/" + getGroupPreferences().getString(PreferenceNames.PREF_GROUP_NAME, null));
+    }
+
+
 }

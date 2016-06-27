@@ -11,7 +11,7 @@ public class BackendSpotifyAuth {
     @SerializedName("uid")
     @Expose
     private String uid;
-    @SerializedName("spotify-token")
+    @SerializedName("access_token")
     @Expose
     private String spotifyToken;
 

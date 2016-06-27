@@ -17,7 +17,7 @@ import android.widget.RadioButton;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.DatabaseError ;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
@@ -26,6 +26,8 @@ import java.util.Map;
 
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.ui.activities.MainActivity;
+import io.yeomans.echelon.util.Dependencies;
+import io.yeomans.echelon.util.PreferenceNames;
 
 /**
  * Created by jason on 7/1/15.
@@ -38,11 +40,12 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
     private RadioButton rbPublic, rbPassword, rbFriends, rbInvite;
     private TextInputLayout createGroupNameEditWrapper, createGroupPasswordEditWrapper;
     String selectedPrivacy;
+    Dependencies dependencies;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        dependencies = Dependencies.INSTANCE;
         mainActivity = (MainActivity) getActivity();
         mainPref = mainActivity.getSharedPreferences(PreferenceNames.MAIN_PREFS_NAME, 0);
     }
@@ -131,7 +134,7 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
     public void onClick(View v) {
         if (v == view.findViewById(R.id.createGroupCreateButton)) {
             final String name = createGroupNameEditWrapper.getEditText().getText().toString();
-            DatabaseReference refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups/" + name + "/name");
+            DatabaseReference refQueueGroups = dependencies.getDatabase().getReference("queuegroups/" + name + "/name");
             refQueueGroups.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -141,8 +144,8 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
                     } else {
                         String fUid2 = mainPref.getString(PreferenceNames.PREF_FIREBASE_UID, null);
                         if (fUid2 != null) {
-                            mainActivity.myFirebaseRef.child("users/" + fUid2 + "/cur_group").setValue(name);
-                            DatabaseReference ref = mainActivity.myFirebaseRef.child("queuegroups");
+                            dependencies.getCurrentUserReference().child("cur_group ").setValue(name);
+                            DatabaseReference ref = dependencies.getDatabase().getReference("queuegroups");
                             Map<String, Object> map = new HashMap<>();
                             map.put("name", name);
                             map.put("created", ServerValue.TIMESTAMP);
@@ -176,7 +179,7 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
                 }
 
                 @Override
-                public void onCancelled(DatabaseError  firebaseError) {
+                public void onCancelled(DatabaseError firebaseError) {
 
                 }
             });

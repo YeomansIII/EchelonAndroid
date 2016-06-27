@@ -1,23 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="50dp"
-    android:background="@color/primaryColorDark"
-    android:visibility="gone">
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@color/primaryColorDark"
+                android:visibility="visible">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <ImageButton
+        android:id="@+id/controlPlayButton"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="horizontal">
+        android:layout_centerInParent="true"
+        android:background="@android:color/transparent"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:src="@drawable/ic_play_arrow_white_36dp"/>
 
-        <ImageButton
-            android:id="@+id/controlPlayButton"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:background="@android:color/transparent"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:src="@drawable/ic_play_arrow_white_36dp" />
-    </LinearLayout>
+    <ImageButton
+        android:id="@+id/controlSkipButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:background="@android:color/transparent"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:src="@drawable/ic_skip_next_white_36dp"/>
+
 </RelativeLayout>

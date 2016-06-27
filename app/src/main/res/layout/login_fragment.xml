@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/login_bg2"
-    android:orientation="vertical"
-    android:padding="20dp">
+                android:id="@+id/loginRootRelativeLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/login_bg2"
+                android:orientation="vertical"
+                android:padding="20dp">
 
     <LinearLayout
         android:id="@+id/loginLayout"
@@ -24,34 +25,33 @@
             android:focusableInTouchMode="true"
             android:padding="10dp"
             android:text="Login to Echelon"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:textAppearance="?android:attr/textAppearanceLarge"/>
 
 
         <TextView
             android:id="@+id/loginErrorText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/full_red" />
+            android:textColor="@color/full_red"/>
 
-        <io.yeomans.echelon.ui.views.ButtonRectangle
+        <Button
             android:id="@+id/spotifyLoginButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="Login With Spotify" />
+            android:text="Login With Spotify"
+            android:theme="@style/EchelonRaisedButton"/>
 
-        <io.yeomans.echelon.ui.views.ButtonFlat
+        <Button
             android:id="@+id/anonymousLoginButton"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center_horizontal"
             android:gravity="center_vertical|center|center_horizontal"
-            android:paddingBottom="20dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingTop="20dp"
-            android:text="Skip Login (Limited)" />
+            android:padding="22dp"
+            android:text="Skip Login (Limited)"/>
     </LinearLayout>
 
 </RelativeLayout>

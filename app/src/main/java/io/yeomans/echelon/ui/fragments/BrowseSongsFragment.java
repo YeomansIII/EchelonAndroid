@@ -1,6 +1,5 @@
 package io.yeomans.echelon.ui.fragments;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -20,14 +19,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import io.github.kaaes.spotify.webapi.core.models.FeaturedPlaylists;
+import io.github.kaaes.spotify.webapi.core.models.PlaylistSimple;
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.ui.activities.MainActivity;
 import io.yeomans.echelon.ui.adapters.PlaylistRecyclerAdapter;
-import kaaes.spotify.webapi.android.models.FeaturedPlaylists;
-import kaaes.spotify.webapi.android.models.PlaylistSimple;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import io.yeomans.echelon.util.Dependencies;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by jason on 7/10/15.
@@ -55,11 +55,13 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
     RecyclerView.LayoutManager mLayoutManager;
     List<PlaylistSimple> playlists;
     String message;
+    Dependencies dependencies;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setHasOptionsMenu(true);
+        dependencies = Dependencies.INSTANCE;
         mainActivity = (MainActivity) getActivity();
         selected = false;
         playlists = new ArrayList<>();
@@ -176,10 +178,12 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
         Map<String, Object> options = new HashMap<>();
         options.put("locale", uLocale.toString());
         options.put("timestamp", dateTime);
-        mainActivity.spotify.getFeaturedPlaylists(new Callback<FeaturedPlaylists>() {
+        Call<FeaturedPlaylists> call = dependencies.getSpotify().getFeaturedPlaylists();
+        call.enqueue(new Callback<FeaturedPlaylists>() {
             @Override
-            public void success(FeaturedPlaylists featuredPlaylists, Response response) {
+            public void onResponse(Call<FeaturedPlaylists> call, Response<FeaturedPlaylists> response) {
                 Log.i("Playlists", "Get playlist results");
+                FeaturedPlaylists featuredPlaylists = response.body();
                 mainActivity.toolbar.setTitle(featuredPlaylists.message);
                 message = featuredPlaylists.message;
                 playlists.addAll(featuredPlaylists.playlists.items);
@@ -188,8 +192,8 @@ public class BrowseSongsFragment extends Fragment implements View.OnClickListene
             }
 
             @Override
-            public void failure(RetrofitError error) {
-                Log.wtf("WhatList", error.toString() + "   " + error.getMessage());
+            public void onFailure(Call<FeaturedPlaylists> call, Throwable t) {
+                Log.wtf("WhatList", t.toString() + "   " + t.getMessage());
             }
         });
     }

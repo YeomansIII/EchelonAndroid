@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/createGroupFragmentLayout"
@@ -16,7 +16,7 @@
             android:layout_marginBottom="10dp"
             android:layout_marginTop="10dp"
             android:text="Create a Group"
-            android:textSize="25sp" />
+            android:textSize="25sp"/>
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/createGroupNameEditWrapper"
@@ -33,7 +33,7 @@
                 android:drawableStart="@drawable/ic_library_music_black_24dp"
                 android:ems="10"
                 android:hint="Group Name"
-                android:inputType="text" />
+                android:inputType="text"/>
         </android.support.design.widget.TextInputLayout>
 
         <RelativeLayout
@@ -54,7 +54,7 @@
                 android:drawablePadding="10dp"
                 android:drawableStart="@drawable/ic_account_multiple_black_24dp"
                 android:text="Privacy"
-                android:textSize="20sp" />
+                android:textSize="20sp"/>
 
 
             <LinearLayout
@@ -75,7 +75,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checked="false"
-                        android:text="Public" />
+                        android:text="Public"/>
 
                     <RadioButton
                         android:id="@+id/createGroupPrivacyPasswordRadio"
@@ -85,7 +85,7 @@
                         android:layout_alignStart="@+id/createGroupPrivacyPublicRadio"
                         android:layout_below="@+id/createGroupPrivacyPublicRadio"
                         android:checked="false"
-                        android:text="Password" />
+                        android:text="Password"/>
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -100,7 +100,7 @@
                         android:layout_alignParentLeft="true"
                         android:layout_alignParentStart="true"
                         android:checked="false"
-                        android:text="Friends" />
+                        android:text="Friends"/>
 
                     <RadioButton
                         android:id="@+id/createGroupPrivacyInviteRadio"
@@ -110,7 +110,7 @@
                         android:layout_alignParentStart="true"
                         android:layout_below="@+id/createGroupPrivacyFriendsRadio"
                         android:checked="false"
-                        android:text="Invite Only" />
+                        android:text="Invite Only"/>
                 </RelativeLayout>
             </LinearLayout>
 
@@ -133,16 +133,17 @@
                 android:drawableStart="@drawable/ic_lock_outline_black_24dp"
                 android:ems="10"
                 android:hint="Group Password"
-                android:inputType="text" />
+                android:inputType="text"/>
         </android.support.design.widget.TextInputLayout>
 
-        <io.yeomans.echelon.ui.views.ButtonRectangle
+        <Button
             android:id="@+id/createGroupCreateButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:text="Create Group" />
+            android:text="Create Group"
+            android:theme="@style/EchelonRaisedButton"/>
     </LinearLayout>
 </RelativeLayout>

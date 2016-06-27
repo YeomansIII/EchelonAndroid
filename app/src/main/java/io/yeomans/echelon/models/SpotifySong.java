@@ -4,6 +4,9 @@ import android.os.AsyncTask;
 import android.os.Parcel;
 import android.util.Log;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.ServerValue;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,6 +15,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -31,16 +35,7 @@ public class SpotifySong extends Track implements Comparable<SpotifySong> {
     private Long added;
     private boolean played;
     private boolean backStack;
-    private String songId;
     private String uri;
-    private String title;
-    private String artist;
-    private int lengthMs;
-    private String albumArtSmall;
-    private String albumArtMedium;
-    private String albumArtLarge;
-    private int rating;
-    private boolean nowPlaying;
     private Map<String, Object> votedUp;
     private Map<String, Object> votedDown;
 
@@ -188,14 +183,6 @@ public class SpotifySong extends Track implements Comparable<SpotifySong> {
         this.popularity = rating;
     }
 
-    public boolean isNowPlaying() {
-        return nowPlaying;
-    }
-
-    public void setNowPlaying(boolean nowPlaying) {
-        this.nowPlaying = nowPlaying;
-    }
-
     public Map<String, Object> getVotedUp() {
         return votedUp;
     }
@@ -324,49 +311,65 @@ public class SpotifySong extends Track implements Comparable<SpotifySong> {
         this.type = type;
     }
 
-    private void fillSongData() {
-        AsyncTask<String, Void, String> get = new AsyncTask<String, Void, String>() {
-            @Override
-            protected String doInBackground(String... params) {
-                String a = "";
-                HttpURLConnection urlConnection;
-                try {
-                    Log.d("GET", "URL: " + params[0]);
-                    URL urlget = new URL(params[0]);
-                    urlConnection = (HttpURLConnection) urlget.openConnection();
-                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                    Scanner s = new Scanner(in).useDelimiter("\\A");
-
-                    //return "works";
-                    String returner = s.hasNext() ? s.next() : "";
-                    urlConnection.disconnect();
-                    return returner;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return "{\"success\":false, \"error\":\"could not connect to server\"}";
-            }
-
-            @Override
-            protected void onPostExecute(String msg) {
-                try {
-                    Log.d("GET", "PostExecute Song Search");
-                    JSONObject json = new JSONObject(msg);
-                    uri = json.getString("uri");
-                    title = json.getString("name");
-                    artist = json.getJSONArray("artists").getJSONObject(0).getString("name");
-                    JSONObject jsonAlbum = json.getJSONObject("album");
-                    album.name = jsonAlbum.getString("name");
-                    Image temp = new Image();
-                    temp.url = jsonAlbum.getJSONArray("images").getJSONObject(2).getString("url");
-                    album.images.set(2, temp);
-                    duration_ms = json.getInt("duration_ms");
-                } catch (JSONException je) {
-                    je.printStackTrace();
-                }
-            }
-        }.execute("https://api.spotify.com/v1/tracks/" + songId, null, null);
+    public Map<String, Object> getMap() {
+        Map<String, Object> toAdd = new HashMap<>();
+        toAdd.put("key", getKey());
+        toAdd.put("added", ServerValue.TIMESTAMP);
+        toAdd.put("songId", getId());
+        toAdd.put("uri", getUri());
+        toAdd.put("title", getTitle());
+        toAdd.put("artist", getArtist());
+        toAdd.put("album", getAlbum());
+        toAdd.put("lengthMs", getLengthMs());
+        toAdd.put("albumArtSmall", getAlbumArtSmall().url);
+        toAdd.put("albumArtMedium", getAlbumArtMedium().url);
+        toAdd.put("albumArtLarge", getAlbumArtLarge().url);
+        return toAdd;
     }
+
+//    private void fillSongData() {
+//        AsyncTask<String, Void, String> get = new AsyncTask<String, Void, String>() {
+//            @Override
+//            protected String doInBackground(String... params) {
+//                String a = "";
+//                HttpURLConnection urlConnection;
+//                try {
+//                    Log.d("GET", "URL: " + params[0]);
+//                    URL urlget = new URL(params[0]);
+//                    urlConnection = (HttpURLConnection) urlget.openConnection();
+//                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+//                    Scanner s = new Scanner(in).useDelimiter("\\A");
+//
+//                    //return "works";
+//                    String returner = s.hasNext() ? s.next() : "";
+//                    urlConnection.disconnect();
+//                    return returner;
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//                return "{\"success\":false, \"error\":\"could not connect to server\"}";
+//            }
+//
+//            @Override
+//            protected void onPostExecute(String msg) {
+//                try {
+//                    Log.d("GET", "PostExecute Song Search");
+//                    JSONObject json = new JSONObject(msg);
+//                    uri = json.getString("uri");
+//                    title = json.getString("name");
+//                    artist = json.getJSONArray("artists").getJSONObject(0).getString("name");
+//                    JSONObject jsonAlbum = json.getJSONObject("album");
+//                    album.name = jsonAlbum.getString("name");
+//                    Image temp = new Image();
+//                    temp.url = jsonAlbum.getJSONArray("images").getJSONObject(2).getString("url");
+//                    album.images.set(2, temp);
+//                    duration_ms = json.getInt("duration_ms");
+//                } catch (JSONException je) {
+//                    je.printStackTrace();
+//                }
+//            }
+//        }.execute("https://api.spotify.com/v1/tracks/" + songId, null, null);
+//    }
 
     @Override
     public int compareTo(SpotifySong ssong) {

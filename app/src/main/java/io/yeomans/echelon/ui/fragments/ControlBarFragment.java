@@ -1,6 +1,10 @@
 package io.yeomans.echelon.ui.fragments;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -9,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.ui.activities.MainActivity;
 
@@ -19,15 +25,27 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
 
     public MainActivity mainActivity;
     private OnMediaControlSelectedListener mCallback;
+    private Intent playIntent = new Intent("io.yeomans.echelon.PLAY"),
+            pauseIntent = new Intent("io.yeomans.echelon.PAUSE"),
+            skipIntent = new Intent("io.yeomans.echelon.SKIP"),
+            stopServiceIntent = new Intent("io.yeomans.echelon.STOP_SERVICE");
+    private IntentFilter filter;
+
+    @Bind(R.id.controlPlayButton)
+    public ImageButton controlPlayButton;
+    @Bind(R.id.controlSkipButton)
+    public ImageButton controlSkipButton;
 
     private boolean playing;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mainActivity = (MainActivity) getActivity();
-        playing = false;
+        filter = new IntentFilter();
+        filter.addAction("io.yeomans.echelon.PLAYING");
+        filter.addAction("io.yeomans.echelon.PAUSING");
+        //playing = mainActivity.playerService.mPlayerPlaying;
     }
 
     @Override
@@ -42,11 +60,20 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.control_bar_fragment,
                 container, false);
+        ButterKnife.bind(this, view);
+        getContext().registerReceiver(receiver, filter);
 
         // view.findViewById(R.id.groupAddSongButton).setOnClickListener(this);
-        view.findViewById(R.id.controlPlayButton).setOnClickListener(this);
+        controlPlayButton.setOnClickListener(this);
+        controlSkipButton.setOnClickListener(this);
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        getContext().unregisterReceiver(receiver);
     }
 
     @Override
@@ -75,44 +102,26 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
     @Override
     public void onClick(View v) {
         Log.d("Control", "click");
-        if (v == getView().findViewById(R.id.controlPlayButton)) {
-            //Log.d("Control", "playlist from ControlFrag: " + mCallback.playQueue);
-            if (mainActivity.playerService.mPlayerPlaying) {
-                mainActivity.onPauseControlSelected();
-                //playing = false;
+        if (v.getId() == R.id.controlPlayButton) {
+            Log.d("Control", "Play button clicked");
+            if (!playing) {
+                getContext().sendBroadcast(playIntent);
             } else {
-                mainActivity.onPlayControlSelected();
-                //playing = true;
+                getContext().sendBroadcast(pauseIntent);
             }
+        } else if (v.getId() == R.id.controlSkipButton) {
+            getContext().sendBroadcast(skipIntent);
         }
-//        else if (v == getView().findViewById(R.id.groupAddSongButton)) {
-//            Log.d("Control", "add song 1");
-//            FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
-//            GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-//            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//            if (groupFragment != null && groupFragment.isVisible()) {
-//                Log.d("Control", "add song 2");
-//                fragmentTransaction.replace(R.id.container, new SongSearchFragment(), "SEARCH_FRAG").addToBackStack(null).commit();
-//            }
-//        }
     }
 
     @Override
     public void onPlayerPlay() {
-        ImageButton v = (ImageButton) getView().findViewById(R.id.controlPlayButton);
-        v.setImageDrawable(getView().getResources().getDrawable(R.drawable.ic_pause_white_48dp));
-        if (mCallback != null) {
-            mCallback.onPlayControlSelected();
-        }
+
     }
 
     @Override
     public void onPlayerPause() {
-        ImageButton v = (ImageButton) getView().findViewById(R.id.controlPlayButton);
-        v.setImageDrawable(getView().getResources().getDrawable(R.drawable.ic_play_arrow_white_48dp));
-        if (mCallback != null) {
-            mCallback.onPauseControlSelected();
-        }
+
     }
 
     public interface OnMediaControlSelectedListener {
@@ -120,4 +129,18 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
 
         boolean onPauseControlSelected();
     }
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals("io.yeomans.echelon.PLAYING")) {
+                controlPlayButton.setImageDrawable(getView().getResources().getDrawable(R.drawable.ic_pause_white_48dp));
+                playing = true;
+            } else if (action.equals("io.yeomans.echelon.PAUSING")) {
+                controlPlayButton.setImageDrawable(getView().getResources().getDrawable(R.drawable.ic_play_arrow_white_48dp));
+                playing = false;
+            }
+        }
+    };
 }

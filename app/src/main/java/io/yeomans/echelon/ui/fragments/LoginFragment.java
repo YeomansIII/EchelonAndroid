@@ -62,13 +62,13 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        if (v == view.findViewById(R.id.spotifyLoginButton)) {
-            Log.d("Login", "Spotify login touched");
-            mainActivity.authenticateSpotify();
-        } else if (v == view.findViewById(R.id.anonymousLoginButton)) {
-            Log.d("Login", "Anonymous login touched");
-            mainActivity.authenticateAnonymously();
-        }
+//        if (v == view.findViewById(R.id.spotifyLoginButton)) {
+//            Log.d("Login", "Spotify login touched");
+//            mainActivity.authenticateSpotify();
+//        } else if (v == view.findViewById(R.id.anonymousLoginButton)) {
+//            Log.d("Login", "Anonymous login touched");
+//            mainActivity.authenticateAnonymously();
+//        }
     }
 
     public interface OnEchelonLoginListener {
