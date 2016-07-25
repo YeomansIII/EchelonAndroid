@@ -112,6 +112,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
                     nowPlaying = null;
                 } else {
                     nowPlaying = dataSnapshot.getValue(SpotifySong.class);
+                    startForegroundNotification(nowPlaying);
                 }
             }
 
@@ -294,13 +295,16 @@ public class PlayerService extends Service implements PlayerNotificationCallback
             setNowPlaying(toPlay);
             mPlayer.play(toPlay.getUri());
             mPlayerCherry = false;
-            android.support.v4.app.NotificationCompat.Builder mBuilder =
-                    new android.support.v4.app.NotificationCompat.Builder(this)
-                            .setSmallIcon(R.mipmap.ic_launcher)
-                            .setContentTitle("Echelon")
-                            .setContentText("Playing Music");
-            startForeground(1, mBuilder.build());
         }
+    }
+
+    public void startForegroundNotification(SpotifySong spotifySong) {
+        android.support.v4.app.NotificationCompat.Builder mBuilder =
+                new android.support.v4.app.NotificationCompat.Builder(this)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle(spotifySong.getTitle())
+                        .setContentText(spotifySong.getArtist());
+        startForeground(1, mBuilder.build());
     }
 
     public class PlayerBinder extends Binder {
