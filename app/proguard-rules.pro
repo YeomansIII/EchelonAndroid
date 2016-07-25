@@ -51,6 +51,7 @@
 -keep class butterknife.** { *; }
 -dontwarn butterknife.internal.**
 -keep class **$$ViewBinder { *; }
+-dontwarn retrofit2.Platform$Java8
 
 -keepclasseswithmembernames class * {
     @butterknife.* <fields>;
