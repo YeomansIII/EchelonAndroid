@@ -15,6 +15,7 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+-dontnote
 -keep class com.spotify.sdk.android.** { *; }
 ### Json SERIALIZER SETTINGS
 -keep class com.firebase.** { *; }
@@ -24,14 +25,14 @@
 -keepnames class org.ietf.jgss.** { *; }
 -dontwarn org.apache.**
 -dontwarn org.w3c.dom.**
--keep class io.yeomans.echelon.SpotifySong.** { *; }
--keep class io.yeomans.echelon.SpotifySong { *; }
--keepnames class io.yeomans.echelon.SpotifySong.** { *; }
--keepnames class io.yeomans.echelon.SpotifySong { *; }
--keep class io.yeomans.echelon.Participant.** { *; }
--keep class io.yeomans.echelon.Participant { *; }
--keepnames class io.yeomans.echelon.Participant.** { *; }
--keepnames class io.yeomans.echelon.Participant { *; }
+-keep class io.yeomans.echelon.models.SpotifySong.** { *; }
+-keep class io.yeomans.echelon.models.SpotifySong { *; }
+-keepnames class io.yeomans.echelon.models.SpotifySong.** { *; }
+-keepnames class io.yeomans.echelon.models.SpotifySong { *; }
+-keep class io.yeomans.echelon.models.Participant.** { *; }
+-keep class io.yeomans.echelon.models.Participant { *; }
+-keepnames class io.yeomans.echelon.models.Participant.** { *; }
+-keepnames class io.yeomans.echelon.models.Participant { *; }
 -keepattributes Signature
 -keep class com.google.gson.** { *; }
 -keep class com.google.inject.** { *; }
@@ -47,3 +48,14 @@
 -dontwarn com.squareup.okhttp.**
 -dontwarn okio.**
 -dontwarn rx.**
+-keep class butterknife.** { *; }
+-dontwarn butterknife.internal.**
+-keep class **$$ViewBinder { *; }
+
+-keepclasseswithmembernames class * {
+    @butterknife.* <fields>;
+}
+
+-keepclasseswithmembernames class * {
+    @butterknife.* <methods>;
+}
