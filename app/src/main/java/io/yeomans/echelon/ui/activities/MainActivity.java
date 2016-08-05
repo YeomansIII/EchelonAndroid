@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity
     private Dependencies dependencies;
     public static final String PROD_FIREBASE_URL = "https://flickering-heat-6442.firebaseio.com/";
     public static final String DEV_FIREBASE_URL = "https://echelon-dev.firebaseio.com/";
-    public static final String ECHELON_PROD_WORKER_URL = "https://api.echelonapp.io/";
+    public static final String ECHELON_PROD_WORKER_URL = "https://echelon-1000.appspot.com/";
     //public static final String ECHELON_DEV_WORKER_URL = "http://192.168.0.204:8080/";
 
     //COMMON
@@ -220,7 +220,7 @@ public class MainActivity extends AppCompatActivity
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
-        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
+        //coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
 
 
         // Check device for Play Services APK. If check succeeds, proceed with

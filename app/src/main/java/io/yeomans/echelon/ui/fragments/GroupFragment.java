@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -81,15 +82,31 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     private ValueEventListener trackListChangeListener, participantListener, nowPlayingChangeListener;
 
     private Boolean isFabOpen = false;
-    @Bind(R.id.groupAddSongFab) protected FloatingActionButton fab;
-    @Bind(R.id.groupAddSongFab1) protected FloatingActionButton fab1;
-    @Bind(R.id.groupAddSongFab2) protected FloatingActionButton fab2;
-    @Bind(R.id.groupAddSongFab3) protected FloatingActionButton fab3;
+    @Bind(R.id.groupAddSongFab)
+    protected FloatingActionButton fab;
+    @Bind(R.id.groupAddSongFab1)
+    protected FloatingActionButton fab1;
+    @Bind(R.id.groupAddSongFab2)
+    protected FloatingActionButton fab2;
+    @Bind(R.id.groupAddSongFab3)
+    protected FloatingActionButton fab3;
     private Animation fab_open, fab_close, rotate_forward, rotate_backward, tip_fade_in, tip_fade_out;
-    @Bind(R.id.queueBrowseTextFrame) protected FrameLayout queueBrowseTextFrame;
-    @Bind(R.id.queueSearchTextFrame) protected FrameLayout queueSearchTextFrame;
-    @Bind(R.id.queueYourMusicTextFrame) protected FrameLayout queueYourMusicTextFrame;
-    @Bind(R.id.queueOverlayFrame) protected FrameLayout queueOverlayFrame;
+    @Bind(R.id.queueBrowseTextFrame)
+    protected FrameLayout queueBrowseTextFrame;
+    @Bind(R.id.queueSearchTextFrame)
+    protected FrameLayout queueSearchTextFrame;
+    @Bind(R.id.queueYourMusicTextFrame)
+    protected FrameLayout queueYourMusicTextFrame;
+    @Bind(R.id.queueOverlayFrame)
+    protected FrameLayout queueOverlayFrame;
+    @Bind(R.id.queueNowPlayingLayout)
+    protected RelativeLayout queueNowPlayingLayout;
+    @Bind(R.id.nowPlayingAlbumArtImage)
+    protected ImageView nowPlayingAlbumArtImage;
+    @Bind(R.id.nowPlayingTitleText)
+    protected TextView nowPlayingTitleText;
+    @Bind(R.id.nowPlayingArtistText)
+    protected TextView nowPlayingArtistText;
     private Drawer particDrawerResult;
     private boolean particDrawerOpen;
 
@@ -134,10 +151,12 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d("MyFirebase", "Track data changed!");
-                SpotifySong ss = dataSnapshot.getValue(SpotifySong.class);
-                if (nowPlaying == null || !ss.getKey().equals(nowPlaying.getKey())) {
+                if (dataSnapshot.getValue() != null) {
+                    SpotifySong ss = dataSnapshot.getValue(SpotifySong.class);
                     nowPlaying = ss;
-                    //Picasso.with(mainActivity).load(nowPlaying.getAlbumArtLarge().url).placeholder(R.drawable.ic_music_circle_black_48dp).into(nowPlayingAlbumCover);
+                    nowPlayingTitleText.setText(nowPlaying.getTitle());
+                    nowPlayingArtistText.setText(nowPlaying.getArtist());
+                    Picasso.with(mainActivity).load(nowPlaying.getAlbumArtLarge().url).placeholder(R.drawable.ic_music_circle_black_48dp).into(nowPlayingAlbumArtImage);
                 }
             }
 
@@ -205,7 +224,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         isDestroyed = false;
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.queuedSongsRecyclerView);
-        mRecyclerView.setNestedScrollingEnabled(false);
+//        mRecyclerView.setNestedScrollingEnabled(false);
         mLayoutManager = new NestedRVLinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
 
         mCurrentLayoutManagerType = LayoutManagerType.LINEAR_LAYOUT_MANAGER;
@@ -296,6 +315,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
 
         queuegroupRef.child("tracks").addValueEventListener(trackListChangeListener);
         queuegroupRef.child("participants").addValueEventListener(participantListener);
+        queuegroupRef.child("nowPlaying").addValueEventListener(nowPlayingChangeListener);
         return view;
     }
 
@@ -332,6 +352,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         super.onDestroyView();
         queuegroupRef.child("tracks").removeEventListener(trackListChangeListener);
         queuegroupRef.child("participants").removeEventListener(participantListener);
+        queuegroupRef.child("nowPlaying").removeEventListener(nowPlayingChangeListener);
         //getView().findViewById(R.id.groupAddSongButton).setVisibility(View.GONE);
     }
 

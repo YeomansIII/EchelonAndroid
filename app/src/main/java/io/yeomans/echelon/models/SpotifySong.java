@@ -25,6 +25,7 @@ import io.github.kaaes.spotify.webapi.core.models.ArtistSimple;
 import io.github.kaaes.spotify.webapi.core.models.Image;
 import io.github.kaaes.spotify.webapi.core.models.LinkedTrack;
 import io.github.kaaes.spotify.webapi.core.models.Track;
+import io.yeomans.echelon.util.Dependencies;
 
 /**
  * Created by jason on 6/26/15.
@@ -181,6 +182,13 @@ public class SpotifySong extends Track implements Comparable<SpotifySong> {
 
     public void setRating(int rating) {
         this.popularity = rating;
+    }
+
+    public boolean isUpVoted() {
+        if (votedUp != null) {
+            return votedUp.containsKey(Dependencies.INSTANCE.getAuth().getCurrentUser().getUid());
+        }
+        return false;
     }
 
     public Map<String, Object> getVotedUp() {

@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -18,6 +19,8 @@ import io.github.kaaes.spotify.webapi.core.models.ArtistSimple;
 import io.github.kaaes.spotify.webapi.core.models.Track;
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.models.SpotifySong;
+import io.yeomans.echelon.util.Dependencies;
+import io.yeomans.echelon.util.FirebaseCommon;
 
 /**
  * Created by jason on 2/9/16.
@@ -63,8 +66,18 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
     public void onBindViewHolder(SonglistRecyclerAdapter.ViewHolder holder, int position) {
         Track curTrack;
         if (isSpotifySong) {
+            holder.isSpotifySong = true;
             curTrack = sTracks.get(position);
+            SpotifySong curSS = (SpotifySong) curTrack;
+            holder.key = curSS.getKey();
+            holder.upVoted = curSS.isUpVoted();
+            if (holder.upVoted) {
+                holder.voteUp.setSelected(true);
+            } else {
+                holder.voteUp.setSelected(false);
+            }
         } else {
+            holder.isSpotifySong = false;
             curTrack = mTracks.get(position);
         }
         String imgUrl;
@@ -88,8 +101,10 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
         holder.artist.setText(artistText.replaceAll(", $", ""));
         holder.trackId = curTrack.id;
 
-        if(vote) {
-            holder.voteBox.setVisibility(View.VISIBLE);
+        if (vote) {
+            holder.voteUp.setVisibility(View.VISIBLE);
+        } else {
+            holder.voteUp.setVisibility(View.GONE);
         }
 
         if (mOnSongClickListener != null) {
@@ -102,8 +117,10 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
         // for any view that will be set as you render a row
         public TextView title, artist;
         public ImageView image;
+        public String key;
         public String trackId;
-        public RelativeLayout voteBox;
+        public boolean upVoted, isSpotifySong;
+        public ImageButton voteUp;
         public OnSongClickListener mOnSongClick;
 
         // We also create a constructor that accepts the entire item row
@@ -116,14 +133,25 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
             title = (TextView) itemView.findViewById(R.id.songTitleText);
             artist = (TextView) itemView.findViewById(R.id.songArtistText);
             image = (ImageView) itemView.findViewById(R.id.songAlbumArtImage);
-            voteBox = (RelativeLayout) itemView.findViewById(R.id.songItemVoterLayout);
+            voteUp = (ImageButton) itemView.findViewById(R.id.voteSongUpButton);
+            voteUp.setOnClickListener(this);
             itemView.setOnClickListener(this);
         }
 
 
         @Override
         public void onClick(View view) {
-            if (mOnSongClick != null) {
+            if (view == voteUp && !key.equals("") && isSpotifySong) {
+                if (upVoted) {
+                    FirebaseCommon.rankSong(key, 0);
+                    voteUp.setSelected(false);
+                    upVoted = false;
+                } else {
+                    FirebaseCommon.rankSong(key, 1);
+                    voteUp.setSelected(true);
+                    upVoted = true;
+                }
+            } else if (mOnSongClick != null) {
                 mOnSongClick.onSongClick(this);
             }
         }

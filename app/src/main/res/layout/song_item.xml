@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/songItemLayout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="3dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="0dp"
+    android:background="#99FFFFFF">
 
     <ImageView
         android:id="@+id/songAlbumArtImage"
@@ -19,9 +27,9 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/songAlbumArtImage"
         android:layout_marginTop="5dp"
-        android:layout_toLeftOf="@+id/songItemVoterLayout"
+        android:layout_toLeftOf="@+id/voteSongUpButton"
         android:layout_toRightOf="@+id/songAlbumArtImage"
-        android:layout_toStartOf="@+id/songItemVoterLayout"
+        android:layout_toStartOf="@+id/voteSongUpButton"
         android:singleLine="true"
         android:text="Song Title"
         android:textSize="20dp" />
@@ -32,56 +40,21 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/songAlbumArtImage"
         android:layout_marginBottom="10dp"
-        android:layout_toLeftOf="@+id/songItemVoterLayout"
+        android:layout_toLeftOf="@+id/voteSongUpButton"
         android:layout_toRightOf="@+id/songAlbumArtImage"
-        android:layout_toStartOf="@+id/songItemVoterLayout"
+        android:layout_toStartOf="@+id/voteSongUpButton"
         android:text="Artist"
         android:textSize="15dp" />
 
-    <RelativeLayout
-        android:id="@+id/songItemVoterLayout"
-        android:layout_width="60dp"
+    <ImageButton
+        android:id="@+id/voteSongUpButton"
+        android:layout_width="70dp"
         android:layout_height="70dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/songAlbumArtImage"
-        android:visibility="gone">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <ImageButton
-                android:id="@+id/voteSongUpButton"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:layout_weight="2"
-                android:src="@drawable/ic_chevron_up_black_36dp"
-                android:background="#00ffffff" />
-
-            <TextView
-                android:id="@+id/songRatingText"
-                android:layout_width="fill_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:text="0"
-                android:gravity="center"
-                android:textSize="12sp" />
-
-            <ImageButton
-                android:id="@+id/voteSongDownButton"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_weight="2"
-                android:src="@drawable/ic_chevron_down_black_36dp"
-                android:background="#00ffffff" />
-        </LinearLayout>
-    </RelativeLayout>
+        android:background="@color/transparent"
+        android:padding="15dp"
+        android:scaleType="fitCenter"
+        android:tint="@color/thumbs_up_color_list"
+        app:srcCompat="@drawable/thumb_up" />
 </RelativeLayout>

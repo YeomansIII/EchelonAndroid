@@ -12,8 +12,7 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
-    <style name="ThemeActionBar"
-           parent="Widget.AppCompat.Light.ActionBar.Solid">
+    <style name="ThemeActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid">
         <item name="android:background">@null</item>
         <!-- Support library compatibility -->
         <item name="background">@null</item>
@@ -40,5 +39,27 @@
         <item name="colorButtonNormal">@color/primaryAccent</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:padding">22dp</item>
+    </style>
+
+    <style name="NowPlayingCardViewStyle" parent="CardView">
+        <item name="cardUseCompatPadding">true</item>
+        <item name="cardCornerRadius">2dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="contentPaddingBottom">0dp</item>
+        <item name="contentPaddingTop">0dp</item>
+        <item name="contentPaddingLeft">0dp</item>
+        <item name="contentPaddingRight">0dp</item>
+        <item name="cardBackgroundColor">@color/ech_seaFrost</item>
+    </style>
+
+    <style name="SongCardViewStyle" parent="CardView">
+        <item name="cardUseCompatPadding">true</item>
+        <item name="cardCornerRadius">1dp</item>
+        <item name="cardElevation">1dp</item>
+        <item name="contentPaddingBottom">10dp</item>
+        <item name="contentPaddingTop">10dp</item>
+        <item name="contentPaddingLeft">16dp</item>
+        <item name="contentPaddingRight">16dp</item>
+        <item name="cardBackgroundColor">@color/white</item>
     </style>
 </resources>

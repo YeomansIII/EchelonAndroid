@@ -1,5 +1,6 @@
 package io.yeomans.echelon.services;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -47,7 +48,13 @@ public class PlayerService extends Service implements PlayerNotificationCallback
     private PlayerBinder playerBinder;
 
     private Intent playingIntent = new Intent("io.yeomans.echelon.PLAYING"),
-            pausingIntent = new Intent("io.yeomans.echelon.PAUSING");
+            pausingIntent = new Intent("io.yeomans.echelon.PAUSING"),
+            playIntent = new Intent("io.yeomans.echelon.PLAY"),
+            pauseIntent = new Intent("io.yeomans.echelon.PAUSE"),
+            playPauseIntent = new Intent("io.yeomans.echelon.PLAY_PAUSE"),
+            skipIntent = new Intent("io.yeomans.echelon.SKIP"),
+            stopIntent = new Intent("io.yeomans.echelon.STOP"),
+            stopServiceIntent = new Intent("io.yeomans.echelon.STOP_SERVICE");
 
     public Player mPlayer;
     public boolean mPlayerPlaying;
@@ -80,8 +87,10 @@ public class PlayerService extends Service implements PlayerNotificationCallback
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("io.yeomans.echelon.STOP_SERVICE");
+        filter.addAction("io.yeomans.echelon.STOP");
         filter.addAction("io.yeomans.echelon.PLAY");
         filter.addAction("io.yeomans.echelon.PAUSE");
+        filter.addAction("io.yeomans.echelon.PLAY_PAUSE");
         filter.addAction("io.yeomans.echelon.SKIP");
 
         registerReceiver(receiver, filter);
@@ -198,6 +207,12 @@ public class PlayerService extends Service implements PlayerNotificationCallback
         return false;
     }
 
+    public void playPause() {
+        if (!play()) {
+            pause();
+        }
+    }
+
     public boolean stop() {
         mPlayer.pause();
         mPlayer.clearQueue();
@@ -299,11 +314,18 @@ public class PlayerService extends Service implements PlayerNotificationCallback
     }
 
     public void startForegroundNotification(SpotifySong spotifySong) {
+        PendingIntent notifClickPendingIntent =
+                PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent stopPIntent = PendingIntent.getBroadcast(this, 0, stopServiceIntent, 0);
+        PendingIntent playPausePIntent = PendingIntent.getBroadcast(this, 0, playPauseIntent, 0);
         android.support.v4.app.NotificationCompat.Builder mBuilder =
                 new android.support.v4.app.NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle(spotifySong.getTitle())
-                        .setContentText(spotifySong.getArtist());
+                        .setContentText(spotifySong.getArtist())
+                        .setContentIntent(notifClickPendingIntent)
+                        .addAction(R.drawable.ic_stop_black_18dp, "Close", stopPIntent)
+                        .addAction(R.drawable.ic_stop_black_18dp, "Play/Pause", playPausePIntent);
         startForeground(1, mBuilder.build());
     }
 
@@ -323,7 +345,14 @@ public class PlayerService extends Service implements PlayerNotificationCallback
                 play();
             } else if (action.equals("io.yeomans.echelon.PAUSE")) {
                 pause();
+            } else if (action.equals("io.yeomans.echelon.PLAY_PAUSE")) {
+                playPause();
+            } else if (action.equals("io.yeomans.echelon.STOP")) {
+                Log.d(TAG, "Stop Service Intent");
+                pause();
+                stop();
             } else if (action.equals("io.yeomans.echelon.STOP_SERVICE")) {
+                Log.d(TAG, "Stop Service Intent");
                 pause();
                 stop();
                 stopSelf();
