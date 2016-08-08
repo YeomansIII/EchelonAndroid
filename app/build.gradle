@@ -1,101 +1,99 @@
 apply plugin: 'com.android.application'
+apply plugin: 'android-apt'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+  compileSdkVersion 24
+  buildToolsVersion "24.0.1"
 
-    defaultConfig {
-        applicationId "io.yeomans.echelon"
-        minSdkVersion 16
-        targetSdkVersion 23
-        versionCode 23
-        versionName "0.5"
-        archivesBaseName = "Echelon-$versionName-$versionCode"
-        vectorDrawables.useSupportLibrary = true
+  defaultConfig {
+    applicationId "io.yeomans.echelon"
+    minSdkVersion 16
+    targetSdkVersion 23
+    versionCode 23
+    versionName "0.5"
+    archivesBaseName = "Echelon-$versionName-$versionCode"
+    vectorDrawables.useSupportLibrary = true
+  }
+  signingConfigs {
+    release {
+      storeFile file("${System.env.ECHELON_KEYSTORE_PATH}")
+      storePassword "${System.env.ECHELON_KEYSTORE_PW}"
+      keyAlias "echelon"
+      keyPassword "${System.env.ECHELON_ALIAS_PW}"
     }
-    signingConfigs {
-        release {
-            storeFile file("${System.env.ECHELON_KEYSTORE_PATH}")
-            storePassword "${System.env.ECHELON_KEYSTORE_PW}"
-            keyAlias "echelon"
-            keyPassword "${System.env.ECHELON_ALIAS_PW}"
-        }
+  }
+  buildTypes {
+    debug {
+      buildConfigField "boolean", "DEBUG_MODE", "true"
+      minifyEnabled false
+      //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+      debuggable true
+      //signingConfig signingConfigs.release
     }
-    buildTypes {
-        debug {
-            buildConfigField "boolean", "DEBUG_MODE", "true"
-            minifyEnabled false
-            //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            debuggable true
-            //signingConfig signingConfigs.release
-        }
 //        debugmini {
 //            minifyEnabled true
 //            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 //            debuggable true
 //            signingConfig signingConfigs.release
 //        }
-        release {
-            buildConfigField "boolean", "DEBUG_MODE", "false"
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
-        }
+    release {
+      buildConfigField "boolean", "DEBUG_MODE", "false"
+      minifyEnabled true
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+      signingConfig signingConfigs.release
     }
-    packagingOptions {
-        exclude 'META-INF/LICENSE-FIREBASE.txt'
-        exclude 'META-INF/NOTICE'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/MANIFEST'
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/MANIFEST'
-        exclude '.readme'
-    }
+  }
+  packagingOptions {
+    exclude 'META-INF/LICENSE-FIREBASE.txt'
+    exclude 'META-INF/NOTICE'
+    exclude 'META-INF/LICENSE'
+    exclude 'META-INF/MANIFEST'
+    exclude 'META-INF/LICENSE.txt'
+    exclude 'META-INF/NOTICE.txt'
+    exclude 'META-INF/MANIFEST'
+    exclude '.readme'
+  }
 }
 
 
 repositories {
-    jcenter()
-    mavenCentral()
-    flatDir {
-        dirs 'libs'
-    }
-    maven { url 'https://maven.fabric.io/public' }
-    maven { url 'https://jitpack.io' }
+  jcenter()
+  mavenCentral()
+  flatDir {
+    dirs 'libs'
+  }
+  maven { url 'https://maven.fabric.io/public' }
+  maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    // This library handles authentication and authorization
-    compile 'com.spotify.sdk:spotify-auth:1.0.0-beta12@aar'
-    // This library handles music playback
-    compile 'com.spotify.sdk:spotify-player:1.0.0-beta12@aar'
-    compile('com.crashlytics.sdk.android:crashlytics:2.4.0@aar') {
-        transitive = true;
-    }
-    compile('com.mikepenz:materialdrawer:5.3.1@aar') {
-        transitive = true
-    }
-    compile 'com.android.support:appcompat-v7:24.1.1'
-    compile 'com.android.support:support-v4:24.1.1'
-    compile 'com.android.support:design:24.1.1'
-    compile 'com.android.support:recyclerview-v7:24.1.1'
-    compile 'com.android.support:support-vector-drawable:24.1.1'
-    compile 'com.android.support:cardview-v7:24.1.1'
-    compile 'com.jakewharton:butterknife:7.0.1'
-    compile 'com.google.firebase:firebase-core:9.0.2'
-    compile 'com.google.firebase:firebase-messaging:9.0.2'
-    compile 'com.google.firebase:firebase-database:9.0.2'
-    compile 'com.google.firebase:firebase-auth:9.0.2'
-    compile 'com.google.firebase:firebase-crash:9.0.2'
-    compile 'com.google.firebase:firebase-config:9.0.2'
-    compile 'com.squareup.okhttp3:okhttp:3.1.1'
-    compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-    compile 'com.spotify.webapi.android:spotify-api-core:0.4.1@aar'
-    compile 'com.spotify.webapi.android:spotify-api-retrofit2:0.4.1@aar'
+  compile fileTree(include: ['*.jar'], dir: 'libs')
+  // This library handles authentication and authorization
+  compile 'com.spotify.sdk:spotify-auth:1.0.0-beta13@aar'
+  // This library handles music playback
+  compile 'com.spotify.sdk:spotify-player:1.0.0-beta13@aar'
+  compile('com.mikepenz:materialdrawer:5.3.6@aar') {
+    transitive = true
+  }
+  compile 'com.android.support:appcompat-v7:24.1.1'
+  compile 'com.android.support:support-v4:24.1.1'
+  compile 'com.android.support:design:24.1.1'
+  compile 'com.android.support:recyclerview-v7:24.1.1'
+  compile 'com.android.support:support-vector-drawable:24.1.1'
+  compile 'com.android.support:cardview-v7:24.1.1'
+  compile 'com.jakewharton:butterknife:7.0.1'
+  compile 'com.google.firebase:firebase-core:9.4.0'
+  compile 'com.google.firebase:firebase-messaging:9.4.0'
+  compile 'com.google.firebase:firebase-database:9.4.0'
+  compile 'com.google.firebase:firebase-auth:9.4.0'
+  compile 'com.google.firebase:firebase-crash:9.4.0'
+  compile 'com.google.firebase:firebase-config:9.4.0'
+  compile 'com.squareup.okhttp3:okhttp:3.4.1'
+  compile 'com.squareup.picasso:picasso:2.5.2'
+  compile 'com.squareup.retrofit2:retrofit:2.1.0'
+  compile 'com.squareup.retrofit2:converter-gson:2.1.0'
+  compile 'com.spotify.webapi.android:spotify-api-core:0.4.1@aar'
+  compile 'com.spotify.webapi.android:spotify-api-retrofit2:0.4.1@aar'
 }
 
 apply plugin: 'com.google.gms.google-services'

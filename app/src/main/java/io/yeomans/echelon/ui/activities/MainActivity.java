@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -37,7 +36,6 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -78,546 +76,544 @@ import io.yeomans.echelon.util.Dependencies;
 import io.yeomans.echelon.util.EchelonUtils;
 import io.yeomans.echelon.util.PreferenceNames;
 
-
 public class MainActivity extends AppCompatActivity
-        implements View.OnClickListener {
+  implements View.OnClickListener {
 
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-     */
-    public Toolbar toolbar;
-    public ActionBar actionBar;
-    private NavigationView navigationView;
-    public CoordinatorLayout coordinatorLayout;
+  /**
+   * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
+   */
+  public Toolbar toolbar;
+  public ActionBar actionBar;
+  private NavigationView navigationView;
+  public CoordinatorLayout coordinatorLayout;
 
-    //NAV DRAWER
-    private IProfile profile;
+  //NAV DRAWER
+  private IProfile profile;
 
-    //SPOTIFY
-    public static final String CLIENT_ID = "8b81e3deddce42c4b0f2972e181b8a3a";
-    public static final String REDIRECT_URI = "echelonapp://callback";
-    public static final int REQUEST_CODE = 9001;
+  //SPOTIFY
+  public static final String CLIENT_ID = "8b81e3deddce42c4b0f2972e181b8a3a";
+  public static final String REDIRECT_URI = "echelonapp://callback";
+  public static final int REQUEST_CODE = 9001;
 
-    public boolean spotifyAuthenticated;
-    public AuthenticationResponse authResponse;
-    public String spotifyAuthToken;
-    // public SpotifyApi spotifyApi;
-    public SpotifyService spotify;
-    public PlayerService playerService;
-    public boolean playerConnBound;
+  public boolean spotifyAuthenticated;
+  public AuthenticationResponse authResponse;
+  public String spotifyAuthToken;
+  // public SpotifyApi spotifyApi;
+  public SpotifyService spotify;
+  public PlayerService playerService;
+  public boolean playerConnBound;
 
-    public boolean loggedIn;
-    public LinkedList<SpotifySong> backStack;
-    public List<SpotifySong> playQueue;
-    private OnPlayerControlCallback mPlayerControlCallback;
+  public boolean loggedIn;
+  public LinkedList<SpotifySong> backStack;
+  public List<SpotifySong> playQueue;
+  private OnPlayerControlCallback mPlayerControlCallback;
 
-    private ServiceConnection playerConn = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            playerService = ((PlayerService.PlayerBinder) service).getService();
-            if (!playerService.isInitiated()) {
-                playerService.configPlayer();
-            }
-            Log.i("PlayerService", "Connected to MainActivity");
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-
-        }
-    };
-
-
-    //GCM
-    public static final String EXTRA_MESSAGE = "message";
-    public static final String PROPERTY_REG_ID = "device_gcm_id";
-    private static final String PROPERTY_APP_VERSION = "appVersion";
-    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-
-    /**
-     * Substitute you own sender ID here. This is the project number you got
-     * from the API Console, as described in "Getting Started."
-     */
-    String SENDER_ID = "45203521863";
-
-    /**
-     * Tag used on log messages.
-     */
-    static final String TAG = "GCM Demo";
-
-    String regid;
-    AtomicInteger msgId = new AtomicInteger();
-
-    //FIREBASE
-    private Dependencies dependencies;
-    public static final String PROD_FIREBASE_URL = "https://flickering-heat-6442.firebaseio.com/";
-    public static final String DEV_FIREBASE_URL = "https://echelon-dev.firebaseio.com/";
-    public static final String ECHELON_PROD_WORKER_URL = "https://echelon-1000.appspot.com/";
-    //public static final String ECHELON_DEV_WORKER_URL = "http://192.168.0.204:8080/";
-
-    //COMMON
-    public SharedPreferences pref, groupPref;
-    Context context;
-    MainActivity mainActivity;
-    MainActivity mainActivityClass;
+  private ServiceConnection playerConn = new ServiceConnection() {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onServiceConnected(ComponentName name, IBinder service) {
+      playerService = ((PlayerService.PlayerBinder) service).getService();
+      if (getGroup() != null && !playerService.isInitiated()) {
+        playerService.configPlayer();
+      }
+      if (playerService.mPlayerPlaying) {
+        sendBroadcast(playerService.playingIntent);
+      }
+    }
 
-        supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
-        setContentView(R.layout.activity_main);
-        Dependencies.INSTANCE.init(getApplicationContext());
-        dependencies = Dependencies.INSTANCE;
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
 
-        //String token = pref.getString(PREF_ECHELON_API_TOKEN, null);
+    }
+  };
 
 
-        if (dependencies.getAuth().getCurrentUser() == null) {
-            loggedIn = false;
-            Intent intent = new Intent(MainActivity.this, WelcomeActivity.class);
-            startActivity(intent);
-            MainActivity.this.finish();
-        } else {
-            loggedIn = true;
-            DatabaseReference userRef = dependencies.getDatabase().getReference("users/" + dependencies.getAuth().getCurrentUser().getUid());
-            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    SharedPreferences.Editor edit = pref.edit();
-                    if (dataSnapshot.hasChild("display_name")) {
-                        edit.putString(PreferenceNames.PREF_USER_DISPLAY_NAME, (String) dataSnapshot.child("display_name").getValue());
-                    }
-                    if (dataSnapshot.hasChild("ext_url")) {
-                        edit.putString(PreferenceNames.PREF_USER_EXT_URL, (String) dataSnapshot.child("ext_url").getValue());
-                    }
-                    if (dataSnapshot.hasChild("image_url")) {
-                        edit.putString(PreferenceNames.PREF_USER_IMAGE_URL, (String) dataSnapshot.child("image_url").getValue());
-                    }
-                    edit.apply();
-                }
+  //GCM
+  public static final String EXTRA_MESSAGE = "message";
+  public static final String PROPERTY_REG_ID = "device_gcm_id";
+  private static final String PROPERTY_APP_VERSION = "appVersion";
+  private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
-                @Override
-                public void onCancelled(DatabaseError firebaseError) {
-                    Toast.makeText(getApplicationContext(), "Error accessing the database", Toast.LENGTH_SHORT).show();
-                }
-            });
+  /**
+   * Substitute you own sender ID here. This is the project number you got
+   * from the API Console, as described in "Getting Started."
+   */
+  String SENDER_ID = "45203521863";
+
+  /**
+   * Tag used on log messages.
+   */
+  static final String TAG = "MainActivity";
+
+  String regid;
+  AtomicInteger msgId = new AtomicInteger();
+
+  //FIREBASE
+  private Dependencies dependencies;
+  public static final String PROD_FIREBASE_URL = "https://flickering-heat-6442.firebaseio.com/";
+  public static final String DEV_FIREBASE_URL = "https://echelon-dev.firebaseio.com/";
+  public static final String ECHELON_PROD_WORKER_URL = "https://echelon-1000.appspot.com/";
+  //public static final String ECHELON_DEV_WORKER_URL = "http://192.168.0.204:8080/";
+
+  //COMMON
+  public SharedPreferences pref, groupPref;
+  Context context;
+  MainActivity mainActivity;
+  MainActivity mainActivityClass;
+
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+    setContentView(R.layout.activity_main);
+    Dependencies.INSTANCE.init(getApplicationContext());
+    dependencies = Dependencies.INSTANCE;
+
+    //String token = pref.getString(PREF_ECHELON_API_TOKEN, null);
+
+
+    if (dependencies.getAuth().getCurrentUser() == null) {
+      loggedIn = false;
+      Intent intent = new Intent(MainActivity.this, WelcomeActivity.class);
+      startActivity(intent);
+      MainActivity.this.finish();
+    } else {
+      loggedIn = true;
+      DatabaseReference userRef = dependencies.getDatabase().getReference("users/" + dependencies.getAuth().getCurrentUser().getUid());
+      userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+          SharedPreferences.Editor edit = pref.edit();
+          if (dataSnapshot.hasChild("display_name")) {
+            edit.putString(PreferenceNames.PREF_USER_DISPLAY_NAME, (String) dataSnapshot.child("display_name").getValue());
+          }
+          if (dataSnapshot.hasChild("ext_url")) {
+            edit.putString(PreferenceNames.PREF_USER_EXT_URL, (String) dataSnapshot.child("ext_url").getValue());
+          }
+          if (dataSnapshot.hasChild("image_url")) {
+            edit.putString(PreferenceNames.PREF_USER_IMAGE_URL, (String) dataSnapshot.child("image_url").getValue());
+          }
+          edit.apply();
         }
 
-        spotify = io.github.kaaes.spotify.webapi.retrofit.v2.Spotify.createAuthenticatedService(spotifyAuthToken);
-        Picasso.with(getApplicationContext()).setIndicatorsEnabled(BuildConfig.DEBUG);
-        context = getApplicationContext();
-        mainActivity = this;
-        mainActivityClass = MainActivity.this;
+        @Override
+        public void onCancelled(DatabaseError firebaseError) {
+          Toast.makeText(getApplicationContext(), "Error accessing the database", Toast.LENGTH_SHORT).show();
+        }
+      });
+    }
 
-        pref = dependencies.getPreferences();
-        groupPref = dependencies.getGroupPreferences();
+    spotify = io.github.kaaes.spotify.webapi.retrofit.v2.Spotify.createAuthenticatedService(spotifyAuthToken);
+    Picasso.with(getApplicationContext()).setIndicatorsEnabled(BuildConfig.DEBUG);
+    context = getApplicationContext();
+    mainActivity = this;
+    mainActivityClass = MainActivity.this;
 
-        playQueue = new LinkedList<>();
-        backStack = new LinkedList<>();
+    pref = dependencies.getPreferences();
+    groupPref = dependencies.getGroupPreferences();
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        actionBar = getSupportActionBar();
-        //coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
+    playQueue = new LinkedList<>();
+    backStack = new LinkedList<>();
+
+    toolbar = (Toolbar) findViewById(R.id.toolbar);
+    setSupportActionBar(toolbar);
+    actionBar = getSupportActionBar();
+    //coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
 
 
-        // Check device for Play Services APK. If check succeeds, proceed with
-        //  GCM registration.
-        if (checkPlayServices()) {
+    // Check device for Play Services APK. If check succeeds, proceed with
+    //  GCM registration.
+    if (checkPlayServices()) {
 //            gcm = GoogleCloudMessaging.getInstance(this);
 //            registerInBackground();
-        } else {
-            Log.i(TAG, "No valid Google Play Services APK found.");
+    } else {
+      Log.i(TAG, "No valid Google Play Services APK found.");
+    }
+    setContentViewHome();
+    checkGroup();
+    setUpNavDrawerAndActionBar();
+
+    setOnPlayerControlCallback(((OnPlayerControlCallback) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")));
+  }
+
+  public void setContentViewLogin() {
+    Fragment newFragment = new LoginFragment();
+    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+    ft.replace(R.id.container, newFragment).commit();
+  }
+
+  public void setContentViewHome() {
+    Fragment newFragment = new HomeFragment();
+    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+    ft.replace(R.id.container, newFragment).commit();
+  }
+
+  public void setUpNavDrawerAndActionBar() {
+    DrawerImageLoader.init(new AbstractDrawerImageLoader() {
+      @Override
+      public void set(ImageView imageView, Uri uri, Drawable placeholder) {
+        Picasso.with(imageView.getContext()).load(uri).placeholder(placeholder).into(imageView);
+      }
+
+      @Override
+      public void cancel(ImageView imageView) {
+        Picasso.with(imageView.getContext()).cancelRequest(imageView);
+      }
+    });
+    profile = new ProfileDrawerItem();
+    final AccountHeader headerResult = new AccountHeaderBuilder()
+      .withActivity(this)
+      .withHeaderBackground(R.drawable.nav_header_bg)
+      .addProfiles(profile)
+      .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
+        @Override
+        public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
+          return false;
         }
+      })
+      .withSelectionListEnabledForSingleProfile(false)
+      .build();
+    PrimaryDrawerItem item1 = new PrimaryDrawerItem().withName("Home").withIcon(R.drawable.ic_home_grey600_36dp);
+    PrimaryDrawerItem item2 = new PrimaryDrawerItem().withName("Group").withIcon(R.drawable.ic_queue_music_grey_36dp);
+    PrimaryDrawerItem item3 = new PrimaryDrawerItem().withName("Account").withIcon(R.drawable.ic_account_grey600_36dp);
+    PrimaryDrawerItem item4 = new PrimaryDrawerItem().withName("Settings").withIcon(R.drawable.ic_settings_grey600_36dp);
+    PrimaryDrawerItem item5 = new SecondaryDrawerItem().withName("Submit Feature/Bug");
+    PrimaryDrawerItem item6 = new SecondaryDrawerItem().withName("About");
+    final Drawer result = new DrawerBuilder()
+      .withActivity(this)
+      .withToolbar(toolbar)
+      .withAccountHeader(headerResult)
+      .addDrawerItems(
+        item1,
+        item2,
+        item3,
+        item4,
+        new DividerDrawerItem(),
+        item5,
+        item6
+      )
+      .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+        @Override
+        public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+          boolean returner = false;
+          FragmentManager fragmentManager = getSupportFragmentManager();
+          FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-//        if (!loggedIn) {
-//            setContentViewLogin();
-//        } else {
-//            setContentViewHome();
-//            setUpNavDrawerAndActionBar();
-//        }
-        setContentViewHome();
-        setUpNavDrawerAndActionBar();
-        startup();
-
-        setOnPlayerControlCallback(((OnPlayerControlCallback) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")));
-    }
-
-    private void setContentViewLogin() {
-        Fragment newFragment = new LoginFragment();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.container, newFragment).commit();
-    }
-
-    private void setContentViewHome() {
-        Fragment newFragment = new HomeFragment();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.container, newFragment).commit();
-    }
-
-    public void setUpNavDrawerAndActionBar() {
-        DrawerImageLoader.init(new AbstractDrawerImageLoader() {
-            @Override
-            public void set(ImageView imageView, Uri uri, Drawable placeholder) {
-                Picasso.with(imageView.getContext()).load(uri).placeholder(placeholder).into(imageView);
-            }
-
-            @Override
-            public void cancel(ImageView imageView) {
-                Picasso.with(imageView.getContext()).cancelRequest(imageView);
-            }
-        });
-        profile = new ProfileDrawerItem();
-        final AccountHeader headerResult = new AccountHeaderBuilder()
-                .withActivity(this)
-                .withHeaderBackground(R.drawable.nav_header_bg)
-                .addProfiles(profile)
-                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
-                    @Override
-                    public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
-                        return false;
-                    }
-                })
-                .withSelectionListEnabledForSingleProfile(false)
-                .build();
-        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withName("Home").withIcon(R.drawable.ic_home_grey600_36dp);
-        PrimaryDrawerItem item2 = new PrimaryDrawerItem().withName("Group").withIcon(R.drawable.ic_queue_music_grey_36dp);
-        PrimaryDrawerItem item3 = new PrimaryDrawerItem().withName("Account").withIcon(R.drawable.ic_account_grey600_36dp);
-        PrimaryDrawerItem item4 = new PrimaryDrawerItem().withName("Settings").withIcon(R.drawable.ic_settings_grey600_36dp);
-        PrimaryDrawerItem item5 = new SecondaryDrawerItem().withName("Submit Feature/Bug");
-        PrimaryDrawerItem item6 = new SecondaryDrawerItem().withName("About");
-        final Drawer result = new DrawerBuilder()
-                .withActivity(this)
-                .withToolbar(toolbar)
-                .withAccountHeader(headerResult)
-                .addDrawerItems(
-                        item1,
-                        item2,
-                        item3,
-                        item4,
-                        new DividerDrawerItem(),
-                        item5,
-                        item6
-                )
-                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-                    @Override
-                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        boolean returner = false;
-                        FragmentManager fragmentManager = getSupportFragmentManager();
-                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-                        switch (position) {
-                            case 1:
-                                fragmentTransaction
-                                        .replace(R.id.container, new HomeFragment(), "HOME_FRAG")
-                                        .commit();
-                                returner = true;
-                                break;
-                            case 2:
-                                GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
-                                String gName = groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null);
-                                if (groupFragment != null && groupFragment.isVisible()) {
-                                    Log.d("Nav", "You are already at the group!");
-                                } else if (gName != null) {
-                                    View cfocus = getCurrentFocus();
-                                    if (cfocus != null) {
-                                        InputMethodManager imm = (InputMethodManager) getSystemService(
-                                                Context.INPUT_METHOD_SERVICE);
-                                        imm.hideSoftInputFromWindow(cfocus.getWindowToken(), 0);
-                                    }
-                                    Fragment fragment = new GroupFragment();
-                                    Bundle bundle = new Bundle();
-                                    if (groupPref.getString(PreferenceNames.PREF_GROUP_LEADER_UID, "").equals(pref.getString(PreferenceNames.PREF_FIREBASE_UID, "."))) {
-                                        bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
-                                    } else {
-                                        bundle.putStringArray("extra_stuff", new String[]{"" + false, "" + false});
-                                    }
-                                    fragment.setArguments(bundle);
-                                    fragmentManager.beginTransaction()
-                                            .replace(R.id.container, fragment, "GROUP_FRAG")
-                                            .commit();
-                                } else {
-                                    Toast.makeText(getApplicationContext(), "Please create or join a group first", Toast.LENGTH_SHORT).show();
-                                }
-                                returner = true;
-                                break;
-                            case 3:
-                                fragmentTransaction.replace(R.id.container, new AccountFragment(), "ACCOUNT_FRAG").addToBackStack(null).commit();
-                                returner = true;
-                                break;
-                            case 4:
-                                fragmentTransaction.replace(R.id.container, new SettingsFragment(), "SETTINGS_FRAG").addToBackStack(null).commit();
-                                returner = true;
-                                break;
-                            case 6:
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://docs.google.com/forms/d/1xta8IsctqjHZ-o5-NNOgUUIuX9WFjsqvWFFaWnLauLw/viewform?usp=send_form"));
-                                startActivity(browserIntent);
-                                break;
-                            case 7:
-                                fragmentTransaction.replace(R.id.container, new AboutFragment(), "ABOUT_FRAG").addToBackStack(null).commit();
-                                returner = true;
-                                break;
-                        }
-                        return false;
-                    }
-                }).build();
-        if (dependencies.getAuth().getCurrentUser() != null) {
-            dependencies.getCurrentUserReference()
-                    .addValueEventListener(
-                            new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    String email = (String) dataSnapshot.child("email").getValue();
-                                    if (email != null && !email.equals("null")) {
-                                        profile.withEmail(email);
-                                    }
-                                    headerResult.updateProfile(profile);
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError firebaseError) {
-
-                                }
-                            }
-                    );
-            dependencies.getCurrentParticipantReference()
-                    .addValueEventListener(
-                            new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    String displayName = (String) dataSnapshot.child("display_name").getValue();
-                                    if (displayName != null && !displayName.equals("null")) {
-                                        profile.withName(displayName);
-                                        pref.edit().putString(PreferenceNames.PREF_USER_DISPLAY_NAME, displayName).apply();
-                                    } else {
-                                        profile.withName((String) dataSnapshot.child("id").getValue());
-                                    }
-                                    String imgUrl = (String) dataSnapshot.child("image_url").getValue();
-                                    if (imgUrl != null) {
-                                        profile.withIcon(imgUrl);
-                                    }
-                                    headerResult.updateProfile(profile);
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError firebaseError) {
-
-                                }
-                            }
-                    );
-        }
-    }
-
-    public void checkGroup() {
-        dependencies.getCurrentUserReference().child("cur_group")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.getValue() != null) {
-                            dependencies.getDatabase().getReference("queuegroups/" + dataSnapshot.getValue()).addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    if (dataSnapshot.getValue() != null) {
-                                        groupPref.edit()
-                                                .putString(PreferenceNames.PREF_GROUP_NAME,
-                                                        (String) dataSnapshot.child("name").getValue())
-                                                .putString(PreferenceNames.PREF_GROUP_LEADER_UID,
-                                                        (String) dataSnapshot.child("leader").getValue()).apply();
-                                        FragmentTransaction fragmentTransaction = mainActivity.getSupportFragmentManager().beginTransaction();
-                                        DialogFragment dialogFragment = null;
-                                        if (pref.getString(PreferenceNames.PREF_FIREBASE_UID, "").equals(dataSnapshot.child("leader").getValue())) {
-                                            dialogFragment = new CurrentGroupLeaderDialogFragment();
-                                            //dialogFragment.show(getSupportFragmentManager(), "CURRENT_GROUP_LEADER_DIALOG");
-                                        } else {
-                                            dialogFragment = new CurrentGroupDialogFragment();
-                                            //dialogFragment.show(getSupportFragmentManager(), "CURRENT_GROUP_DIALOG");
-                                        }
-                                        //dialogFragment.show(fragmentTransaction, "CURRENT_GROUP_DIALOG");
-                                        fragmentTransaction.add(dialogFragment, null).commitAllowingStateLoss();
-                                        Log.d("Dialog", "Show group dialog");
-                                        //fragmentTransaction.commitAllowingStateLoss();
-                                    } else {
-                                        dependencies.getCurrentUserReference().child("cur_group").removeValue();
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError firebaseError) {
-
-                                }
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError firebaseError) {
-
-                    }
-                });
-    }
-
-    public void logout() {
-        if (pref.getString(PreferenceNames.PREF_USER_AUTH_TYPE, "").equals("anonymous")) {
-            dependencies.getCurrentUserReference().removeValue();
-            dependencies.getCurrentParticipantReference().removeValue();
-        } else {
-            dependencies.getCurrentParticipantReference().child("online").setValue(false);
-        }
-        dependencies.getAuth().signOut();
-        pref.edit().clear().apply();
-        groupPref.edit().clear().apply();
-        AuthenticationClient.clearCookies(getApplicationContext());
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        ((ControlBarFragment) fragmentManager.findFragmentByTag("CONTROL_FRAG")).unReady();
-        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        fragmentManager.beginTransaction().replace(R.id.container, new LoginFragment()).commit();
-    }
-
-    public boolean onLeaveGroupClick(MenuItem item) {
-        if (dependencies.getAuth().getCurrentUser() != null) {
-            String uid = dependencies.getAuth().getCurrentUser().getUid();
-            if (groupPref.getString(PreferenceNames.PREF_GROUP_LEADER_UID, "").equals(uid)) {
-                dependencies.getCurrentGroupReference().removeValue();
-            } else {
-                dependencies.getCurrentGroupReference().child("participants/" + uid).removeValue();
-            }
-            dependencies.getDatabase().getReference("users/" + uid + "/cur_group").removeValue();
-            groupPref.edit().clear().apply();
-            ((ControlBarFragment) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")).unReady();
-            setContentViewHome();
-        } else {
-            Snackbar.make(findViewById(R.id.coordinator_layout), "Not identified, please log in", Snackbar.LENGTH_SHORT).show();
-            logout();
-        }
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        //int id = item.getItemId();
-        Log.d("Nav", "onOptionsItemSelected");
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    public void startup() {
-        Intent playerIntent = new Intent(this, PlayerService.class);
-        if (EchelonUtils.isServiceRunning(this, PlayerService.class)) {
-            playerConnBound = getApplicationContext().bindService(playerIntent, playerConn, 0);
-        } else {
-            getApplicationContext().startService(playerIntent);
-            playerConnBound = getApplicationContext().bindService(playerIntent, playerConn, 0);
-        }
-        checkGroup();
-    }
-
-    //register your activity onResume()
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.d("Main", "Activity onResume()");
-        //context.registerReceiver(actionGcmReceiver, new IntentFilter("gcm_intent"));
-    }
-
-    //Must unregister onPause()
-    @Override
-    protected void onPause() {
-        super.onPause();
-        //context.unregisterReceiver(actionGcmReceiver);
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (playerConnBound) {
-            getApplicationContext().unbindService(playerConn);
-        }
-        super.onDestroy();
-    }
-
-    @Override
-    public void onBackPressed() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment groupFragment = fragmentManager.findFragmentByTag("GROUP_FRAG");
-        if (groupFragment != null && groupFragment.isVisible()) {
-            fragmentManager.beginTransaction().replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    /**
-     * Check the device to make sure it has the Google Play Services APK. If
-     * it doesn't, display a dialog that allows users to download the APK from
-     * the Google Play Store or enable it in the device's system settings.
-     */
-    public boolean checkPlayServices() {
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
-                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
-            } else {
-                Log.i(TAG, "This device is not supported.");
-                finish();
-            }
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public void onClick(View v) {
-
-    }
-
-    private static void setOverflowButtonColor(final Activity activity, final PorterDuffColorFilter colorFilter) {
-        final String overflowDescription = activity.getString(R.string.abc_action_menu_overflow_description);
-        final ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
-        final ViewTreeObserver viewTreeObserver = decorView.getViewTreeObserver();
-        viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                final ArrayList<View> outViews = new ArrayList<View>();
-                decorView.findViewsWithText(outViews, overflowDescription,
-                        View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION);
-                if (outViews.isEmpty()) {
-                    return;
+          switch (position) {
+            case 1:
+              fragmentTransaction
+                .replace(R.id.container, new HomeFragment(), "HOME_FRAG")
+                .commit();
+              returner = true;
+              break;
+            case 2:
+              GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
+              String gName = groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null);
+              if (groupFragment != null && groupFragment.isVisible()) {
+                Log.d("Nav", "You are already at the group!");
+              } else if (gName != null) {
+                View cfocus = getCurrentFocus();
+                if (cfocus != null) {
+                  InputMethodManager imm = (InputMethodManager) getSystemService(
+                    Context.INPUT_METHOD_SERVICE);
+                  imm.hideSoftInputFromWindow(cfocus.getWindowToken(), 0);
                 }
-                ImageView overflow = (ImageView) outViews.get(0);
-                overflow.setColorFilter(colorFilter);
-                removeOnGlobalLayoutListener(decorView, this);
-            }
-        });
-    }
-
-    private static void removeOnGlobalLayoutListener(View v, ViewTreeObserver.OnGlobalLayoutListener listener) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            v.getViewTreeObserver().removeGlobalOnLayoutListener(listener);
-        } else {
-            v.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
+                Fragment fragment = new GroupFragment();
+                Bundle bundle = new Bundle();
+                if (groupPref.getString(PreferenceNames.PREF_GROUP_LEADER_UID, "").equals(pref.getString(PreferenceNames.PREF_FIREBASE_UID, "."))) {
+                  bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
+                } else {
+                  bundle.putStringArray("extra_stuff", new String[]{"" + false, "" + false});
+                }
+                fragment.setArguments(bundle);
+                fragmentManager.beginTransaction()
+                  .replace(R.id.container, fragment, "GROUP_FRAG")
+                  .commit();
+              } else {
+                Toast.makeText(getApplicationContext(), "Please create or join a group first", Toast.LENGTH_SHORT).show();
+              }
+              returner = true;
+              break;
+            case 3:
+              fragmentTransaction.replace(R.id.container, new AccountFragment(), "ACCOUNT_FRAG").addToBackStack(null).commit();
+              returner = true;
+              break;
+            case 4:
+              fragmentTransaction.replace(R.id.container, new SettingsFragment(), "SETTINGS_FRAG").addToBackStack(null).commit();
+              returner = true;
+              break;
+            case 6:
+              Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://docs.google.com/forms/d/1xta8IsctqjHZ-o5-NNOgUUIuX9WFjsqvWFFaWnLauLw/viewform?usp=send_form"));
+              startActivity(browserIntent);
+              break;
+            case 7:
+              fragmentTransaction.replace(R.id.container, new AboutFragment(), "ABOUT_FRAG").addToBackStack(null).commit();
+              returner = true;
+              break;
+          }
+          return false;
         }
-    }
+      }).build();
+    if (dependencies.getAuth().getCurrentUser() != null) {
+      dependencies.getCurrentUserReference()
+        .addValueEventListener(
+          new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+              String email = (String) dataSnapshot.child("email").getValue();
+              if (email != null && !email.equals("null")) {
+                profile.withEmail(email);
+              }
+              headerResult.updateProfile(profile);
+            }
 
-    public boolean onPlayControlSelected() {
-        return playerService.play();
-    }
+            @Override
+            public void onCancelled(DatabaseError firebaseError) {
 
-    public boolean onPauseControlSelected() {
-        return playerService.pause();
-    }
+            }
+          }
+        );
+      dependencies.getCurrentParticipantReference()
+        .addValueEventListener(
+          new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+              String displayName = (String) dataSnapshot.child("display_name").getValue();
+              if (displayName != null && !displayName.equals("null")) {
+                profile.withName(displayName);
+                pref.edit().putString(PreferenceNames.PREF_USER_DISPLAY_NAME, displayName).apply();
+              } else {
+                profile.withName((String) dataSnapshot.child("id").getValue());
+              }
+              String imgUrl = (String) dataSnapshot.child("image_url").getValue();
+              if (imgUrl != null) {
+                profile.withIcon(imgUrl);
+              }
+              headerResult.updateProfile(profile);
+            }
 
-    public interface OnPlayerControlCallback {
-        void onPlayerPlay();
+            @Override
+            public void onCancelled(DatabaseError firebaseError) {
 
-        void onPlayerPause();
+            }
+          }
+        );
     }
+  }
 
-    public void setOnPlayerControlCallback(OnPlayerControlCallback mPlayerControlCallback) {
-        this.mPlayerControlCallback = mPlayerControlCallback;
+  public String getGroup() {
+    return dependencies.getGroupPreferences().getString(PreferenceNames.PREF_GROUP_NAME, null);
+  }
+
+  public void checkGroup() {
+    dependencies.getCurrentUserReference().child("cur_group")
+      .addListenerForSingleValueEvent(new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+          if (dataSnapshot.getValue() != null) {
+            dependencies.getDatabase().getReference("queuegroups/" + dataSnapshot.getValue()).addListenerForSingleValueEvent(new ValueEventListener() {
+              @Override
+              public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                  groupPref.edit()
+                    .putString(PreferenceNames.PREF_GROUP_NAME,
+                      (String) dataSnapshot.child("name").getValue())
+                    .putString(PreferenceNames.PREF_GROUP_LEADER_UID,
+                      (String) dataSnapshot.child("leader").getValue()).apply();
+                  FragmentTransaction fragmentTransaction = mainActivity.getSupportFragmentManager().beginTransaction();
+                  DialogFragment dialogFragment = null;
+                  if (pref.getString(PreferenceNames.PREF_FIREBASE_UID, "").equals(dataSnapshot.child("leader").getValue())) {
+                    dialogFragment = new CurrentGroupLeaderDialogFragment();
+                    //dialogFragment.show(getSupportFragmentManager(), "CURRENT_GROUP_LEADER_DIALOG");
+                  } else {
+                    dialogFragment = new CurrentGroupDialogFragment();
+                    //dialogFragment.show(getSupportFragmentManager(), "CURRENT_GROUP_DIALOG");
+                  }
+                  //dialogFragment.show(fragmentTransaction, "CURRENT_GROUP_DIALOG");
+                  fragmentTransaction.add(dialogFragment, null).commitAllowingStateLoss();
+                  Log.d("Dialog", "Show group dialog");
+                  //fragmentTransaction.commitAllowingStateLoss();
+                } else {
+                  dependencies.getCurrentUserReference().child("cur_group").removeValue();
+                }
+              }
+
+              @Override
+              public void onCancelled(DatabaseError firebaseError) {
+
+              }
+            });
+          }
+        }
+
+        @Override
+        public void onCancelled(DatabaseError firebaseError) {
+
+        }
+      });
+  }
+
+  public void logout() {
+    if (pref.getString(PreferenceNames.PREF_USER_AUTH_TYPE, "").equals("anonymous")) {
+      dependencies.getCurrentUserReference().removeValue();
+      dependencies.getCurrentParticipantReference().removeValue();
+    } else {
+      dependencies.getCurrentParticipantReference().child("online").setValue(false);
     }
+    dependencies.getAuth().signOut();
+    pref.edit().clear().apply();
+    groupPref.edit().clear().apply();
+    AuthenticationClient.clearCookies(getApplicationContext());
+    FragmentManager fragmentManager = getSupportFragmentManager();
+    ((ControlBarFragment) fragmentManager.findFragmentByTag("CONTROL_FRAG")).unReady();
+    fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    fragmentManager.beginTransaction().replace(R.id.container, new LoginFragment()).commit();
+  }
+
+//    public boolean onLeaveGroupClick(MenuItem item) {
+//        if (dependencies.getAuth().getCurrentUser() != null) {
+//            String uid = dependencies.getAuth().getCurrentUser().getUid();
+//            if (groupPref.getString(PreferenceNames.PREF_GROUP_LEADER_UID, "").equals(uid)) {
+//                dependencies.getCurrentGroupReference().removeValue();
+//            } else {
+//                dependencies.getCurrentGroupReference().child("participants/" + uid).removeValue();
+//            }
+//            dependencies.getDatabase().getReference("users/" + uid + "/cur_group").removeValue();
+//            groupPref.edit().clear().apply();
+//            ((ControlBarFragment) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")).unReady();
+//            setContentViewHome();
+//        } else {
+//            Snackbar.make(findViewById(R.id.coordinator_layout), "Not identified, please log in", Snackbar.LENGTH_SHORT).show();
+//            logout();
+//        }
+//        return true;
+//    }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    // Handle action bar item clicks here. The action bar will
+    // automatically handle clicks on the Home/Up button, so long
+    // as you specify a parent activity in AndroidManifest.xml.
+    //int id = item.getItemId();
+    Log.d("Nav", "onOptionsItemSelected");
+
+    return super.onOptionsItemSelected(item);
+  }
+
+  public void startupPlayerService() {
+    Intent playerIntent = new Intent(this, PlayerService.class);
+    if (EchelonUtils.isServiceRunning(this, PlayerService.class)) {
+      playerConnBound = getApplicationContext().bindService(playerIntent, playerConn, 0);
+    } else {
+      getApplicationContext().startService(playerIntent);
+      playerConnBound = getApplicationContext().bindService(playerIntent, playerConn, 0);
+    }
+  }
+
+  //register your activity onResume()
+  @Override
+  public void onResume() {
+    super.onResume();
+    Log.d("Main", "Activity onResume()");
+    startupPlayerService();
+    //context.registerReceiver(actionGcmReceiver, new IntentFilter("gcm_intent"));
+  }
+
+  //Must unregister onPause()
+  @Override
+  protected void onPause() {
+    super.onPause();
+    //context.unregisterReceiver(actionGcmReceiver);
+  }
+
+  @Override
+  protected void onDestroy() {
+    if (playerConnBound) {
+      getApplicationContext().unbindService(playerConn);
+    }
+    super.onDestroy();
+  }
+
+  @Override
+  public void onBackPressed() {
+    FragmentManager fragmentManager = getSupportFragmentManager();
+    Fragment groupFragment = fragmentManager.findFragmentByTag("GROUP_FRAG");
+    if (groupFragment != null && groupFragment.isVisible()) {
+      fragmentManager.beginTransaction().replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
+    } else {
+      super.onBackPressed();
+    }
+  }
+
+  /**
+   * Check the device to make sure it has the Google Play Services APK. If
+   * it doesn't, display a dialog that allows users to download the APK from
+   * the Google Play Store or enable it in the device's system settings.
+   */
+  public boolean checkPlayServices() {
+    int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+    if (resultCode != ConnectionResult.SUCCESS) {
+      if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+        GooglePlayServicesUtil.getErrorDialog(resultCode, this,
+          PLAY_SERVICES_RESOLUTION_REQUEST).show();
+      } else {
+        Log.i(TAG, "This device is not supported.");
+        finish();
+      }
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public void onClick(View v) {
+
+  }
+
+  private static void setOverflowButtonColor(final Activity activity, final PorterDuffColorFilter colorFilter) {
+    final String overflowDescription = activity.getString(R.string.abc_action_menu_overflow_description);
+    final ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
+    final ViewTreeObserver viewTreeObserver = decorView.getViewTreeObserver();
+    viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+      @Override
+      public void onGlobalLayout() {
+        final ArrayList<View> outViews = new ArrayList<View>();
+        decorView.findViewsWithText(outViews, overflowDescription,
+          View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION);
+        if (outViews.isEmpty()) {
+          return;
+        }
+        ImageView overflow = (ImageView) outViews.get(0);
+        overflow.setColorFilter(colorFilter);
+        removeOnGlobalLayoutListener(decorView, this);
+      }
+    });
+  }
+
+  private static void removeOnGlobalLayoutListener(View v, ViewTreeObserver.OnGlobalLayoutListener listener) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+      v.getViewTreeObserver().removeGlobalOnLayoutListener(listener);
+    } else {
+      v.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
+    }
+  }
+
+  public boolean onPlayControlSelected() {
+    return playerService.play();
+  }
+
+  public boolean onPauseControlSelected() {
+    return playerService.pause();
+  }
+
+  public interface OnPlayerControlCallback {
+    void onPlayerPlay();
+
+    void onPlayerPause();
+  }
+
+  public void setOnPlayerControlCallback(OnPlayerControlCallback mPlayerControlCallback) {
+    this.mPlayerControlCallback = mPlayerControlCallback;
+  }
 }

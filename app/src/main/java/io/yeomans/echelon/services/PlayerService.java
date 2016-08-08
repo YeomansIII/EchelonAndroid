@@ -40,324 +40,350 @@ import io.yeomans.echelon.util.PreferenceNames;
  * Created by jason on 4/25/16.
  */
 public class PlayerService extends Service implements PlayerNotificationCallback, ConnectionStateCallback {
-    private static final String TAG = "PlayerService";
+  private static final String TAG = "PlayerService";
 
-    public boolean playerSetup = false, firebaseSetup = false;
-    SharedPreferences pref, groupPref;
-    private ValueEventListener trackListChangeListener, nowPlayingChangeListener;
-    private PlayerBinder playerBinder;
+  public boolean playerSetup = false, firebaseSetup = false;
+  SharedPreferences pref, groupPref;
+  private ValueEventListener trackListChangeListener, nowPlayingChangeListener;
+  private PlayerBinder playerBinder;
 
-    private Intent playingIntent = new Intent("io.yeomans.echelon.PLAYING"),
-            pausingIntent = new Intent("io.yeomans.echelon.PAUSING"),
-            playIntent = new Intent("io.yeomans.echelon.PLAY"),
-            pauseIntent = new Intent("io.yeomans.echelon.PAUSE"),
-            playPauseIntent = new Intent("io.yeomans.echelon.PLAY_PAUSE"),
-            skipIntent = new Intent("io.yeomans.echelon.SKIP"),
-            stopIntent = new Intent("io.yeomans.echelon.STOP"),
-            stopServiceIntent = new Intent("io.yeomans.echelon.STOP_SERVICE");
+  public Intent playingIntent = new Intent("io.yeomans.echelon.PLAYING"),
+    pausingIntent = new Intent("io.yeomans.echelon.PAUSING"),
+    playIntent = new Intent("io.yeomans.echelon.PLAY"),
+    pauseIntent = new Intent("io.yeomans.echelon.PAUSE"),
+    playPauseIntent = new Intent("io.yeomans.echelon.PLAY_PAUSE"),
+    skipIntent = new Intent("io.yeomans.echelon.SKIP"),
+    stopIntent = new Intent("io.yeomans.echelon.STOP"),
+    stopServiceIntent = new Intent("io.yeomans.echelon.STOP_SERVICE");
 
-    public Player mPlayer;
-    public boolean mPlayerPlaying;
-    public boolean mPlayerCherry;
-    public boolean playerReady;
-    public boolean loggedIn;
-    public LinkedList<SpotifySong> backStack;
-    public List<SpotifySong> playQueue;
-    public SpotifySong nowPlaying;
+  public Player mPlayer;
+  public boolean mPlayerPlaying;
+  public boolean mPlayerShouldPlaying;
+  public boolean mPlayerCherry;
+  public boolean playerReady;
+  public boolean loggedIn;
+  public LinkedList<SpotifySong> backStack;
+  public List<SpotifySong> playQueue;
+  public SpotifySong nowPlaying;
 
-    Dependencies dependencies;
+  Dependencies dependencies;
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return playerBinder;
-    }
+  @Nullable
+  @Override
+  public IBinder onBind(Intent intent) {
+    return playerBinder;
+  }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Dependencies.INSTANCE.init(getApplicationContext());
-        dependencies = Dependencies.INSTANCE;
-        Log.i(TAG, "Creating PlayerService");
-        playerBinder = new PlayerBinder();
-        playQueue = new LinkedList<>();
-        backStack = new LinkedList<>();
-        pref = dependencies.getPreferences();
-        groupPref = dependencies.getPreferences();
+  @Override
+  public void onCreate() {
+    super.onCreate();
+    Dependencies.INSTANCE.init(getApplicationContext());
+    dependencies = Dependencies.INSTANCE;
+    Log.i(TAG, "Creating PlayerService");
+    playerBinder = new PlayerBinder();
+    playQueue = new LinkedList<>();
+    backStack = new LinkedList<>();
+    pref = dependencies.getPreferences();
+    groupPref = dependencies.getPreferences();
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("io.yeomans.echelon.STOP_SERVICE");
-        filter.addAction("io.yeomans.echelon.STOP");
-        filter.addAction("io.yeomans.echelon.PLAY");
-        filter.addAction("io.yeomans.echelon.PAUSE");
-        filter.addAction("io.yeomans.echelon.PLAY_PAUSE");
-        filter.addAction("io.yeomans.echelon.SKIP");
+    IntentFilter filter = new IntentFilter();
+    filter.addAction("io.yeomans.echelon.STOP_SERVICE");
+    filter.addAction("io.yeomans.echelon.STOP");
+    filter.addAction("io.yeomans.echelon.PLAY");
+    filter.addAction("io.yeomans.echelon.PAUSE");
+    filter.addAction("io.yeomans.echelon.PLAY_PAUSE");
+    filter.addAction("io.yeomans.echelon.SKIP");
 
-        registerReceiver(receiver, filter);
+    registerReceiver(receiver, filter);
 
-        trackListChangeListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d("MyFirebase", "Track data changed!");
-                playQueue.clear();
-                SpotifySong nowPlayingSS = null;
-                for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
-                    SpotifySong ss = dataSnapshot1.getValue(SpotifySong.class);
-                    playQueue.add(ss);
-                }
-                Collections.sort(playQueue);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-
-        };
-        nowPlayingChangeListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() == null) {
-                    nowPlaying = null;
-                } else {
-                    nowPlaying = dataSnapshot.getValue(SpotifySong.class);
-                    startForegroundNotification(nowPlaying);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        };
-        dependencies.getCurrentGroupReference().child("tracks").addValueEventListener(trackListChangeListener);
-        dependencies.getCurrentGroupReference().child("nowPlaying").addValueEventListener(nowPlayingChangeListener);
-    }
-
-    public int onStartCommand(Intent intent, int flags, int startId) {
-
-        return 1;
-    }
-
-    public IBinder onUnBind(Intent arg0) {
-        // TO DO Auto-generated method
-        return null;
-    }
-
-    private void setNowPlaying(SpotifySong toPlay) {
-        if (nowPlaying != null) {
-            DatabaseReference push = dependencies.getCurrentGroupReference().child("pastTracks").push();
-            push.setValue(nowPlaying.getMap());
+    trackListChangeListener = new ValueEventListener() {
+      @Override
+      public void onDataChange(DataSnapshot dataSnapshot) {
+        Log.d("MyFirebase", "Track data changed!");
+        playQueue.clear();
+        SpotifySong nowPlayingSS = null;
+        for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
+          SpotifySong ss = dataSnapshot1.getValue(SpotifySong.class);
+          playQueue.add(ss);
         }
-        if (toPlay == null) {
-            dependencies.getCurrentGroupReference().child("nowPlaying").removeValue();
-        } else {
-            dependencies.getCurrentGroupReference().child("nowPlaying").setValue(toPlay.getMap());
-            dependencies.getCurrentGroupReference().child("tracks/" + toPlay.getKey()).removeValue();
+        Collections.sort(playQueue);
+        if (mPlayerShouldPlaying) {
+          mPlayer.clearQueue();
+          for (SpotifySong ss : playQueue) {
+            mPlayer.queue(ss.getUri());
+          }
         }
-    }
+      }
 
-    public void configPlayer() {
-        String authToken = pref.getString(PreferenceNames.PREF_SPOTIFY_AUTH_TOKEN, null);
-        if (authToken != null) {
-            Config playerConfig = new Config(this, authToken, MainActivity.CLIENT_ID);
-            mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
-                @Override
-                public void onInitialized(Player player) {
-                    mPlayer.addConnectionStateCallback(PlayerService.this);
-                    mPlayer.addPlayerNotificationCallback(PlayerService.this);
-                    playerReady = true;
-                    mPlayerPlaying = false;
-                    mPlayerCherry = true;
-                    playerSetup = true;
-                    Log.d("Player", "Player Ready");
-                    //playFirstSong();
-                }
+      @Override
+      public void onCancelled(DatabaseError databaseError) {
+        Toast.makeText(getApplicationContext(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+      }
 
-                @Override
-                public void onError(Throwable throwable) {
-                    Log.e("MainActivity", "Could not initialize player: " + throwable.getMessage());
-                }
-            });
-        } else {
-            Toast.makeText(getApplicationContext(), "Could not create player", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    public boolean isInitiated() {
-        return playerSetup && firebaseSetup;
-    }
-
-    public boolean play() {
-        if (!mPlayerPlaying && mPlayerCherry) {
-            playFirstSong();
-            return true;
-        } else if (!mPlayerPlaying) {
-            mPlayer.resume();
-            return true;
-        }
-        return false;
-    }
-
-    public boolean pause() {
-        if (mPlayerPlaying) {
-            mPlayer.pause();
-            return true;
-        }
-        return false;
-    }
-
-    public void playPause() {
-        if (!play()) {
-            pause();
-        }
-    }
-
-    public boolean stop() {
-        mPlayer.pause();
-        mPlayer.clearQueue();
-        mPlayerCherry = true;
-        return true;
-    }
-
-    public void onStop() {
-
-    }
-
-    public void onPause() {
-
-    }
-
-    @Override
-    public void onDestroy() {
-        dependencies.getCurrentGroupReference().child("tracks").removeEventListener(trackListChangeListener);
-        Spotify.destroyPlayer(mPlayer);
-        unregisterReceiver(receiver);
-    }
-
-    @Override
-    public void onLowMemory() {
-
-    }
-
-    @Override
-    public void onLoggedIn() {
-
-    }
-
-    @Override
-    public void onLoggedOut() {
-
-    }
-
-    @Override
-    public void onLoginFailed(Throwable throwable) {
-
-    }
-
-    @Override
-    public void onTemporaryError() {
-
-    }
-
-    @Override
-    public void onConnectionMessage(String s) {
-
-    }
-
-    @Override
-    public void onPlaybackEvent(EventType eventType, PlayerState playerState) {
-        if (eventType == EventType.TRACK_END) {
-            if (playQueue.size() > 0) {
-                SpotifySong old = playQueue.get(0);
-                old.setBackStack(true);
-                Map<String, Object> oldMap = new HashMap<>();
-                dependencies.getCurrentGroupReference().child("tracks")
-                        .child(old.getKey())
-                        .updateChildren(oldMap);
-                backStack.add(old);
-                playQueue.remove(0);
-                if (playQueue.size() > 0) {
-                    SpotifySong toPlay = playQueue.get(0);
-                    mPlayer.play(toPlay.getUri());
-                    setNowPlaying(toPlay);
-                } else {
-                    mPlayerCherry = true;
-                    mPlayerPlaying = false;
-                }
-            } else {
-                stop();
-                setNowPlaying(null);
-            }
-        } else if (eventType == EventType.PLAY) {
-            mPlayerPlaying = true;
-            sendBroadcast(playingIntent);
-        } else if (eventType == EventType.PAUSE) {
-            mPlayerPlaying = false;
-            sendBroadcast(pausingIntent);
-        }
-    }
-
-    @Override
-    public void onPlaybackError(ErrorType errorType, String s) {
-
-    }
-
-    public void playFirstSong() {
-        Log.d("Play", "PlayQueue: " + playQueue);
-        if (playQueue.size() > 0) {
-            SpotifySong toPlay = playQueue.get(0);
-            setNowPlaying(toPlay);
-            mPlayer.play(toPlay.getUri());
-            mPlayerCherry = false;
-        }
-    }
-
-    public void startForegroundNotification(SpotifySong spotifySong) {
-        PendingIntent notifClickPendingIntent =
-                PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent stopPIntent = PendingIntent.getBroadcast(this, 0, stopServiceIntent, 0);
-        PendingIntent playPausePIntent = PendingIntent.getBroadcast(this, 0, playPauseIntent, 0);
-        android.support.v4.app.NotificationCompat.Builder mBuilder =
-                new android.support.v4.app.NotificationCompat.Builder(this)
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle(spotifySong.getTitle())
-                        .setContentText(spotifySong.getArtist())
-                        .setContentIntent(notifClickPendingIntent)
-                        .addAction(R.drawable.ic_stop_black_18dp, "Close", stopPIntent)
-                        .addAction(R.drawable.ic_stop_black_18dp, "Play/Pause", playPausePIntent);
-        startForeground(1, mBuilder.build());
-    }
-
-    public class PlayerBinder extends Binder {
-        public PlayerService getService() {
-            return PlayerService.this;
-        }
-    }
-
-    private final BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals("io.yeomans.echelon.SKIP")) {
-                mPlayer.skipToNext();
-            } else if (action.equals("io.yeomans.echelon.PLAY")) {
-                play();
-            } else if (action.equals("io.yeomans.echelon.PAUSE")) {
-                pause();
-            } else if (action.equals("io.yeomans.echelon.PLAY_PAUSE")) {
-                playPause();
-            } else if (action.equals("io.yeomans.echelon.STOP")) {
-                Log.d(TAG, "Stop Service Intent");
-                pause();
-                stop();
-            } else if (action.equals("io.yeomans.echelon.STOP_SERVICE")) {
-                Log.d(TAG, "Stop Service Intent");
-                pause();
-                stop();
-                stopSelf();
-            }
-        }
     };
+    nowPlayingChangeListener = new ValueEventListener() {
+      @Override
+      public void onDataChange(DataSnapshot dataSnapshot) {
+        if (dataSnapshot.getValue() == null) {
+          nowPlaying = null;
+        } else {
+          nowPlaying = dataSnapshot.getValue(SpotifySong.class);
+          startForegroundNotification(nowPlaying);
+        }
+      }
+
+      @Override
+      public void onCancelled(DatabaseError databaseError) {
+        Toast.makeText(getApplicationContext(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+      }
+    };
+  }
+
+  public int onStartCommand(Intent intent, int flags, int startId) {
+
+    return 1;
+  }
+
+  public IBinder onUnBind(Intent arg0) {
+    // TO DO Auto-generated method
+    return null;
+  }
+
+  private void setNowPlaying(SpotifySong toPlay) {
+    if (nowPlaying != null) {
+      DatabaseReference push = dependencies.getCurrentGroupReference().child("pastTracks").push();
+      push.setValue(nowPlaying.getMap());
+    }
+    if (toPlay == null) {
+      dependencies.getCurrentGroupReference().child("nowPlaying").removeValue();
+    } else {
+      dependencies.getCurrentGroupReference().child("nowPlaying").setValue(toPlay.getMap());
+      dependencies.getCurrentGroupReference().child("tracks/" + toPlay.getKey()).removeValue();
+    }
+  }
+
+  public void configPlayer() {
+    String authToken = pref.getString(PreferenceNames.PREF_SPOTIFY_AUTH_TOKEN, null);
+    if (authToken != null) {
+      Config playerConfig = new Config(this, authToken, MainActivity.CLIENT_ID);
+      mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
+        @Override
+        public void onInitialized(Player player) {
+          mPlayer.addConnectionStateCallback(PlayerService.this);
+          mPlayer.addPlayerNotificationCallback(PlayerService.this);
+          playerReady = true;
+          mPlayerPlaying = false;
+          mPlayerShouldPlaying = false;
+          mPlayerCherry = true;
+          playerSetup = true;
+          Log.d("Player", "Player Ready");
+          dependencies.getCurrentGroupReference().child("tracks").addValueEventListener(trackListChangeListener);
+          dependencies.getCurrentGroupReference().child("nowPlaying").addValueEventListener(nowPlayingChangeListener);
+          //playFirstSong();
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+          Log.e("MainActivity", "Could not initialize player: " + throwable.getMessage());
+        }
+      });
+    } else {
+      Toast.makeText(getApplicationContext(), "Could not create player", Toast.LENGTH_LONG).show();
+    }
+  }
+
+  public boolean isInitiated() {
+    return playerSetup;
+  }
+
+  public boolean play() {
+    if (!mPlayerPlaying && mPlayerCherry) {
+      mPlayerShouldPlaying = true;
+      playFirstSong();
+      return true;
+    } else if (!mPlayerPlaying) {
+      mPlayerShouldPlaying = true;
+      mPlayer.resume();
+      return true;
+    }
+    return false;
+  }
+
+  public boolean pause() {
+    if (mPlayerPlaying) {
+      mPlayer.pause();
+      mPlayerShouldPlaying = false;
+      return true;
+    }
+    return false;
+  }
+
+  public void playPause() {
+    if (!play()) {
+      pause();
+    }
+  }
+
+  public boolean stop() {
+    mPlayer.pause();
+    mPlayer.clearQueue();
+    mPlayerCherry = true;
+    mPlayerShouldPlaying = false;
+    return true;
+  }
+
+  public void kill() {
+    stop();
+    dependencies.getCurrentGroupReference().child("tracks").removeEventListener(trackListChangeListener);
+    dependencies.getCurrentGroupReference().child("nowPlaying").removeEventListener(nowPlayingChangeListener);
+    Spotify.destroyPlayer(mPlayer);
+    unregisterReceiver(receiver);
+    stopSelf();
+  }
+
+  public void onStop() {
+
+  }
+
+  public void onPause() {
+
+  }
+
+  @Override
+  public void onDestroy() {
+    dependencies.getCurrentGroupReference().child("tracks").removeEventListener(trackListChangeListener);
+    dependencies.getCurrentGroupReference().child("nowPlaying").removeEventListener(nowPlayingChangeListener);
+    Spotify.destroyPlayer(mPlayer);
+    try {
+      unregisterReceiver(receiver);
+    } catch (IllegalArgumentException e) {
+
+    }
+  }
+
+  @Override
+  public void onLowMemory() {
+
+  }
+
+  @Override
+  public void onLoggedIn() {
+
+  }
+
+  @Override
+  public void onLoggedOut() {
+
+  }
+
+  @Override
+  public void onLoginFailed(Throwable throwable) {
+
+  }
+
+  @Override
+  public void onTemporaryError() {
+
+  }
+
+  @Override
+  public void onConnectionMessage(String s) {
+
+  }
+
+  @Override
+  public void onPlaybackEvent(EventType eventType, PlayerState playerState) {
+    if (eventType == EventType.TRACK_CHANGED) {
+      setNowPlaying(playQueue.get(0));
+    } else if (eventType == EventType.PLAY) {
+      mPlayerPlaying = true;
+      sendBroadcast(playingIntent);
+    } else if (eventType == EventType.PAUSE) {
+      mPlayerPlaying = false;
+      sendBroadcast(pausingIntent);
+      if (mPlayerShouldPlaying) {
+        setNowPlaying(null);
+        mPlayerShouldPlaying = false;
+      }
+    } else if (eventType == EventType.TRACK_END) {
+      if (mPlayerPlaying) {
+        mPlayerPlaying = false;
+        sendBroadcast(pausingIntent);
+      }
+    } else if (eventType == EventType.TRACK_START) {
+      if (!mPlayerPlaying) {
+        mPlayerPlaying = true;
+        sendBroadcast(playingIntent);
+      }
+    }
+  }
+
+  @Override
+  public void onPlaybackError(ErrorType errorType, String s) {
+
+  }
+
+  public void playFirstSong() {
+    Log.d("Play", "PlayQueue: " + playQueue);
+    if (playQueue.size() > 0) {
+      if (mPlayerShouldPlaying) {
+        mPlayer.clearQueue();
+        for (SpotifySong ss : playQueue) {
+          mPlayer.queue(ss.getUri());
+        }
+      }
+      mPlayerCherry = false;
+    }
+  }
+
+  public void startForegroundNotification(SpotifySong spotifySong) {
+    PendingIntent notifClickPendingIntent =
+      PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+    PendingIntent stopPIntent = PendingIntent.getBroadcast(this, 0, stopServiceIntent, 0);
+    PendingIntent playPausePIntent = PendingIntent.getBroadcast(this, 0, playPauseIntent, 0);
+    android.support.v4.app.NotificationCompat.Builder mBuilder =
+      new android.support.v4.app.NotificationCompat.Builder(this)
+        .setSmallIcon(R.mipmap.ic_launcher)
+        .setContentTitle(spotifySong.getTitle())
+        .setContentText(spotifySong.getArtist())
+        .setContentIntent(notifClickPendingIntent)
+        .addAction(R.drawable.ic_stop_black_18dp, "Close", stopPIntent)
+        .addAction(R.drawable.ic_stop_black_18dp, "Play/Pause", playPausePIntent);
+    startForeground(1, mBuilder.build());
+  }
+
+  public class PlayerBinder extends Binder {
+    public PlayerService getService() {
+      return PlayerService.this;
+    }
+  }
+
+  private final BroadcastReceiver receiver = new BroadcastReceiver() {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      String action = intent.getAction();
+      if (action.equals("io.yeomans.echelon.SKIP")) {
+        mPlayer.skipToNext();
+      } else if (action.equals("io.yeomans.echelon.PLAY")) {
+        Log.d(TAG, "mPlayerPlaying: " + mPlayerPlaying + "; mPlayerShouldPlaying: " + mPlayerShouldPlaying);
+        play();
+      } else if (action.equals("io.yeomans.echelon.PAUSE")) {
+        Log.d(TAG, "mPlayerPlaying: " + mPlayerPlaying + "; mPlayerShouldPlaying: " + mPlayerShouldPlaying);
+        pause();
+      } else if (action.equals("io.yeomans.echelon.PLAY_PAUSE")) {
+        Log.d(TAG, "mPlayerPlaying: " + mPlayerPlaying + "; mPlayerShouldPlaying: " + mPlayerShouldPlaying);
+        playPause();
+      } else if (action.equals("io.yeomans.echelon.STOP")) {
+        Log.d(TAG, "Stop Service Intent");
+        pause();
+        stop();
+      } else if (action.equals("io.yeomans.echelon.STOP_SERVICE")) {
+        Log.d(TAG, "Stop Service Intent");
+        pause();
+        stop();
+        stopSelf();
+      }
+    }
+  };
 
 }

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <RelativeLayout
+    android:id="@+id/songDetailTrackInfoLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <TextView
+      android:id="@+id/songDetailTitleText"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="Song Title"
+      android:textColor="@color/md_black_1000"
+      android:textSize="30sp" />
+
+    <TextView
+      android:id="@+id/songDetailArtistText"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@+id/songDetailTitleText"
+      android:text="Song Artists"
+      android:textSize="20sp" />
+  </RelativeLayout>
+
+  <Button
+    android:id="@+id/songDetailViewSpotifyButton"
+    style="@style/Widget.AppCompat.Button.Borderless"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/songDetailTrackInfoLayout"
+    android:layout_margin="0dp"
+    android:gravity="start|center"
+    android:padding="16dp"
+    android:text="Open in Spotify" />
+
+  <Button
+    android:id="@+id/songDetailAddPlaylistButton"
+    style="@style/Widget.AppCompat.Button.Borderless"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/songDetailViewSpotifyButton"
+    android:layout_margin="0dp"
+    android:gravity="start|center"
+    android:padding="16dp"
+    android:text="Add to playlist" />
+
+</RelativeLayout>
