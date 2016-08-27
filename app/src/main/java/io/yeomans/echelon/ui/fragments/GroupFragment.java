@@ -1,14 +1,11 @@
 package io.yeomans.echelon.ui.fragments;
 
-import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -42,7 +39,6 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.models.SpotifySong;
 import io.yeomans.echelon.ui.activities.MainActivity;
@@ -120,16 +116,12 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
 
     mainActivity = (MainActivity) getActivity();
 
-    if (!mainActivity.playerService.isInitiated()) {
-      mainActivity.playerService.configPlayer();
-    }
-
     playqueue = mainActivity.playQueue;
     isDestroyed = false;
 
     songListRA = new SonglistRecyclerAdapter(playqueue, true);
 
-    queuegroupRef = dependencies.getDatabase().getReference("queuegroups/" + dependencies.getGroupPreferences().getString(PreferenceNames.PREF_GROUP_NAME, ""));
+    queuegroupRef = dependencies.getCurrentGroupReference();
     trackListChangeListener = new ValueEventListener() {
       @Override
       public void onDataChange(DataSnapshot dataSnapshot) {

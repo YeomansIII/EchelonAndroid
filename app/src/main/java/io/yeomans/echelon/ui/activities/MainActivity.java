@@ -107,12 +107,17 @@ public class MainActivity extends AppCompatActivity
   public LinkedList<SpotifySong> backStack;
   public List<SpotifySong> playQueue;
   private OnPlayerControlCallback mPlayerControlCallback;
+  public boolean shouldPlayAfterServiceInit;
 
   private ServiceConnection playerConn = new ServiceConnection() {
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
       playerService = ((PlayerService.PlayerBinder) service).getService();
+      if (shouldPlayAfterServiceInit) {
+        playerService.shouldPlayAfterServiceInit = shouldPlayAfterServiceInit;
+        shouldPlayAfterServiceInit = false;
+      }
       if (getGroup() != null && !playerService.isInitiated()) {
         playerService.configPlayer();
       }

@@ -25,10 +25,8 @@ import com.spotify.sdk.android.player.PlayerState;
 import com.spotify.sdk.android.player.Spotify;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.models.SpotifySong;
@@ -61,6 +59,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
   public boolean mPlayerShouldPlaying;
   public boolean mPlayerCherry;
   public boolean playerReady;
+  public boolean shouldPlayAfterServiceInit;
   public boolean loggedIn;
   public LinkedList<SpotifySong> backStack;
   public List<SpotifySong> playQueue;
@@ -112,6 +111,10 @@ public class PlayerService extends Service implements PlayerNotificationCallback
           for (SpotifySong ss : playQueue) {
             mPlayer.queue(ss.getUri());
           }
+        }
+        if (shouldPlayAfterServiceInit) {
+          shouldPlayAfterServiceInit = false;
+          play();
         }
       }
 
@@ -169,8 +172,8 @@ public class PlayerService extends Service implements PlayerNotificationCallback
       mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
         @Override
         public void onInitialized(Player player) {
-          mPlayer.addConnectionStateCallback(PlayerService.this);
-          mPlayer.addPlayerNotificationCallback(PlayerService.this);
+          player.addConnectionStateCallback(PlayerService.this);
+          player.addPlayerNotificationCallback(PlayerService.this);
           playerReady = true;
           mPlayerPlaying = false;
           mPlayerShouldPlaying = false;
@@ -179,7 +182,6 @@ public class PlayerService extends Service implements PlayerNotificationCallback
           Log.d("Player", "Player Ready");
           dependencies.getCurrentGroupReference().child("tracks").addValueEventListener(trackListChangeListener);
           dependencies.getCurrentGroupReference().child("nowPlaying").addValueEventListener(nowPlayingChangeListener);
-          //playFirstSong();
         }
 
         @Override
@@ -193,10 +195,13 @@ public class PlayerService extends Service implements PlayerNotificationCallback
   }
 
   public boolean isInitiated() {
-    return playerSetup;
+    return playerSetup && mPlayer != null;
   }
 
   public boolean play() {
+    if (!isInitiated()) {
+      configPlayer();
+    }
     if (!mPlayerPlaying && mPlayerCherry) {
       mPlayerShouldPlaying = true;
       playFirstSong();
@@ -237,6 +242,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
     dependencies.getCurrentGroupReference().child("tracks").removeEventListener(trackListChangeListener);
     dependencies.getCurrentGroupReference().child("nowPlaying").removeEventListener(nowPlayingChangeListener);
     Spotify.destroyPlayer(mPlayer);
+    mPlayer = null;
     unregisterReceiver(receiver);
     stopSelf();
   }
@@ -294,7 +300,9 @@ public class PlayerService extends Service implements PlayerNotificationCallback
   @Override
   public void onPlaybackEvent(EventType eventType, PlayerState playerState) {
     if (eventType == EventType.TRACK_CHANGED) {
-      setNowPlaying(playQueue.get(0));
+      if (playQueue.size() > 0) {
+        setNowPlaying(playQueue.get(0));
+      }
     } else if (eventType == EventType.PLAY) {
       mPlayerPlaying = true;
       sendBroadcast(playingIntent);
