@@ -10,7 +10,6 @@ android:
   - extra-google-m2repository
   - extra-android-m2repository
   - addon-google_apis-google-19
-  - sys-img-armeabi-v7a-android-24
 jdk:
   - oraclejdk8
 branches:
@@ -20,9 +19,7 @@ branches:
   - newplayer
 env:
   - secure: "Ul+4hBORLGu+w4bAPkbkClSgDsLOG+HzPDtrzyy2aFu1v+8+APiVCaYEYDZGsI36mRFsM93zuJt6wUdJkosRPFI5PeIRCqhDb0dG0mn5OYuQDNlSb754Fc2sg78t7PCY2uj7pKPLyUM+pBSs67EYKjCUbOCAKvswUqJoJfSGelvyhhaTIM7x8kx0ikhnZLSFrE2oh7D88T7Iu+790e8b5XbGoOlXIH7GtDL+N/fwJJ9FOAMIKgF6eIIkTgWXbUx+93vjvZloGQ4rHmQR1hEoIWbWxHDoT2CId0DMVkVptvV+M0jD1mMXfH+dMAxbAm2uzhnInjGRGpD0oApGzKxHza4U6bW6wj0q+edtOrJ2xmBrS3EiG3cdFPVfd1G5Tn+pw63XMJhq1FQFSG4QuIbJwaGD6rLmhaewYEQXyKmYT6t34CA0UJy5GiHsDyrUpfdr738dxk60Nr6lH+F+XGABBZXi4P4ztt59aZoz8+3fR0d/eIH8ysGDmg9KCzLtjibU13n1rxhhGw8ebPEXrMBAbQNZjcap0WCbDD25k6uJc8KTD/4Kocx7Ly6rPQjYYC5ql1sm6GStPmWK5+blUHtLvpdjh16L95fRorbYJbAUkKSxmdCHpv5gira7Qtmcl1OsB7oG6N1ETMTvJkgoTr0rL63m+FmgQXaSasrBA/fqZP8="
-# Emulator Management: Create, Start and Wait
-before_script:
-  - echo no | android create avd --force -n test -t android-21 --abi armeabi-v7a
-  - emulator -avd test -no-skin -no-audio -no-window &
-  - android-wait-for-emulator
-  - adb shell input keyevent 82 &
+
+script:
+  - android list target
+  - ./gradlew build -x test
