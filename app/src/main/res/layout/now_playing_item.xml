@@ -1,88 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/nowPlayingItemLayout"
+  android:id="@+id/nowPlayingItemLayout"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:background="@color/ech_pearlBlueLuster">
+
+  <ImageView
+    android:id="@+id/songAlbumArtImage"
+    android:layout_width="100dp"
+    android:layout_height="100dp"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentStart="true"
+    android:layout_alignParentTop="true"
+    android:layout_marginRight="10dp"
+    android:contentDescription="@string/album_cover_image" />
+
+  <TextView
+    android:id="@+id/songTitleText"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/ech_pearlBlueLuster">
+    android:layout_alignTop="@+id/songAlbumArtImage"
+    android:layout_marginTop="5dp"
+    android:layout_toLeftOf="@+id/songItemVoterLayout"
+    android:layout_toRightOf="@+id/songAlbumArtImage"
+    android:layout_toStartOf="@+id/songItemVoterLayout"
+    android:singleLine="true"
+    android:text="Song Title"
+    android:textSize="20dp" />
 
-    <ImageView
-        android:id="@+id/songAlbumArtImage"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+  <TextView
+    android:id="@+id/songArtistText"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/songTitleText"
+    android:layout_marginBottom="10dp"
+    android:layout_marginTop="5dp"
+    android:layout_toLeftOf="@+id/songItemVoterLayout"
+    android:layout_toRightOf="@+id/songAlbumArtImage"
+    android:layout_toStartOf="@+id/songItemVoterLayout"
+    android:text="Artist"
+    android:textSize="15dp" />
+
+  <RelativeLayout
+    android:id="@+id/songItemVoterLayout"
+    android:layout_width="60dp"
+    android:layout_height="70dp"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentRight="true"
+    android:layout_alignTop="@+id/songAlbumArtImage"
+    android:visibility="gone">
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:orientation="vertical">
+
+      <ImageButton
+        android:id="@+id/voteSongUpButton"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_marginRight="10dp" />
+        android:layout_weight="2"
+        android:contentDescription="@string/vote_song_up_image"
+        android:src="@drawable/ic_chevron_up_black_24dp" />
 
-    <TextView
-        android:id="@+id/songTitleText"
+      <TextView
+        android:id="@+id/songRatingText"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="0"
+        android:textSize="12sp" />
+
+      <ImageButton
+        android:id="@+id/voteSongDownButton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/songAlbumArtImage"
-        android:layout_marginTop="5dp"
-        android:layout_toLeftOf="@+id/songItemVoterLayout"
-        android:layout_toRightOf="@+id/songAlbumArtImage"
-        android:layout_toStartOf="@+id/songItemVoterLayout"
-        android:singleLine="true"
-        android:text="Song Title"
-        android:textSize="20dp" />
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:contentDescription="@string/vote_song_down_image"
+        android:src="@drawable/ic_chevron_down_black_24dp" />
+    </LinearLayout>
 
-    <TextView
-        android:id="@+id/songArtistText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_toLeftOf="@+id/songItemVoterLayout"
-        android:layout_toRightOf="@+id/songAlbumArtImage"
-        android:layout_toStartOf="@+id/songItemVoterLayout"
-        android:text="Artist"
-        android:textSize="15dp"
-        android:layout_below="@+id/songTitleText"
-        android:layout_marginTop="5dp" />
-
-    <RelativeLayout
-        android:id="@+id/songItemVoterLayout"
-        android:layout_width="60dp"
-        android:layout_height="70dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/songAlbumArtImage"
-        android:visibility="gone">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <ImageButton
-                android:id="@+id/voteSongUpButton"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:layout_weight="2"
-                android:src="@drawable/ic_chevron_up_black_24dp" />
-
-            <TextView
-                android:id="@+id/songRatingText"
-                android:layout_width="fill_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:text="0"
-                android:gravity="center"
-                android:textSize="12sp" />
-
-            <ImageButton
-                android:id="@+id/voteSongDownButton"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_weight="2"
-                android:src="@drawable/ic_chevron_down_black_24dp" />
-        </LinearLayout>
-
-    </RelativeLayout>
+  </RelativeLayout>
 </RelativeLayout>

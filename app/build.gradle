@@ -3,12 +3,12 @@ apply plugin: 'android-apt'
 
 android {
   compileSdkVersion 24
-  buildToolsVersion "24.0.1"
+  buildToolsVersion "24.0.2"
 
   defaultConfig {
     applicationId "io.yeomans.echelon"
-    minSdkVersion 16
-    targetSdkVersion 23
+    minSdkVersion 17
+    targetSdkVersion 24
     versionCode 23
     versionName "0.5"
     archivesBaseName = "Echelon-$versionName-$versionCode"
@@ -53,6 +53,9 @@ android {
     exclude 'META-INF/MANIFEST'
     exclude '.readme'
   }
+  lintOptions {
+    abortOnError false
+  }
 }
 
 
@@ -75,12 +78,12 @@ dependencies {
   compile('com.mikepenz:materialdrawer:5.3.6@aar') {
     transitive = true
   }
-  compile 'com.android.support:appcompat-v7:24.1.1'
-  compile 'com.android.support:support-v4:24.1.1'
-  compile 'com.android.support:design:24.1.1'
-  compile 'com.android.support:recyclerview-v7:24.1.1'
-  compile 'com.android.support:support-vector-drawable:24.1.1'
-  compile 'com.android.support:cardview-v7:24.1.1'
+  compile 'com.android.support:appcompat-v7:24.2.0'
+  compile 'com.android.support:support-v4:24.2.0'
+  compile 'com.android.support:design:24.2.0'
+  compile 'com.android.support:recyclerview-v7:24.2.0'
+  compile 'com.android.support:support-vector-drawable:24.2.0'
+  compile 'com.android.support:cardview-v7:24.2.0'
   compile 'com.jakewharton:butterknife:7.0.1'
   compile 'com.google.firebase:firebase-core:9.4.0'
   compile 'com.google.firebase:firebase-messaging:9.4.0'
@@ -89,6 +92,7 @@ dependencies {
   compile 'com.google.firebase:firebase-crash:9.4.0'
   compile 'com.google.firebase:firebase-config:9.4.0'
   compile 'com.squareup.okhttp3:okhttp:3.4.1'
+  compile 'com.github.florent37:picassopalette:2.0.0'
   compile 'com.squareup.picasso:picasso:2.5.2'
   compile 'com.squareup.retrofit2:retrofit:2.1.0'
   compile 'com.squareup.retrofit2:converter-gson:2.1.0'

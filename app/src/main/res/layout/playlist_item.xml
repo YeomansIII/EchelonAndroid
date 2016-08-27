@@ -1,41 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/playlistItemLayout"
+  android:id="@+id/playlistItemLayout"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content">
+
+  <RelativeLayout
+    android:id="@+id/playlistItemInnerLayout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
+    android:background="#73000000"
+    android:padding="5dp">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:background="#73000000"
-        android:padding="5dp">
+    <ImageView
+      android:id="@+id/playlistArtImage"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentTop="true"
+      android:layout_centerHorizontal="true"
+      android:adjustViewBounds="true"
+      android:contentDescription="@string/playlist_cover_image"
+      android:scaleType="fitCenter" />
 
-        <ImageView
-            android:id="@+id/playlistArtImage"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter" />
-
-        <TextView
-            android:id="@+id/playlistTitleText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/playlistArtImage"
-            android:layout_centerHorizontal="true"
-            android:gravity="center"
-            android:singleLine="true"
-            android:text="Song Title"
-            android:textAlignment="center"
-            android:textColor="@android:color/white"
-            android:textSize="14sp"
-            android:paddingBottom="0dp"
-            android:paddingLeft="5dp"
-            android:paddingTop="5dp"
-            android:paddingRight="5dp" />
-    </RelativeLayout>
+    <TextView
+      android:id="@+id/playlistTitleText"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@+id/playlistArtImage"
+      android:layout_centerHorizontal="true"
+      android:gravity="center"
+      android:paddingBottom="0dp"
+      android:paddingLeft="5dp"
+      android:paddingRight="5dp"
+      android:paddingTop="5dp"
+      android:singleLine="true"
+      android:text="Song Title"
+      android:textAlignment="center"
+      android:textColor="@android:color/white"
+      android:textSize="14sp" />
+  </RelativeLayout>
 
 </RelativeLayout>

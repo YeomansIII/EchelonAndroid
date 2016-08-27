@@ -1,60 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/songItemLayout"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/songItemLayout"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:layout_marginBottom="3dp"
+  android:layout_marginEnd="16dp"
+  android:layout_marginLeft="16dp"
+  android:layout_marginRight="16dp"
+  android:layout_marginStart="16dp"
+  android:layout_marginTop="0dp"
+  android:background="#99FFFFFF">
+
+  <ImageView
+    android:id="@+id/songAlbumArtImage"
+    android:layout_width="70dp"
+    android:layout_height="70dp"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentStart="true"
+    android:layout_alignParentTop="true"
+    android:layout_marginRight="10dp"
+    android:contentDescription="@string/album_cover_image" />
+
+  <TextView
+    android:id="@+id/songTitleText"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="3dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
-    android:layout_marginStart="16dp"
-    android:layout_marginTop="0dp"
-    android:background="#99FFFFFF">
+    android:layout_alignTop="@+id/songAlbumArtImage"
+    android:layout_marginTop="5dp"
+    android:layout_toLeftOf="@+id/voteSongUpButton"
+    android:layout_toRightOf="@+id/songAlbumArtImage"
+    android:layout_toStartOf="@+id/voteSongUpButton"
+    android:singleLine="true"
+    android:text="Song Title"
+    android:textSize="20dp" />
 
-    <ImageView
-        android:id="@+id/songAlbumArtImage"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginRight="10dp" />
+  <TextView
+    android:id="@+id/songArtistText"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignBottom="@+id/songAlbumArtImage"
+    android:layout_marginBottom="10dp"
+    android:layout_toLeftOf="@+id/voteSongUpButton"
+    android:layout_toRightOf="@+id/songAlbumArtImage"
+    android:layout_toStartOf="@+id/voteSongUpButton"
+    android:text="Artist"
+    android:textSize="15dp" />
 
-    <TextView
-        android:id="@+id/songTitleText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/songAlbumArtImage"
-        android:layout_marginTop="5dp"
-        android:layout_toLeftOf="@+id/voteSongUpButton"
-        android:layout_toRightOf="@+id/songAlbumArtImage"
-        android:layout_toStartOf="@+id/voteSongUpButton"
-        android:singleLine="true"
-        android:text="Song Title"
-        android:textSize="20dp" />
-
-    <TextView
-        android:id="@+id/songArtistText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/songAlbumArtImage"
-        android:layout_marginBottom="10dp"
-        android:layout_toLeftOf="@+id/voteSongUpButton"
-        android:layout_toRightOf="@+id/songAlbumArtImage"
-        android:layout_toStartOf="@+id/voteSongUpButton"
-        android:text="Artist"
-        android:textSize="15dp" />
-
-    <ImageButton
-        android:id="@+id/voteSongUpButton"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:background="@color/transparent"
-        android:padding="15dp"
-        android:scaleType="fitCenter"
-        android:tint="@color/thumbs_up_color_list"
-        app:srcCompat="@drawable/thumb_up" />
+  <ImageButton
+    android:id="@+id/voteSongUpButton"
+    android:layout_width="70dp"
+    android:layout_height="70dp"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentRight="true"
+    android:background="@color/transparent"
+    android:contentDescription="@string/vote_song_up_image"
+    android:padding="15dp"
+    android:scaleType="fitCenter"
+    android:tint="@color/thumbs_up_color_list"
+    app:srcCompat="@drawable/thumb_up" />
 </RelativeLayout>
