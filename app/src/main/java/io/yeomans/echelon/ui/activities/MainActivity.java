@@ -1,15 +1,12 @@
 package io.yeomans.echelon.ui.activities;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.CoordinatorLayout;
@@ -24,8 +21,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
@@ -53,7 +48,6 @@ import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -76,8 +70,7 @@ import io.yeomans.echelon.util.Dependencies;
 import io.yeomans.echelon.util.EchelonUtils;
 import io.yeomans.echelon.util.PreferenceNames;
 
-public class MainActivity extends AppCompatActivity
-  implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity {
 
   /**
    * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -569,39 +562,6 @@ public class MainActivity extends AppCompatActivity
       return false;
     }
     return true;
-  }
-
-  @Override
-  public void onClick(View v) {
-
-  }
-
-  private static void setOverflowButtonColor(final Activity activity, final PorterDuffColorFilter colorFilter) {
-    final String overflowDescription = activity.getString(R.string.abc_action_menu_overflow_description);
-    final ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
-    final ViewTreeObserver viewTreeObserver = decorView.getViewTreeObserver();
-    viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-      @Override
-      public void onGlobalLayout() {
-        final ArrayList<View> outViews = new ArrayList<View>();
-        decorView.findViewsWithText(outViews, overflowDescription,
-          View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION);
-        if (outViews.isEmpty()) {
-          return;
-        }
-        ImageView overflow = (ImageView) outViews.get(0);
-        overflow.setColorFilter(colorFilter);
-        removeOnGlobalLayoutListener(decorView, this);
-      }
-    });
-  }
-
-  private static void removeOnGlobalLayoutListener(View v, ViewTreeObserver.OnGlobalLayoutListener listener) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-      v.getViewTreeObserver().removeGlobalOnLayoutListener(listener);
-    } else {
-      v.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
-    }
   }
 
   public boolean onPlayControlSelected() {

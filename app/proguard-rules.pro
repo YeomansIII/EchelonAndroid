@@ -33,7 +33,6 @@
 -keep class io.yeomans.echelon.models.Participant { *; }
 -keepnames class io.yeomans.echelon.models.Participant.** { *; }
 -keepnames class io.yeomans.echelon.models.Participant { *; }
--keepattributes Signature
 -keep class com.google.gson.** { *; }
 -keep class com.google.inject.** { *; }
 -keep class org.apache.http.** { *; }
@@ -43,7 +42,11 @@
 -keep class retrofit.** { *; }
 -keep class retrofit.http.** { *; }
 -keep class retrofit.client.** { *; }
+-keep class com.squareup.okhttp.** { *; }
+-keep interface com.squareup.okhttp.** { *; }
 -keep class kaaes.spotify.webapi.android.** { *; }
+-keep class com.spotify.webapi.android.** { *; }
+-keep class io.github.kaaes.spotify.webapi.** { *; }
 -dontwarn retrofit.**
 -dontwarn com.squareup.okhttp.**
 -dontwarn okio.**
@@ -59,4 +62,13 @@
 
 -keepclasseswithmembernames class * {
     @butterknife.* <methods>;
+}
+
+-dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+-keepattributes Signature
+-keepattributes Exceptions
+
+-keepclasseswithmembers class * {
+    @retrofit2.http.* <methods>;
 }
