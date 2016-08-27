@@ -11,15 +11,23 @@ android:
   - extra-android-m2repository
   - addon-google_apis-google-19
 jdk:
-  - oraclejdk8
+- oraclejdk8
 branches:
   only:
   - master
   - dev
   - newplayer
 env:
-  - secure: "Ul+4hBORLGu+w4bAPkbkClSgDsLOG+HzPDtrzyy2aFu1v+8+APiVCaYEYDZGsI36mRFsM93zuJt6wUdJkosRPFI5PeIRCqhDb0dG0mn5OYuQDNlSb754Fc2sg78t7PCY2uj7pKPLyUM+pBSs67EYKjCUbOCAKvswUqJoJfSGelvyhhaTIM7x8kx0ikhnZLSFrE2oh7D88T7Iu+790e8b5XbGoOlXIH7GtDL+N/fwJJ9FOAMIKgF6eIIkTgWXbUx+93vjvZloGQ4rHmQR1hEoIWbWxHDoT2CId0DMVkVptvV+M0jD1mMXfH+dMAxbAm2uzhnInjGRGpD0oApGzKxHza4U6bW6wj0q+edtOrJ2xmBrS3EiG3cdFPVfd1G5Tn+pw63XMJhq1FQFSG4QuIbJwaGD6rLmhaewYEQXyKmYT6t34CA0UJy5GiHsDyrUpfdr738dxk60Nr6lH+F+XGABBZXi4P4ztt59aZoz8+3fR0d/eIH8ysGDmg9KCzLtjibU13n1rxhhGw8ebPEXrMBAbQNZjcap0WCbDD25k6uJc8KTD/4Kocx7Ly6rPQjYYC5ql1sm6GStPmWK5+blUHtLvpdjh16L95fRorbYJbAUkKSxmdCHpv5gira7Qtmcl1OsB7oG6N1ETMTvJkgoTr0rL63m+FmgQXaSasrBA/fqZP8="
-
+- secure: Ul+4hBORLGu+w4bAPkbkClSgDsLOG+HzPDtrzyy2aFu1v+8+APiVCaYEYDZGsI36mRFsM93zuJt6wUdJkosRPFI5PeIRCqhDb0dG0mn5OYuQDNlSb754Fc2sg78t7PCY2uj7pKPLyUM+pBSs67EYKjCUbOCAKvswUqJoJfSGelvyhhaTIM7x8kx0ikhnZLSFrE2oh7D88T7Iu+790e8b5XbGoOlXIH7GtDL+N/fwJJ9FOAMIKgF6eIIkTgWXbUx+93vjvZloGQ4rHmQR1hEoIWbWxHDoT2CId0DMVkVptvV+M0jD1mMXfH+dMAxbAm2uzhnInjGRGpD0oApGzKxHza4U6bW6wj0q+edtOrJ2xmBrS3EiG3cdFPVfd1G5Tn+pw63XMJhq1FQFSG4QuIbJwaGD6rLmhaewYEQXyKmYT6t34CA0UJy5GiHsDyrUpfdr738dxk60Nr6lH+F+XGABBZXi4P4ztt59aZoz8+3fR0d/eIH8ysGDmg9KCzLtjibU13n1rxhhGw8ebPEXrMBAbQNZjcap0WCbDD25k6uJc8KTD/4Kocx7Ly6rPQjYYC5ql1sm6GStPmWK5+blUHtLvpdjh16L95fRorbYJbAUkKSxmdCHpv5gira7Qtmcl1OsB7oG6N1ETMTvJkgoTr0rL63m+FmgQXaSasrBA/fqZP8=
 script:
-  - android list target
-  - ./gradlew build -x test
+- android list target
+- "./gradlew build -x test"
+deploy:
+  provider: releases
+  api_key:
+    secure: cKc02FfnBJh8drDY/5VLVBohZbZONToSqwUnHB0wiKFOKJ3Dzg2x8IiyHJg7qz71UCLt+G8If1XC2hmNvZ3LTbXCPZHtoNHDz61nMWesns9wTcRwBrl8db4Abf2Hk19uuzYWjEGR47OPs43jZbs3xqCvpWoQ4pTIf98+WinIWOafRhSJiApx+kVu61yxDTgPGjqXAmgNa1SZ6G9t/8x7jNrE/IE3bdmCKnbEo8rnC/bKOURzqsojfRw9dm5gkGny+wKIXoj0A8wUo+mXLd1Xo+G7xXRxcSS9p1cs/i33hZUwvYGUxiBvjWmJ3/2owj7rzfsnPHsqzu8daypzcWafZylIjZdrM96UkBds+jrsnMn5HhJ0PL10rx9CRBgLsGMikF/9oQD1mRlm9CQ54wrn61SFKt/FWMKCaDHlulM6BayXp2IGeFtC8yyilIlGmrPQFLB4PXwuvNXy4UMtne2+SiIOZUiVAG8+QlCTaEeQ161vHsRePCtUiL6al9y4WDXT8ixl83PoFTrUt5A0h3oEPRC+D8PoKEodoOjXk5I5KBHwd3jS0vQSlRUGksNSLzzi61ggLAMS4aJM6iJszvmbPF5Q/7BrmYACEx3DKTf2LABrN4IjhSEcK+1I0zoXV5SUemUFAPLYVx/2X0iam0KtWYA/GK/M45T4LVFMOfHiuWk=
+  file_glob: true
+  file: "app/build/outputs/apk/*.apk"
+  skip_cleanup: true
+  on:
+    tags: true
