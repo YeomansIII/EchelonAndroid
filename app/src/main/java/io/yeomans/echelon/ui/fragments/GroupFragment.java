@@ -1,14 +1,17 @@
 package io.yeomans.echelon.ui.fragments;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -19,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -35,7 +39,9 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -106,6 +112,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
   protected TextView nowPlayingArtistText;
   private Drawer particDrawerResult;
   private boolean particDrawerOpen;
+  private String groupName;
 
   Dependencies dependencies;
 
@@ -213,9 +220,10 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
       container, false);
     ButterKnife.bind(this, view);
 
+    groupName = dependencies.getGroupPreferences().getString(PreferenceNames.PREF_GROUP_NAME, "error");
     //mainActivity.actionBar.setElevation(0);
     mainActivity.toolbar.setBackgroundColor(getResources().getColor(R.color.primaryColor));
-    mainActivity.actionBar.setTitle(dependencies.getGroupPreferences().getString(PreferenceNames.PREF_GROUP_NAME, "error"));
+    mainActivity.actionBar.setTitle(groupName);
 
     setHasOptionsMenu(true);
 
@@ -420,10 +428,12 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
   public void onClick(View v) {
     int id = v.getId();
     switch (id) {
-      case R.id.groupAddSongFab:
-        if (particDrawerOpen) {
+      case R.id.groupAddSongFab: // or add user (invite)
+        Log.i("Queue", "FAB Touch");
+        if (particDrawerOpen) { // this occurs when the participant drawer is open and the button is showing an "add user" icon
           Log.i("Queue", "Can't add a friend quite yet!");
-        } else {
+          createInviteDialog();
+        } else { // this occurs when the participant drawer is closed and the button is showing an "add" icon, meaning add music
           animateFAB();
         }
         break;
@@ -461,6 +471,42 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         animateFAB();
         break;
 
+    }
+  }
+
+  public void createInviteDialog() {
+    AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
+    builder.setTitle("Title");
+
+    final EditText input = new EditText(mainActivity);
+    // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+    input.setInputType(InputType.TYPE_CLASS_TEXT);
+    builder.setView(input);
+
+    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        inviteUser(input.getText().toString());
+      }
+    });
+    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        dialog.cancel();
+      }
+    });
+
+    builder.show();
+  }
+
+  public void inviteUser(String user) {
+    if (dependencies.getAuth().getCurrentUser() != null) {
+      Map<String, Object> invite = new HashMap<>();
+      invite.put("groupName", groupName);
+      invite.put("inviter", dependencies.getAuth().getCurrentUser().getUid());
+      invite.put("invitee", user);
+      DatabaseReference invitePush = dependencies.getDatabase().getReference("queue/invites").push();
+      invitePush.setValue(invite);
     }
   }
 
