@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -35,6 +36,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -187,7 +189,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
               if (dataSnapshot.hasChild("display_name")) {
                 name = dataSnapshot.child("display_name").getValue().toString();
               } else {
-                name = dataSnapshot.child("id").getValue().toString();
+                name = "Anonymous";
               }
               ProfileDrawerItem dItem = new ProfileDrawerItem().withName(name);
               if (dataSnapshot.hasChild("image_url")) {
@@ -195,6 +197,16 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
               } else {
                 dItem.withIcon(R.drawable.ic_account_grey600_24dp);
               }
+              dItem.withTag(dataSnapshot.getKey());
+              dItem.withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                @Override
+                public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                  String userId = (String) drawerItem.getTag();
+                  UserDetailBottomSheetFragment userBottom = UserDetailBottomSheetFragment.newInstance(userId);
+                  userBottom.show(mainActivity.getSupportFragmentManager(), "SONG_DETAIL");
+                  return true;
+                }
+              });
               particDrawerResult.addItem(dItem);
             }
 
@@ -242,13 +254,13 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     }
     setRecyclerViewLayoutManager(mCurrentLayoutManagerType);
 
-//        songListRA.setOnSongClickListener(new SonglistRecyclerAdapter.OnSongClickListener() {
-//            @Override
-//            public void onSongClick(SonglistRecyclerAdapter.ViewHolder viewHolder) {
-//                viewHolder.itemView.setBackgroundColor(Color.GRAY);
-//                FirebaseCommon.addSong(viewHolder.trackId, mainActivity);
-//            }
-//        });
+    songListRA.setOnSongClickListener(new SonglistRecyclerAdapter.OnSongClickListener() {
+      @Override
+      public void onSongClick(SonglistRecyclerAdapter.ViewHolder viewHolder) {
+        SongDetailBottomSheetFragment songBottom = SongDetailBottomSheetFragment.newInstance(viewHolder.trackId);
+        songBottom.show(mainActivity.getSupportFragmentManager(), "SONG_DETAIL");
+      }
+    });
     mRecyclerView.setAdapter(songListRA);
 
     Bundle startingIntentBundle = this.getArguments();

@@ -276,8 +276,8 @@ public class MainActivity extends AppCompatActivity {
     PrimaryDrawerItem item2 = new PrimaryDrawerItem().withName("Group").withIcon(R.drawable.ic_queue_music_grey_36dp);
     PrimaryDrawerItem item3 = new PrimaryDrawerItem().withName("Account").withIcon(R.drawable.ic_account_grey600_36dp);
     PrimaryDrawerItem item4 = new PrimaryDrawerItem().withName("Settings").withIcon(R.drawable.ic_settings_grey600_36dp);
-    PrimaryDrawerItem item5 = new SecondaryDrawerItem().withName("Submit Feature/Bug");
-    PrimaryDrawerItem item6 = new SecondaryDrawerItem().withName("About");
+    SecondaryDrawerItem item5 = new SecondaryDrawerItem().withName("Submit Feature/Bug");
+    SecondaryDrawerItem item6 = new SecondaryDrawerItem().withName("About");
     final Drawer result = new DrawerBuilder()
       .withActivity(this)
       .withToolbar(toolbar)
@@ -378,8 +378,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
               String displayName = (String) dataSnapshot.child("display_name").getValue();
-              if (displayName != null && !displayName.equals("null")) {
-                profile.withName(displayName);
+              String friendCode = (String) dataSnapshot.child("friend_code").getValue();
+              if (displayName != null && !displayName.equals("null") && friendCode != null && !friendCode.equals("null")) {
+                profile.withName(displayName + "#" + friendCode);
                 pref.edit().putString(PreferenceNames.PREF_USER_DISPLAY_NAME, displayName).apply();
               } else {
                 profile.withName((String) dataSnapshot.child("id").getValue());
@@ -454,6 +455,7 @@ public class MainActivity extends AppCompatActivity {
 
   public void logout() {
     if (pref.getString(PreferenceNames.PREF_USER_AUTH_TYPE, "").equals("anonymous")) {
+      dependencies.getCurrentParticipantReference().child("online").onDisconnect().removeValue();
       dependencies.getCurrentUserReference().removeValue();
       dependencies.getCurrentParticipantReference().removeValue();
     } else {

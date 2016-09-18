@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <RelativeLayout
+    android:id="@+id/userDetailInfoLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <ImageView
+      android:id="@+id/userDetailProfileImage"
+      android:layout_width="75dp"
+      android:layout_height="75dp"
+      android:layout_alignParentLeft="true"
+      android:layout_alignParentStart="true"
+      android:layout_marginEnd="3dp" />
+
+    <TextView
+      android:id="@+id/userDetailNameText"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_toEndOf="@+id/userDetailProfileImage"
+      android:text="Display Name"
+      android:textColor="@color/md_black_1000"
+      android:textSize="25sp" />
+
+    <ImageView
+      android:id="@+id/userDetailOnlineImage"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignBottom="@+id/userDetailOnlineText"
+      android:layout_alignTop="@+id/userDetailOnlineText"
+      android:layout_below="@+id/userDetailNameText"
+      android:layout_toEndOf="@+id/userDetailProfileImage"
+      android:background="@color/transparent"
+      android:scaleType="fitCenter"
+      android:tint="@color/thumbs_up_color_list"
+      app:srcCompat="@drawable/checkbox_blank_circle" />
+
+    <TextView
+      android:id="@+id/userDetailOnlineText"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@+id/userDetailNameText"
+      android:layout_toEndOf="@+id/userDetailOnlineImage"
+      android:layout_toRightOf="@+id/userDetailOnlineImage"
+      android:text="Offline"
+      android:textSize="15sp" />
+  </RelativeLayout>
+
+</RelativeLayout>

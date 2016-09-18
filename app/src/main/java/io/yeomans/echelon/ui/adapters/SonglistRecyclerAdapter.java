@@ -1,6 +1,5 @@
 package io.yeomans.echelon.ui.adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -9,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -22,7 +20,6 @@ import io.github.kaaes.spotify.webapi.core.models.Track;
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.models.SpotifySong;
 import io.yeomans.echelon.ui.fragments.SongDetailBottomSheetFragment;
-import io.yeomans.echelon.util.Dependencies;
 import io.yeomans.echelon.util.FirebaseCommon;
 
 /**
@@ -139,7 +136,7 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
       artist = (TextView) itemView.findViewById(R.id.songArtistText);
       image = (ImageView) itemView.findViewById(R.id.songAlbumArtImage);
       image.setOnClickListener(this);
-      voteUp = (ImageButton) itemView.findViewById(R.id.voteSongUpButton);
+      voteUp = (ImageButton) itemView.findViewById(R.id.userDetailOnlineImage);
       voteUp.setOnClickListener(this);
       itemView.setOnClickListener(this);
     }

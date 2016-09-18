@@ -75,7 +75,7 @@ dependencies {
   compile 'com.spotify.sdk:spotify-auth:1.0.0-beta13@aar'
   // This library handles music playback
   compile 'com.spotify.sdk:spotify-player:1.0.0-beta13@aar'
-  compile('com.mikepenz:materialdrawer:5.3.6@aar') {
+  compile('com.mikepenz:materialdrawer:5.6.0@aar') {
     transitive = true
   }
   compile 'com.android.support:appcompat-v7:24.2.1'
