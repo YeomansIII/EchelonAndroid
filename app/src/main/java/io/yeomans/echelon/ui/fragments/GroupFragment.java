@@ -538,7 +538,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                 public void onClick(View v) {
                   createInviteDialog();
                 }
-              }).show();
+              }).setActionTextColor(getResources().getColor(R.color.ech_con_seafrost)).show();
             }
           }
 
@@ -548,7 +548,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
               public void onClick(View v) {
                 createInviteDialog();
               }
-            }).show();
+            }).setActionTextColor(getResources().getColor(R.color.ech_con_seafrost)).show();
           }
         });
       } else {
@@ -556,7 +556,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
           public void onClick(View v) {
             createInviteDialog();
           }
-        }).show();
+        }).setActionTextColor(getResources().getColor(R.color.ech_con_seafrost)).show();
       }
     }
   }
