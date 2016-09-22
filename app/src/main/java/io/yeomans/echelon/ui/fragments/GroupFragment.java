@@ -8,7 +8,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -44,6 +43,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -203,7 +204,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
                 public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                   String userId = (String) drawerItem.getTag();
                   UserDetailBottomSheetFragment userBottom = UserDetailBottomSheetFragment.newInstance(userId);
-                  userBottom.show(mainActivity.getSupportFragmentManager(), "SONG_DETAIL");
+                  userBottom.show(mainActivity.getSupportFragmentManager(), "USER_DETAIL");
                   return true;
                 }
               });
@@ -488,7 +489,8 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
 
   public void createInviteDialog() {
     AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
-    builder.setTitle("Title");
+    builder.setTitle("Invite User");
+    builder.setMessage("Include the user's friendcode in the following format: 'Display Name#0000'");
 
     final EditText input = new EditText(mainActivity);
     // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
@@ -513,12 +515,49 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
 
   public void inviteUser(String user) {
     if (dependencies.getAuth().getCurrentUser() != null) {
-      Map<String, Object> invite = new HashMap<>();
-      invite.put("groupName", groupName);
-      invite.put("inviter", dependencies.getAuth().getCurrentUser().getUid());
-      invite.put("invitee", user);
-      DatabaseReference invitePush = dependencies.getDatabase().getReference("queue/invites").push();
-      invitePush.setValue(invite);
+      Pattern p = Pattern.compile("([^#]*)#([0-9]{4})");
+      Matcher m = p.matcher(user);
+      if (m.find()) {
+        String displayName = m.group(1);
+        String friendCode = m.group(2);
+        Log.d(TAG, "Getting username for display_name: " + displayName + " and friend_code: " + friendCode);
+        dependencies.getDatabase().getReference("display_names/" + displayName + "/" + friendCode).addListenerForSingleValueEvent(new ValueEventListener() {
+          @Override
+          public void onDataChange(DataSnapshot dataSnapshot) {
+            String inviteeUid = (String) dataSnapshot.getValue();
+            if (inviteeUid != null) {
+              Map<String, Object> invite = new HashMap<>();
+              invite.put("groupName", groupName);
+              invite.put("inviter", dependencies.getAuth().getCurrentUser().getUid());
+              invite.put("invitee", inviteeUid);
+              DatabaseReference invitePush = dependencies.getDatabase().getReference("queue/invites").push();
+              invitePush.setValue(invite);
+              Snackbar.make(view, "Invite sent", Snackbar.LENGTH_SHORT).show();
+            } else {
+              Snackbar.make(view, "That user doesn't exist!", Snackbar.LENGTH_LONG).setAction("Try Again", new View.OnClickListener() {
+                public void onClick(View v) {
+                  createInviteDialog();
+                }
+              }).show();
+            }
+          }
+
+          @Override
+          public void onCancelled(DatabaseError databaseError) {
+            Snackbar.make(view, "Error sending invite", Snackbar.LENGTH_LONG).setAction("Try Again", new View.OnClickListener() {
+              public void onClick(View v) {
+                createInviteDialog();
+              }
+            }).show();
+          }
+        });
+      } else {
+        Snackbar.make(view, "Display Name not valid", Snackbar.LENGTH_LONG).setAction("Try Again", new View.OnClickListener() {
+          public void onClick(View v) {
+            createInviteDialog();
+          }
+        }).show();
+      }
     }
   }
 
