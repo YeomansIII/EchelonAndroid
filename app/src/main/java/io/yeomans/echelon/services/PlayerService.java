@@ -24,6 +24,8 @@ import com.spotify.sdk.android.player.PlayerNotificationCallback;
 import com.spotify.sdk.android.player.PlayerState;
 import com.spotify.sdk.android.player.Spotify;
 
+import org.json.JSONObject;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -144,7 +146,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
 
   public int onStartCommand(Intent intent, int flags, int startId) {
 
-    return 1;
+    return Service.START_STICKY;
   }
 
   public IBinder onUnBind(Intent arg0) {
@@ -160,6 +162,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
     if (toPlay == null) {
       dependencies.getCurrentGroupReference().child("nowPlaying").removeValue();
     } else {
+      Log.d(TAG, new JSONObject(toPlay.getMap()).toString());
       dependencies.getCurrentGroupReference().child("nowPlaying").setValue(toPlay.getMap());
       dependencies.getCurrentGroupReference().child("tracks/" + toPlay.getKey()).removeValue();
     }

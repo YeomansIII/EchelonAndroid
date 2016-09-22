@@ -58,11 +58,9 @@ public class FirebaseCommon {
           @Override
           public void onDataChange(DataSnapshot dataSnapshot) {
             String oldDisplayName = null, oldFriendCode = null;
-            boolean hasOld = false;
             if (dataSnapshot.hasChild("display_name") && dataSnapshot.hasChild("friend_code")) {
               oldDisplayName = (String) dataSnapshot.child("display_name").getValue();
               oldFriendCode = (String) dataSnapshot.child("friend_code").getValue();
-              hasOld = true;
             }
             final String finaloldDisplayName = oldDisplayName, finalOldFriendCode = oldFriendCode;
             FirebaseUser curUser = Dependencies.INSTANCE.getAuth().getCurrentUser();
@@ -76,6 +74,10 @@ public class FirebaseCommon {
                   }
                   Dependencies.INSTANCE.getCurrentParticipantReference().child("friend_code").setValue(paddedFriendCode);
                   Dependencies.INSTANCE.getCurrentParticipantReference().child("display_name").setValue(displayName);
+                  Dependencies.INSTANCE.getPreferences().edit()
+                    .putString(PreferenceNames.PREF_USER_DISPLAY_NAME, displayName)
+                    .putString(PreferenceNames.PREF_USER_FRIEND_CODE, paddedFriendCode)
+                    .apply();
                 }
               }
             });

@@ -456,6 +456,12 @@ public class MainActivity extends AppCompatActivity {
   public void logout() {
     if (pref.getString(PreferenceNames.PREF_USER_AUTH_TYPE, "").equals("anonymous")) {
       dependencies.getCurrentParticipantReference().child("online").onDisconnect().removeValue();
+      dependencies.getDatabase().getReference("display_names/" +
+        dependencies.getPreferences().getString(PreferenceNames.PREF_USER_DISPLAY_NAME, null) +
+        "/" + dependencies.getPreferences().getString(PreferenceNames.PREF_USER_FRIEND_CODE, null))
+        .removeValue();
+      dependencies.getCurrentGroupReference().child("participants/" + dependencies.getPreferences().getString(PreferenceNames.PREF_FIREBASE_UID, null))
+        .removeValue();
       dependencies.getCurrentUserReference().removeValue();
       dependencies.getCurrentParticipantReference().removeValue();
     } else {
@@ -470,26 +476,7 @@ public class MainActivity extends AppCompatActivity {
     fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     fragmentManager.beginTransaction().replace(R.id.container, new LoginFragment()).commit();
   }
-
-//    public boolean onLeaveGroupClick(MenuItem item) {
-//        if (dependencies.getAuth().getCurrentUser() != null) {
-//            String uid = dependencies.getAuth().getCurrentUser().getUid();
-//            if (groupPref.getString(PreferenceNames.PREF_GROUP_LEADER_UID, "").equals(uid)) {
-//                dependencies.getCurrentGroupReference().removeValue();
-//            } else {
-//                dependencies.getCurrentGroupReference().child("participants/" + uid).removeValue();
-//            }
-//            dependencies.getDatabase().getReference("users/" + uid + "/cur_group").removeValue();
-//            groupPref.edit().clear().apply();
-//            ((ControlBarFragment) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")).unReady();
-//            setContentViewHome();
-//        } else {
-//            Snackbar.make(findViewById(R.id.coordinator_layout), "Not identified, please log in", Snackbar.LENGTH_SHORT).show();
-//            logout();
-//        }
-//        return true;
-//    }
-
+  
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     // Handle action bar item clicks here. The action bar will
