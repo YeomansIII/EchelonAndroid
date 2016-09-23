@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
@@ -26,6 +27,7 @@ import com.spotify.sdk.android.player.ConnectionStateCallback;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -227,6 +229,7 @@ public class WelcomeActivity extends AppCompatActivity implements ConnectionStat
 
           prefEdit.apply();
         }
+        checkDevice();
         participant.child("online").onDisconnect().setValue(false);
         participant.child("online").setValue(true);
 
@@ -263,6 +266,35 @@ public class WelcomeActivity extends AppCompatActivity implements ConnectionStat
     dependencies.getUserReference(fUid).setValue(userInfo);
     dependencies.getParticipantReference(fUid).setValue(participantInfo);
     FirebaseCommon.setDisplayName(pref.getString(PreferenceNames.PREF_SPOTIFY_DISPLAY_NAME, null));
+  }
+
+  private void checkDevice() {
+    String uuid = dependencies.getDevicePreferences().getString(PreferenceNames.PREF_DEVICE_UUID, null);
+    if (uuid == null) {
+      uuid = UUID.randomUUID().toString();
+    }
+    dependencies.getCurrentUserReference().child("devices/" + uuid).addListenerForSingleValueEvent(new ValueEventListener() {
+      @Override
+      public void onDataChange(DataSnapshot dataSnapshot) {
+        if (dataSnapshot.getValue() == null) {
+          String messagingId = dependencies.getDevicePreferences().getString(PreferenceNames.PREF_MESSAGING_ID, null);
+          Map<String, Object> newDevice = new HashMap<>();
+          newDevice.put("name", dataSnapshot.getKey());
+          newDevice.put("added", ServerValue.TIMESTAMP);
+          newDevice.put("lastActive", ServerValue.TIMESTAMP);
+          newDevice.put("type", "android");
+          dependencies.getDevicePreferences().edit().putString(PreferenceNames.PREF_DEVICE_UUID, dataSnapshot.getKey()).apply();
+          dependencies.getCurrentUserReference().child("devices/" + dataSnapshot.getKey()).setValue(newDevice);
+        } else {
+          dependencies.getCurrentUserReference().child("devices/" + dataSnapshot.getKey() + "/lastActive").setValue(ServerValue.TIMESTAMP);
+        }
+      }
+
+      @Override
+      public void onCancelled(DatabaseError databaseError) {
+        Log.e(TAG, databaseError.getMessage());
+      }
+    });
   }
 
   @Override

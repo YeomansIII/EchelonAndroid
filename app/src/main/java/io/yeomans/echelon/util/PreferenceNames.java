@@ -6,6 +6,7 @@ package io.yeomans.echelon.util;
 public class PreferenceNames {
     public static final String MAIN_PREFS_NAME = "basic_pref";
     public static final String GROUP_PREFS_NAME = "group_pref";
+    public static final String DEVICE_PREFS_NAME = "device_pref";
 
     //USER PREF
     public static final String PREF_USER_AUTH_TYPE = "user_auth_type";
@@ -35,6 +36,10 @@ public class PreferenceNames {
     public static final String PREF_GROUP_OWNER_USERNAME = "group_owner_username";
     public static final String PREF_GROUP_PARTICIPANTS_JSON = "group_participants_json";
 
-    //FIREBASE
+    //FIREBASE PREF
     public static final String PREF_FIREBASE_UID = "firebase_uid";
+
+    //DEVICE PREF
+    public static final String PREF_DEVICE_UUID = "device_uuid";
+    public static final String PREF_MESSAGING_ID = "device_uuid";
 }
