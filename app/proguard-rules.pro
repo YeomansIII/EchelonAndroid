@@ -16,6 +16,7 @@
 #   public *;
 #}
 -dontnote
+-keepattributes EnclosingMethod
 -keep class com.spotify.sdk.android.** { *; }
 ### Json SERIALIZER SETTINGS
 -keep class com.firebase.** { *; }

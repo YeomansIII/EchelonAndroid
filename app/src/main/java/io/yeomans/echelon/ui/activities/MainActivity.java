@@ -476,7 +476,7 @@ public class MainActivity extends AppCompatActivity {
     fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     fragmentManager.beginTransaction().replace(R.id.container, new LoginFragment()).commit();
   }
-  
+
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     // Handle action bar item clicks here. The action bar will
@@ -504,6 +504,8 @@ public class MainActivity extends AppCompatActivity {
     super.onResume();
     Log.d("Main", "Activity onResume()");
     startupPlayerService();
+    dependencies.getCurrentParticipantReference().child("online").onDisconnect().setValue(false);
+    dependencies.getCurrentParticipantReference().child("online").setValue(true);
     //context.registerReceiver(actionGcmReceiver, new IntentFilter("gcm_intent"));
   }
 
