@@ -26,8 +26,9 @@ public class EchelonFirebaseInstanceIdService extends FirebaseInstanceIdService 
   }
 
   private void sendRegistrationToServer(String token) {
+    Log.i(TAG, "Token: " + token);
     SharedPreferences devicePref = Dependencies.INSTANCE.getDevicePreferences();
-    devicePref.edit().putString(PreferenceNames.PREF_MESSAGING_ID, token);
+    devicePref.edit().putString(PreferenceNames.PREF_MESSAGING_ID, token).apply();
     String deviceUuid = devicePref.getString(PreferenceNames.PREF_DEVICE_UUID, null);
     if (deviceUuid != null) {
       Dependencies.INSTANCE.getCurrentUserReference().child("devices/" + deviceUuid + "/messagingId").setValue(token);

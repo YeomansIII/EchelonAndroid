@@ -20,6 +20,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -276,16 +277,22 @@ public class WelcomeActivity extends AppCompatActivity implements ConnectionStat
     dependencies.getCurrentUserReference().child("devices/" + uuid).addListenerForSingleValueEvent(new ValueEventListener() {
       @Override
       public void onDataChange(DataSnapshot dataSnapshot) {
+        String messagingId = FirebaseInstanceId.getInstance().getToken();
         if (dataSnapshot.getValue() == null) {
-          String messagingId = dependencies.getDevicePreferences().getString(PreferenceNames.PREF_MESSAGING_ID, null);
           Map<String, Object> newDevice = new HashMap<>();
           newDevice.put("name", dataSnapshot.getKey());
           newDevice.put("added", ServerValue.TIMESTAMP);
           newDevice.put("lastActive", ServerValue.TIMESTAMP);
           newDevice.put("type", "android");
+          if (messagingId != null) {
+            newDevice.put("messagingId", messagingId);
+          }
           dependencies.getDevicePreferences().edit().putString(PreferenceNames.PREF_DEVICE_UUID, dataSnapshot.getKey()).apply();
           dependencies.getCurrentUserReference().child("devices/" + dataSnapshot.getKey()).setValue(newDevice);
         } else {
+          if (!dataSnapshot.hasChild("messagingId") && messagingId != null) {
+            dependencies.getCurrentUserReference().child("devices/" + dataSnapshot.getKey() + "/messagingId").setValue(messagingId);
+          }
           dependencies.getCurrentUserReference().child("devices/" + dataSnapshot.getKey() + "/lastActive").setValue(ServerValue.TIMESTAMP);
         }
       }
