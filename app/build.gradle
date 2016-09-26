@@ -9,8 +9,8 @@ android {
     applicationId "io.yeomans.echelon"
     minSdkVersion 17
     targetSdkVersion 24
-    versionCode 26
-    versionName "0.7"
+    versionCode 27
+    versionName "0.7.1"
     archivesBaseName = "Echelon-$versionName-$versionCode"
     vectorDrawables.useSupportLibrary = true
   }

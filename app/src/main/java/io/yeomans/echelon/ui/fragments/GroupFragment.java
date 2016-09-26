@@ -558,7 +558,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
               invite.put("inviter_display_name", dependencies.getPreferences().getString(PreferenceNames.PREF_USER_DISPLAY_NAME, "Anonymous"));
               invite.put("invitee", inviteeUid);
               dependencies.getCurrentGroupReference().child("invites/" + inviteeUid).setValue(true);
-              DatabaseReference invitePush = dependencies.getDatabase().getReference("queue/invitess/tasks").push();
+              DatabaseReference invitePush = dependencies.getDatabase().getReference("queue/invites/tasks").push();
               invitePush.setValue(invite);
               Snackbar.make(view, "Invite sent", Snackbar.LENGTH_SHORT).show();
             } else {
