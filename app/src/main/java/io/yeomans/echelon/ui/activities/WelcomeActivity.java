@@ -2,17 +2,27 @@ package io.yeomans.echelon.ui.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.JsonReader;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.appinvite.AppInvite;
+import com.google.android.gms.appinvite.AppInviteInvitationResult;
+import com.google.android.gms.appinvite.AppInviteReferral;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -21,10 +31,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.gson.Gson;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
+
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,6 +79,7 @@ public class WelcomeActivity extends AppCompatActivity implements ConnectionStat
   UserPrivate spotifyUser;
   AuthResult authResulter;
   WelcomeActivity activity;
+  GoogleApiClient mGoogleApiClient;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +89,16 @@ public class WelcomeActivity extends AppCompatActivity implements ConnectionStat
     Dependencies.INSTANCE.init(getApplicationContext());
     dependencies = Dependencies.INSTANCE;
     activity = this;
+    mGoogleApiClient = new GoogleApiClient.Builder(this)
+      .addApi(AppInvite.API)
+      .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
+        @Override
+        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+          Log.d(TAG, connectionResult.getErrorMessage());
+        }
+      })
+      .build();
+    checkInvitation();
     echelonErrorSnackie = Snackbar.make(findViewById(R.id.loginRootRelativeLayout), "Error logging in to Echelon", Snackbar.LENGTH_SHORT);
     spotifyErrorSnackie = Snackbar.make(findViewById(R.id.loginRootRelativeLayout), "Error logging in to Spotify", Snackbar.LENGTH_SHORT);
     if (dependencies.getPreferences().getBoolean(PreferenceNames.PREF_SPOTIFY_AUTHENTICATED, false)) {
@@ -106,7 +130,12 @@ public class WelcomeActivity extends AppCompatActivity implements ConnectionStat
           .putString(PreferenceNames.PREF_USER_AUTH_TYPE, "anonymous")
           .putString(PreferenceNames.PREF_USER_DISPLAY_NAME, "Anonymous")
           .apply();
+        checkDevice();
         Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+          intent.putExtras(bundle);
+        }
         startActivity(intent);
         WelcomeActivity.this.finish();
       }
@@ -126,6 +155,7 @@ public class WelcomeActivity extends AppCompatActivity implements ConnectionStat
       switch (authResponse.getType()) {
         case TOKEN:
           spotifyAuthToken = authResponse.getAccessToken();
+          Log.i(TAG, "Token: " + spotifyAuthToken);
           dependencies.getPreferences().edit()
             .putBoolean(PreferenceNames.PREF_SPOTIFY_AUTHENTICATED, true)
             .putString(PreferenceNames.PREF_SPOTIFY_AUTH_TOKEN, spotifyAuthToken)
@@ -157,29 +187,37 @@ public class WelcomeActivity extends AppCompatActivity implements ConnectionStat
                 .build();
               BackendService backendService = retrofit.create(BackendService.class);
               BackendSpotifyAuth spotifyAuth = new BackendSpotifyAuth(spotifyUser.id + "_spotify", spotifyAuthToken);
+              Log.i(TAG, (new Gson()).toJson(spotifyAuth));
               Call<Token> call2 = backendService.authSpotify(spotifyAuth);
               call2.enqueue(new Callback<Token>() {
                 @Override
                 public void onResponse(Call<Token> call, Response<Token> response) {
-                  dependencies.getAuth().signInWithCustomToken(response.body().getToken())
-                    .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                  Token tokenBody = response.body();
+                  Log.i(TAG, (new Gson()).toJson(tokenBody));
+                  if (tokenBody.getError() == null || !tokenBody.getError().equals("")) {
+                    dependencies.getAuth().signInWithCustomToken(tokenBody.getToken())
+                      .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                        @Override
+                        public void onSuccess(AuthResult authResult) {
+                          authResulter = authResult;
+                          checkUser();
+                        }
+                      }).addOnFailureListener(new OnFailureListener() {
                       @Override
-                      public void onSuccess(AuthResult authResult) {
-                        authResulter = authResult;
-                        checkUser();
+                      public void onFailure(@NonNull Exception e) {
+                        echelonErrorSnackie.show();
+                        Log.d(TAG, e.toString() + "   " + e.getMessage());
                       }
-                    }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                      echelonErrorSnackie.show();
-                      Log.d(TAG, e.toString() + "   " + e.getMessage());
-                    }
-                  });
+                    });
+                  } else {
+                    echelonErrorSnackie.setText(tokenBody.getError()).show();
+                  }
                 }
 
                 @Override
                 public void onFailure(Call<Token> call, Throwable t) {
                   echelonErrorSnackie.show();
+                  Log.d(TAG, call.request().body().toString());
                   Log.d(TAG, t.toString() + "   " + t.getMessage());
                 }
               });
@@ -202,6 +240,29 @@ public class WelcomeActivity extends AppCompatActivity implements ConnectionStat
           Log.e("SpotifyAuth", authResponse.getError());
       }
     }
+  }
+
+  public void checkInvitation() {
+    boolean autoLaunchDeepLink = false;
+    AppInvite.AppInviteApi.getInvitation(mGoogleApiClient, this, autoLaunchDeepLink)
+      .setResultCallback(
+        new ResultCallback<AppInviteInvitationResult>() {
+          @Override
+          public void onResult(AppInviteInvitationResult result) {
+            Log.d(TAG, "getInvitation:onResult:" + result.getStatus());
+            if (result.getStatus().isSuccess()) {
+              // Extract information from the intent
+              Intent intent = result.getInvitationIntent();
+              String deepLink = AppInviteReferral.getDeepLink(intent);
+              //String invitationId = AppInviteReferral.getInvitationId(intent);
+              Log.d(TAG, deepLink);
+              if (deepLink.contains("/g/")) {
+                Uri deepLinkParsed = Uri.parse(deepLink);
+                WelcomeActivity.this.getIntent().putExtra("join_group", true).putExtra("group_name", deepLinkParsed.getPathSegments().get(1));
+              }
+            }
+          }
+        });
   }
 
   private void checkUser() {
@@ -235,6 +296,10 @@ public class WelcomeActivity extends AppCompatActivity implements ConnectionStat
         participant.child("online").setValue(true);
 
         Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+          intent.putExtras(bundle);
+        }
         startActivity(intent);
         WelcomeActivity.this.finish();
       }
@@ -274,11 +339,14 @@ public class WelcomeActivity extends AppCompatActivity implements ConnectionStat
     if (uuid == null) {
       uuid = UUID.randomUUID().toString();
     }
+    Log.d(TAG, "UUID: " + uuid);
     dependencies.getCurrentUserReference().child("devices/" + uuid).addListenerForSingleValueEvent(new ValueEventListener() {
       @Override
       public void onDataChange(DataSnapshot dataSnapshot) {
         String messagingId = FirebaseInstanceId.getInstance().getToken();
+        Log.i(TAG, "Messaging ID: " + messagingId);
         if (dataSnapshot.getValue() == null) {
+          Log.i(TAG, "Creating Device");
           Map<String, Object> newDevice = new HashMap<>();
           newDevice.put("name", dataSnapshot.getKey());
           newDevice.put("added", ServerValue.TIMESTAMP);
@@ -287,10 +355,18 @@ public class WelcomeActivity extends AppCompatActivity implements ConnectionStat
           if (messagingId != null) {
             newDevice.put("messagingId", messagingId);
           }
+          Log.d(TAG, (new Gson()).toJson(newDevice).toString());
           dependencies.getDevicePreferences().edit().putString(PreferenceNames.PREF_DEVICE_UUID, dataSnapshot.getKey()).apply();
-          dependencies.getCurrentUserReference().child("devices/" + dataSnapshot.getKey()).setValue(newDevice);
+          dependencies.getCurrentUserReference().child("type").setValue("owner");
+          dependencies.getCurrentUserReference().child("devices/" + dataSnapshot.getKey()).setValue(newDevice).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+              Log.d(TAG, "Create device complete");
+            }
+          });
         } else {
-          if (!dataSnapshot.hasChild("messagingId") && messagingId != null) {
+          Log.i(TAG, "Device Exists");
+          if (messagingId != null) {
             dependencies.getCurrentUserReference().child("devices/" + dataSnapshot.getKey() + "/messagingId").setValue(messagingId);
           }
           dependencies.getCurrentUserReference().child("devices/" + dataSnapshot.getKey() + "/lastActive").setValue(ServerValue.TIMESTAMP);

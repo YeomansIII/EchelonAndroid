@@ -37,4 +37,10 @@
   <string name="vote_song_up_image">Vote Song Up Image Button</string>
   <string name="vote_song_down_image">Vote Song Down Image Button</string>
 
+  <string name="invitation_title">Echelon Group Invite</string>
+  <string name="invitation_message">Let\'s rock out to some music on Echelon!</string>
+  <string name="invitation_deep_link">https://echelonapp.io</string>
+  <string name="invitation_custom_image">image</string>
+  <string name="invitation_cta">Join Group</string>
+
 </resources>

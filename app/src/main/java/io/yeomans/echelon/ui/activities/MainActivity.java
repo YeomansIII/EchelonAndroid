@@ -26,8 +26,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.gms.appinvite.AppInvite;
+import com.google.android.gms.appinvite.AppInviteInvitationResult;
+import com.google.android.gms.appinvite.AppInviteReferral;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -68,6 +73,7 @@ import io.yeomans.echelon.ui.fragments.LoginFragment;
 import io.yeomans.echelon.ui.fragments.SettingsFragment;
 import io.yeomans.echelon.util.Dependencies;
 import io.yeomans.echelon.util.EchelonUtils;
+import io.yeomans.echelon.util.FirebaseCommon;
 import io.yeomans.echelon.util.PreferenceNames;
 
 public class MainActivity extends AppCompatActivity {
@@ -136,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
    * Substitute you own sender ID here. This is the project number you got
    * from the API Console, as described in "Getting Started."
    */
-  String SENDER_ID = "45203521863";
+  String SENDER_ID = "715574811680";
 
   /**
    * Tag used on log messages.
@@ -158,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
   Context context;
   MainActivity mainActivity;
   MainActivity mainActivityClass;
+  Intent mainActivityIntent;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -167,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
     Dependencies.INSTANCE.init(getApplicationContext());
     dependencies = Dependencies.INSTANCE;
+    mainActivityIntent = getIntent();
 
     //String token = pref.getString(PREF_ECHELON_API_TOKEN, null);
 
@@ -406,51 +414,63 @@ public class MainActivity extends AppCompatActivity {
   }
 
   public void checkGroup() {
-    dependencies.getCurrentUserReference().child("cur_group")
-      .addListenerForSingleValueEvent(new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-          if (dataSnapshot.getValue() != null) {
-            dependencies.getDatabase().getReference("queuegroups/" + dataSnapshot.getValue()).addListenerForSingleValueEvent(new ValueEventListener() {
-              @Override
-              public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() != null) {
-                  groupPref.edit()
-                    .putString(PreferenceNames.PREF_GROUP_NAME,
-                      (String) dataSnapshot.child("name").getValue())
-                    .putString(PreferenceNames.PREF_GROUP_LEADER_UID,
-                      (String) dataSnapshot.child("leader").getValue()).apply();
-                  FragmentTransaction fragmentTransaction = mainActivity.getSupportFragmentManager().beginTransaction();
-                  DialogFragment dialogFragment = null;
-                  if (pref.getString(PreferenceNames.PREF_FIREBASE_UID, "").equals(dataSnapshot.child("leader").getValue())) {
-                    dialogFragment = new CurrentGroupLeaderDialogFragment();
-                    //dialogFragment.show(getSupportFragmentManager(), "CURRENT_GROUP_LEADER_DIALOG");
+    Boolean shouldJoinGroup;
+    String shouldJoinGroupS = mainActivityIntent.getStringExtra("join_group");
+    if (shouldJoinGroupS == null) {
+      shouldJoinGroup = false;
+    } else {
+      shouldJoinGroup = Boolean.parseBoolean(shouldJoinGroupS);
+    }
+    Log.d(TAG, "Should join group: " + shouldJoinGroup + "    Group Name: " + mainActivityIntent.getStringExtra("group_name"));
+    if (shouldJoinGroup) {
+      FirebaseCommon.joinGroup(mainActivityIntent.getStringExtra("group_name"), this);
+    } else {
+      dependencies.getCurrentUserReference().child("cur_group")
+        .addListenerForSingleValueEvent(new ValueEventListener() {
+          @Override
+          public void onDataChange(DataSnapshot dataSnapshot) {
+            if (dataSnapshot.getValue() != null) {
+              dependencies.getDatabase().getReference("queuegroups/" + dataSnapshot.getValue()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                  if (dataSnapshot.getValue() != null) {
+                    groupPref.edit()
+                      .putString(PreferenceNames.PREF_GROUP_NAME,
+                        (String) dataSnapshot.child("name").getValue())
+                      .putString(PreferenceNames.PREF_GROUP_LEADER_UID,
+                        (String) dataSnapshot.child("leader").getValue()).apply();
+                    FragmentTransaction fragmentTransaction = mainActivity.getSupportFragmentManager().beginTransaction();
+                    DialogFragment dialogFragment = null;
+                    if (pref.getString(PreferenceNames.PREF_FIREBASE_UID, "").equals(dataSnapshot.child("leader").getValue())) {
+                      dialogFragment = new CurrentGroupLeaderDialogFragment();
+                      //dialogFragment.show(getSupportFragmentManager(), "CURRENT_GROUP_LEADER_DIALOG");
+                    } else {
+                      dialogFragment = new CurrentGroupDialogFragment();
+                      //dialogFragment.show(getSupportFragmentManager(), "CURRENT_GROUP_DIALOG");
+                    }
+                    //dialogFragment.show(fragmentTransaction, "CURRENT_GROUP_DIALOG");
+                    fragmentTransaction.add(dialogFragment, null).commitAllowingStateLoss();
+                    Log.d("Dialog", "Show group dialog");
+                    //fragmentTransaction.commitAllowingStateLoss();
                   } else {
-                    dialogFragment = new CurrentGroupDialogFragment();
-                    //dialogFragment.show(getSupportFragmentManager(), "CURRENT_GROUP_DIALOG");
+                    dependencies.getCurrentUserReference().child("cur_group").removeValue();
                   }
-                  //dialogFragment.show(fragmentTransaction, "CURRENT_GROUP_DIALOG");
-                  fragmentTransaction.add(dialogFragment, null).commitAllowingStateLoss();
-                  Log.d("Dialog", "Show group dialog");
-                  //fragmentTransaction.commitAllowingStateLoss();
-                } else {
-                  dependencies.getCurrentUserReference().child("cur_group").removeValue();
                 }
-              }
 
-              @Override
-              public void onCancelled(DatabaseError firebaseError) {
+                @Override
+                public void onCancelled(DatabaseError firebaseError) {
 
-              }
-            });
+                }
+              });
+            }
           }
-        }
 
-        @Override
-        public void onCancelled(DatabaseError firebaseError) {
+          @Override
+          public void onCancelled(DatabaseError firebaseError) {
 
-        }
-      });
+          }
+        });
+    }
   }
 
   public void logout() {

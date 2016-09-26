@@ -1,9 +1,12 @@
 package io.yeomans.echelon.ui.fragments;
 
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -28,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,6 +42,8 @@ import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.squareup.picasso.Picasso;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -67,6 +73,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
   private static final String TAG = "BrowseSongsFragment";
   private static final String KEY_LAYOUT_MANAGER = "layoutManager";
   private static final int SPAN_COUNT = 2;
+  static final int REQUEST_INVITE = 1;
 
   private enum LayoutManagerType {
     GRID_LAYOUT_MANAGER,
@@ -80,12 +87,13 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
 
   public boolean isDestroyed;
 
-  private View view;
+  private View view, inviteDialogView;
   private ArrayList<RelativeLayout> songListArr;
   DatabaseReference queuegroupRef;
   List<SpotifySong> playqueue;
   SpotifySong nowPlaying;
   private ValueEventListener trackListChangeListener, participantListener, nowPlayingChangeListener;
+  AlertDialog inviteDialog;
 
   private Boolean isFabOpen = false;
   @Bind(R.id.groupAddSongFab)
@@ -335,6 +343,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     queuegroupRef.child("tracks").addValueEventListener(trackListChangeListener);
     queuegroupRef.child("participants").addValueEventListener(participantListener);
     queuegroupRef.child("nowPlaying").addValueEventListener(nowPlayingChangeListener);
+
     return view;
   }
 
@@ -488,19 +497,36 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
   }
 
   public void createInviteDialog() {
+    inviteDialog = null;
     AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
     builder.setTitle("Invite User");
     builder.setMessage("Include the user's friendcode in the following format: 'Display Name#0000'");
-
-    final EditText input = new EditText(mainActivity);
-    // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-    input.setInputType(InputType.TYPE_CLASS_TEXT);
-    builder.setView(input);
+    inviteDialogView = getActivity().getLayoutInflater().inflate(R.layout.invite_dialog, null);
+    inviteDialogView.findViewById(R.id.inviteDialogContactsButton).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        try {
+          Intent intent = new AppInviteInvitation.IntentBuilder(getString(R.string.invitation_title))
+            .setMessage(getString(R.string.invitation_message))
+            .setDeepLink(Uri.parse(getString(R.string.invitation_deep_link) + "/g/" + URLEncoder.encode(dependencies.getGroupPreferences().getString(PreferenceNames.PREF_GROUP_NAME, null), "UTF-8")))
+            // .setCustomImage(Uri.parse(getString(R.string.invitation_custom_image)))
+            .setCallToActionText(getString(R.string.invitation_cta))
+            .build();
+          if (inviteDialog != null) {
+            inviteDialog.cancel();
+          }
+          startActivityForResult(intent, REQUEST_INVITE);
+        } catch (UnsupportedEncodingException e) {
+          e.printStackTrace();
+        }
+      }
+    });
+    builder.setView(inviteDialogView);
 
     builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
       @Override
       public void onClick(DialogInterface dialog, int which) {
-        inviteUser(input.getText().toString());
+        inviteUser(((TextInputLayout) inviteDialogView.findViewById(R.id.inviteDialogDisplayNameInput)).getEditText().getText().toString());
       }
     });
     builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -510,7 +536,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
       }
     });
 
-    builder.show();
+    inviteDialog = builder.show();
   }
 
   public void inviteUser(String user) {
@@ -527,10 +553,12 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
             String inviteeUid = (String) dataSnapshot.getValue();
             if (inviteeUid != null) {
               Map<String, Object> invite = new HashMap<>();
-              invite.put("groupName", groupName);
+              invite.put("group_name", groupName);
               invite.put("inviter", dependencies.getAuth().getCurrentUser().getUid());
+              invite.put("inviter_display_name", dependencies.getPreferences().getString(PreferenceNames.PREF_USER_DISPLAY_NAME, "Anonymous"));
               invite.put("invitee", inviteeUid);
-              DatabaseReference invitePush = dependencies.getDatabase().getReference("queue/invites").push();
+              dependencies.getCurrentGroupReference().child("invites/" + inviteeUid).setValue(true);
+              DatabaseReference invitePush = dependencies.getDatabase().getReference("queue/invitess/tasks").push();
               invitePush.setValue(invite);
               Snackbar.make(view, "Invite sent", Snackbar.LENGTH_SHORT).show();
             } else {

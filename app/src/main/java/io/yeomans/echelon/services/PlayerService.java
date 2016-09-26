@@ -241,12 +241,18 @@ public class PlayerService extends Service implements PlayerNotificationCallback
   }
 
   public void kill() {
-    stop();
     dependencies.getCurrentGroupReference().child("tracks").removeEventListener(trackListChangeListener);
     dependencies.getCurrentGroupReference().child("nowPlaying").removeEventListener(nowPlayingChangeListener);
-    Spotify.destroyPlayer(mPlayer);
-    mPlayer = null;
-    unregisterReceiver(receiver);
+    if (mPlayer != null) {
+      stop();
+      Spotify.destroyPlayer(mPlayer);
+      mPlayer = null;
+    }
+    try {
+      unregisterReceiver(receiver);
+    } catch (IllegalArgumentException e) {
+      e.printStackTrace();
+    }
     stopSelf();
   }
 
@@ -266,7 +272,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
     try {
       unregisterReceiver(receiver);
     } catch (IllegalArgumentException e) {
-
+      e.printStackTrace();
     }
   }
 

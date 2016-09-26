@@ -1,6 +1,14 @@
 package io.yeomans.echelon.util;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -9,6 +17,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
+
+import io.yeomans.echelon.R;
+import io.yeomans.echelon.ui.fragments.GroupFragment;
 
 /**
  * Created by jason on 9/15/15.
@@ -31,6 +42,41 @@ public class FirebaseCommon {
       ref.child("votedUp").child(uid).removeValue();
       ref.child("votedDown").child(uid).removeValue();
     }
+  }
+
+  static public void joinGroup(final String groupName, final AppCompatActivity activity) {
+    Dependencies dependencies = Dependencies.INSTANCE;
+    SharedPreferences mainPref = dependencies.getPreferences();
+    SharedPreferences groupPref = dependencies.getGroupPreferences();
+    String fUid2 = mainPref.getString(PreferenceNames.PREF_FIREBASE_UID, null);
+    Dependencies.INSTANCE.getDatabase().getReference("users/" + fUid2 + "/cur_group").setValue(groupName);
+    DatabaseReference ref = dependencies.getDatabase().getReference("queuegroups/" + groupName);
+    ref.child("participants/" + fUid2).setValue(true);
+    ref.addListenerForSingleValueEvent(new ValueEventListener() {
+      @Override
+      public void onDataChange(DataSnapshot dataSnapshot) {
+        String leaderUid = (String) dataSnapshot.child("leader").getValue();
+        Dependencies.INSTANCE.getGroupPreferences().edit().putString(PreferenceNames.PREF_GROUP_NAME, dataSnapshot.getKey()).putString(PreferenceNames.PREF_GROUP_LEADER_UID, leaderUid).apply();
+        String fUid3 = Dependencies.INSTANCE.getPreferences().getString(PreferenceNames.PREF_FIREBASE_UID, null);
+        Fragment fragment = new GroupFragment();
+        Bundle bundle = new Bundle();
+        if (leaderUid.equals(fUid3)) {
+          bundle.putStringArray("extra_stuff", new String[]{"" + true, "" + true});
+        } else {
+          bundle.putStringArray("extra_stuff", new String[]{"" + false, "" + false});
+        }
+        fragment.setArguments(bundle);
+        FragmentManager fragmentManager = activity.getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+          .replace(R.id.container, fragment, "GROUP_FRAG")
+          .commit();
+      }
+
+      @Override
+      public void onCancelled(DatabaseError databaseError) {
+
+      }
+    });
   }
 
   static public void setDisplayName(final String displayName) {

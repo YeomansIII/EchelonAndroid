@@ -41,5 +41,5 @@ public class PreferenceNames {
 
     //DEVICE PREF
     public static final String PREF_DEVICE_UUID = "device_uuid";
-    public static final String PREF_MESSAGING_ID = "device_uuid";
+    public static final String PREF_MESSAGING_ID = "device_messaging_id";
 }

@@ -4,24 +4,24 @@
 
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-  <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-
-  <permission
-    android:name="io.yeomans.echelon.permission.C2D_MESSAGE"
-    android:protectionLevel="signature" />
-  <uses-permission android:name="io.yeomans.echelon.permission.C2D_MESSAGE" />
 
   <application
     android:allowBackup="true"
     android:icon="@mipmap/ic_launcher"
     android:label="@string/app_name"
     android:theme="@style/AppTheme">
-    <service android:name=".services.EchelonFirebaseMessagingService">
+    <service
+      android:name=".services.EchelonFirebaseMessagingService"
+      android:enabled="true"
+      android:exported="true">
       <intent-filter>
         <action android:name="com.google.firebase.MESSAGING_EVENT" />
       </intent-filter>
     </service>
-    <service android:name=".services.EchelonFirebaseInstanceIdService">
+    <service
+      android:name=".services.EchelonFirebaseInstanceIdService"
+      android:enabled="true"
+      android:exported="true">
       <intent-filter>
         <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
       </intent-filter>
@@ -43,6 +43,23 @@
 
         <category android:name="android.intent.category.LAUNCHER" />
         <action android:name="android.intent.action.PLAY" />
+      </intent-filter>
+      <intent-filter android:label="@string/app_name">
+        <action android:name="android.intent.action.VIEW" />
+
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <!-- Accepts URIs that begin with "https://echelonapp.io/g” -->
+        <data
+          android:host="echelonapp.io"
+          android:pathPrefix="/g"
+          android:scheme="https" />
+        <!-- note that the leading "/" is required for pathPrefix-->
+        <!-- Accepts URIs that begin with "echelonapp://g” -->
+        <data
+          android:host="g"
+          android:scheme="echelonapp" />
+
       </intent-filter>
     </activity>
     <activity

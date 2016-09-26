@@ -3,7 +3,7 @@
   android:layout_width="match_parent"
   android:layout_height="50dp"
   android:background="@color/primaryColorDark"
-  android:visibility="visible">
+  android:visibility="gone">
 
   <ImageButton
     android:id="@+id/controlPlayButton"
