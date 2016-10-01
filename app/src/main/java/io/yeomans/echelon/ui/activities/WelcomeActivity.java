@@ -393,7 +393,7 @@ public class WelcomeActivity extends AppCompatActivity implements ConnectionStat
   }
 
   @Override
-  public void onLoginFailed(Throwable throwable) {
+  public void onLoginFailed(int i) {
 
   }
 

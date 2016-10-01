@@ -19,10 +19,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
+import com.spotify.sdk.android.player.Error;
 import com.spotify.sdk.android.player.Player;
-import com.spotify.sdk.android.player.PlayerNotificationCallback;
-import com.spotify.sdk.android.player.PlayerState;
+import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
+import com.spotify.sdk.android.player.SpotifyPlayer;
 
 import org.json.JSONObject;
 
@@ -39,7 +40,7 @@ import io.yeomans.echelon.util.PreferenceNames;
 /**
  * Created by jason on 4/25/16.
  */
-public class PlayerService extends Service implements PlayerNotificationCallback, ConnectionStateCallback {
+public class PlayerService extends Service implements Player.NotificationCallback, ConnectionStateCallback {
   private static final String TAG = "PlayerService";
 
   public boolean playerSetup = false, firebaseSetup = false;
@@ -56,12 +57,13 @@ public class PlayerService extends Service implements PlayerNotificationCallback
     stopIntent = new Intent("io.yeomans.echelon.STOP"),
     stopServiceIntent = new Intent("io.yeomans.echelon.STOP_SERVICE");
 
-  public Player mPlayer;
+  public SpotifyPlayer mPlayer;
   public boolean mPlayerPlaying;
   public boolean mPlayerShouldPlaying;
   public boolean mPlayerCherry;
   public boolean playerReady;
   public boolean shouldPlayAfterServiceInit;
+  public boolean playQueueChanged = false;
   public boolean loggedIn;
   public LinkedList<SpotifySong> backStack;
   public List<SpotifySong> playQueue;
@@ -108,12 +110,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
           playQueue.add(ss);
         }
         Collections.sort(playQueue);
-        if (mPlayerShouldPlaying) {
-          mPlayer.clearQueue();
-          for (SpotifySong ss : playQueue) {
-            mPlayer.queue(ss.getUri());
-          }
-        }
+        playQueueChanged = true;
         if (shouldPlayAfterServiceInit) {
           shouldPlayAfterServiceInit = false;
           play();
@@ -172,11 +169,11 @@ public class PlayerService extends Service implements PlayerNotificationCallback
     String authToken = pref.getString(PreferenceNames.PREF_SPOTIFY_AUTH_TOKEN, null);
     if (authToken != null) {
       Config playerConfig = new Config(this, authToken, MainActivity.CLIENT_ID);
-      mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
+      mPlayer = Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
         @Override
-        public void onInitialized(Player player) {
+        public void onInitialized(SpotifyPlayer player) {
           player.addConnectionStateCallback(PlayerService.this);
-          player.addPlayerNotificationCallback(PlayerService.this);
+          player.addNotificationCallback(PlayerService.this);
           playerReady = true;
           mPlayerPlaying = false;
           mPlayerShouldPlaying = false;
@@ -211,7 +208,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
       return true;
     } else if (!mPlayerPlaying) {
       mPlayerShouldPlaying = true;
-      mPlayer.resume();
+      mPlayer.resume(null);
       return true;
     }
     return false;
@@ -219,7 +216,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
 
   public boolean pause() {
     if (mPlayerPlaying) {
-      mPlayer.pause();
+      mPlayer.pause(null);
       mPlayerShouldPlaying = false;
       return true;
     }
@@ -233,8 +230,8 @@ public class PlayerService extends Service implements PlayerNotificationCallback
   }
 
   public boolean stop() {
-    mPlayer.pause();
-    mPlayer.clearQueue();
+    mPlayer.pause(null);
+    //mPlayer.clearQueue();
     mPlayerCherry = true;
     mPlayerShouldPlaying = false;
     return true;
@@ -292,7 +289,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
   }
 
   @Override
-  public void onLoginFailed(Throwable throwable) {
+  public void onLoginFailed(int i) {
 
   }
 
@@ -307,50 +304,57 @@ public class PlayerService extends Service implements PlayerNotificationCallback
   }
 
   @Override
-  public void onPlaybackEvent(EventType eventType, PlayerState playerState) {
-    if (eventType == EventType.TRACK_CHANGED) {
-      if (playQueue.size() > 0) {
-        setNowPlaying(playQueue.get(0));
+  public void onPlaybackEvent(PlayerEvent event) {
+    Log.i(TAG, "Playback event: " + event);
+    if (event == PlayerEvent.kSpPlaybackNotifyTrackChanged) {
+      Log.i(TAG, "Track change event, player playing?: " + mPlayer.getPlaybackState().isPlaying);
+      if (!mPlayer.getPlaybackState().isPlaying) {
+        if (playQueue.size() > 0) {
+          SpotifySong nowToPlay = playQueue.get(0);
+          mPlayer.playUri(null, nowToPlay.getUri(), 0, 0);
+          setNowPlaying(nowToPlay);
+          for (int i = 1; i < playQueue.size(); i++) {
+            mPlayer.queue(null, playQueue.get(i).getUri());
+          }
+        }
       }
-    } else if (eventType == EventType.PLAY) {
+    } else if (event == PlayerEvent.kSpPlaybackNotifyPlay) {
+      Log.i(TAG, "Play event");
       mPlayerPlaying = true;
       sendBroadcast(playingIntent);
-    } else if (eventType == EventType.PAUSE) {
+    } else if (event == PlayerEvent.kSpPlaybackNotifyPause) {
+      Log.i(TAG, "Pause event");
       mPlayerPlaying = false;
       sendBroadcast(pausingIntent);
       if (mPlayerShouldPlaying) {
         setNowPlaying(null);
         mPlayerShouldPlaying = false;
       }
-    } else if (eventType == EventType.TRACK_END) {
-      if (mPlayerPlaying) {
-        mPlayerPlaying = false;
-        sendBroadcast(pausingIntent);
-      }
-    } else if (eventType == EventType.TRACK_START) {
-      if (!mPlayerPlaying) {
-        mPlayerPlaying = true;
-        sendBroadcast(playingIntent);
-      }
     }
   }
 
   @Override
-  public void onPlaybackError(ErrorType errorType, String s) {
+  public void onPlaybackError(Error error) {
 
   }
 
   public void playFirstSong() {
-    Log.d("Play", "PlayQueue: " + playQueue);
+    Log.d(TAG, "PlayQueue First song: " + playQueue);
     if (playQueue.size() > 0) {
       if (mPlayerShouldPlaying) {
-        mPlayer.clearQueue();
-        for (SpotifySong ss : playQueue) {
-          mPlayer.queue(ss.getUri());
+        SpotifySong nowToPlay = playQueue.get(0);
+        mPlayer.playUri(null, nowToPlay.getUri(), 0, 0);
+        setNowPlaying(nowToPlay);
+        for (int i = 1; i < playQueue.size(); i++) {
+          mPlayer.queue(null, playQueue.get(i).getUri());
         }
       }
       mPlayerCherry = false;
     }
+  }
+
+  public void clearPlayerQueue() {
+
   }
 
   public void startForegroundNotification(SpotifySong spotifySong) {
@@ -380,7 +384,7 @@ public class PlayerService extends Service implements PlayerNotificationCallback
     public void onReceive(Context context, Intent intent) {
       String action = intent.getAction();
       if (action.equals("io.yeomans.echelon.SKIP")) {
-        mPlayer.skipToNext();
+        mPlayer.skipToNext(null);
       } else if (action.equals("io.yeomans.echelon.PLAY")) {
         Log.d(TAG, "mPlayerPlaying: " + mPlayerPlaying + "; mPlayerShouldPlaying: " + mPlayerShouldPlaying);
         play();
