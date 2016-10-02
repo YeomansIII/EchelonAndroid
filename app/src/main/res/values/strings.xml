@@ -36,6 +36,7 @@
   <string name="sidenav_header_image">Sidenav Header Image</string>
   <string name="vote_song_up_image">Vote Song Up Image Button</string>
   <string name="vote_song_down_image">Vote Song Down Image Button</string>
+  <string name="more_menu">Context menu</string>
 
   <string name="invitation_title">Echelon Group Invite</string>
   <string name="invitation_message">Let\'s rock out to some music on Echelon!</string>

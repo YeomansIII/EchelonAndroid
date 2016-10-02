@@ -1,15 +1,12 @@
 package io.yeomans.echelon.ui.fragments;
 
 import android.app.Dialog;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.CoordinatorLayout;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -21,14 +18,9 @@ import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import io.github.kaaes.spotify.webapi.core.models.ArtistSimple;
-import io.github.kaaes.spotify.webapi.core.models.Track;
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.models.Participant;
 import io.yeomans.echelon.util.Dependencies;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Created by jason on 8/8/16.
@@ -41,7 +33,7 @@ public class UserDetailBottomSheetFragment extends BottomSheetDialogFragment imp
   public ImageView userDetailProfileImage;
   @Bind(R.id.userDetailNameText)
   public TextView userDetailNameText;
-  @Bind(R.id.userDetailOnlineImage)
+  @Bind(R.id.songItemVoteUpButton)
   public ImageView userDetailOnlineImage;
   @Bind(R.id.userDetailOnlineText)
   public TextView userDetailOnlineText;

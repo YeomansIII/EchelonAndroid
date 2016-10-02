@@ -1,11 +1,15 @@
 package io.yeomans.echelon.ui.adapters;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -66,7 +70,9 @@ public class PlaylistRecyclerAdapter extends RecyclerView.Adapter<PlaylistRecycl
     Picasso.with(context).load(curPlaylist.images.get(0).url).placeholder(R.drawable.ic_music_circle_black_48dp).into(holder.image,
       PicassoPalette.with(curPlaylist.images.get(0).url, holder.image)
         .use(PicassoPalette.Profile.VIBRANT)
-        .intoBackground(holder.innerLayout)
+        .intoBackground(holder.innerLayout, PicassoPalette.Swatch.RGB)
+        .intoTextColor(holder.name, PicassoPalette.Swatch.BODY_TEXT_COLOR)
+        .intoCallBack(holder)
     );
     holder.name.setText(curPlaylist.name);
 
@@ -78,7 +84,7 @@ public class PlaylistRecyclerAdapter extends RecyclerView.Adapter<PlaylistRecycl
     }
   }
 
-  public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+  public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, PicassoPalette.CallBack {
     // Your holder should contain a member variable
     // for any view that will be set as you render a row
     @Bind(R.id.playlistItemInnerLayout)
@@ -87,6 +93,8 @@ public class PlaylistRecyclerAdapter extends RecyclerView.Adapter<PlaylistRecycl
     public TextView name;
     @Bind(R.id.playlistArtImage)
     public ImageView image;
+    @Bind(R.id.playlistItemMoreButton)
+    public ImageButton moreButton;
     public char what;
     public String userId;
     public String playlistId;
@@ -109,6 +117,31 @@ public class PlaylistRecyclerAdapter extends RecyclerView.Adapter<PlaylistRecycl
       if (mOnPlaylistClick != null) {
         mOnPlaylistClick.onPlaylistClick(this);
       }
+    }
+
+    @Override
+    public void onPaletteLoaded(Palette palette) {
+      Palette.Swatch swatch = palette.getVibrantSwatch();
+      int enabled, pressed;
+      if (swatch == null) {
+        swatch = palette.getLightVibrantSwatch();
+      }
+      if (swatch == null) {
+        enabled = palette.getVibrantColor(Color.WHITE);
+        pressed = palette.getDarkVibrantColor(Color.GRAY);
+      } else {
+        enabled = swatch.getBodyTextColor();
+        pressed = swatch.getTitleTextColor();
+      }
+      int[][] states = new int[][]{
+        new int[]{android.R.attr.state_enabled}, // enabled
+        new int[]{android.R.attr.state_pressed}  // pressed
+      };
+      int[] colors = new int[]{
+        enabled,
+        pressed
+      };
+      moreButton.setImageTintList(new ColorStateList(states, colors));
     }
   }
 

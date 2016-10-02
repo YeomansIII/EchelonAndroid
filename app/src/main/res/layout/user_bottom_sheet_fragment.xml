@@ -28,7 +28,7 @@
       android:textSize="25sp" />
 
     <ImageView
-      android:id="@+id/userDetailOnlineImage"
+      android:id="@+id/songItemVoteUpButton"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_alignBottom="@+id/userDetailOnlineText"
@@ -45,8 +45,8 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_below="@+id/userDetailNameText"
-      android:layout_toEndOf="@+id/userDetailOnlineImage"
-      android:layout_toRightOf="@+id/userDetailOnlineImage"
+      android:layout_toEndOf="@+id/songItemVoteUpButton"
+      android:layout_toRightOf="@+id/songItemVoteUpButton"
       android:text="Offline"
       android:textSize="15sp" />
   </RelativeLayout>

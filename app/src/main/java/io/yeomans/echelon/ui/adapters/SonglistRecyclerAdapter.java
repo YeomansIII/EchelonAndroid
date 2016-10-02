@@ -104,8 +104,10 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
 
     if (vote) {
       holder.voteUp.setVisibility(View.VISIBLE);
+      holder.moreButton.setVisibility(View.GONE);
     } else {
       holder.voteUp.setVisibility(View.GONE);
+      holder.moreButton.setVisibility(View.VISIBLE);
     }
 
     if (mOnSongClickListener != null) {
@@ -121,7 +123,7 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
     public String key;
     public String trackId;
     public boolean upVoted, isSpotifySong;
-    public ImageButton voteUp;
+    public ImageButton voteUp, moreButton;
     public OnSongClickListener mOnSongClick;
     Context context;
 
@@ -136,9 +138,10 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
       artist = (TextView) itemView.findViewById(R.id.songArtistText);
       image = (ImageView) itemView.findViewById(R.id.songAlbumArtImage);
       image.setOnClickListener(this);
-      voteUp = (ImageButton) itemView.findViewById(R.id.userDetailOnlineImage);
+      voteUp = (ImageButton) itemView.findViewById(R.id.songItemVoteUpButton);
       voteUp.setOnClickListener(this);
       itemView.setOnClickListener(this);
+      moreButton = (ImageButton) itemView.findViewById(R.id.songItemMoreButton);
     }
 
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
   android:id="@+id/playlistItemLayout"
   android:layout_width="match_parent"
   android:layout_height="wrap_content">
@@ -8,9 +9,7 @@
     android:id="@+id/playlistItemInnerLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="10dp"
-    android:background="#73000000"
-    android:padding="5dp">
+    android:background="#73000000">
 
     <ImageView
       android:id="@+id/playlistArtImage"
@@ -22,22 +21,34 @@
       android:contentDescription="@string/playlist_cover_image"
       android:scaleType="fitCenter" />
 
-    <TextView
-      android:id="@+id/playlistTitleText"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_below="@+id/playlistArtImage"
-      android:layout_centerHorizontal="true"
-      android:gravity="center"
-      android:paddingBottom="0dp"
-      android:paddingLeft="5dp"
-      android:paddingRight="5dp"
-      android:paddingTop="5dp"
-      android:singleLine="true"
-      android:text="Song Title"
-      android:textAlignment="center"
-      android:textColor="@android:color/white"
-      android:textSize="14sp" />
+    <RelativeLayout
+      android:layout_width="wrap_content"
+      android:layout_height="48dp"
+      android:layout_below="@+id/playlistArtImage">
+
+      <ImageButton
+        android:id="@+id/playlistItemMoreButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentEnd="true"
+        android:background="@color/transparent"
+        android:tint="@color/md_blue_grey_50"
+        app:srcCompat="@drawable/dots_vertical" />
+
+      <TextView
+        android:id="@+id/playlistTitleText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="16dp"
+        android:layout_toStartOf="@+id/playlistItemMoreButton"
+        android:maxLines="1"
+        android:text="Song Title"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+    </RelativeLayout>
   </RelativeLayout>
 
 </RelativeLayout>

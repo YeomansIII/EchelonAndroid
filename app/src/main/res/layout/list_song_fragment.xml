@@ -10,9 +10,7 @@
     android:id="@+id/songListRecyclerView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clipToPadding="false"
-    android:paddingBottom="16dp"
-    android:paddingTop="16dp" />
+    android:clipToPadding="false" />
 
   <FrameLayout
     android:id="@+id/songListLoadOverlay"
