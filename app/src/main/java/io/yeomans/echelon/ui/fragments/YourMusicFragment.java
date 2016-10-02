@@ -2,6 +2,7 @@ package io.yeomans.echelon.ui.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,6 +19,7 @@ import java.util.List;
 import io.github.kaaes.spotify.webapi.core.models.Pager;
 import io.github.kaaes.spotify.webapi.core.models.PlaylistSimple;
 import io.yeomans.echelon.R;
+import io.yeomans.echelon.interfaces.Picker;
 import io.yeomans.echelon.ui.activities.MainActivity;
 import io.yeomans.echelon.ui.adapters.PlaylistRecyclerAdapter;
 import io.yeomans.echelon.ui.other.GridSpacingItemDecoration;
@@ -54,6 +56,17 @@ public class YourMusicFragment extends Fragment implements View.OnClickListener 
   RecyclerView.LayoutManager mLayoutManager;
   List<PlaylistSimple> playlists;
   Dependencies dependencies;
+  Bundle arguments;
+
+  public static YourMusicFragment newInstance(boolean isBottomSheet, boolean isPicker, boolean hasListPicker) {
+    YourMusicFragment frag = new YourMusicFragment();
+    Bundle argsBundle = new Bundle();
+    argsBundle.putBoolean("isBottomSheet", isBottomSheet);
+    argsBundle.putBoolean("isPicker", isPicker);
+    argsBundle.putBoolean("hasListPicker", hasListPicker);
+    frag.setArguments(argsBundle);
+    return frag;
+  }
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -71,7 +84,7 @@ public class YourMusicFragment extends Fragment implements View.OnClickListener 
                            Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.browse_songs_fragment,
       container, false);
-
+    arguments = getArguments();
     //mLayoutManager = new GridLayoutManager(getActivity(), 2);
     mainActivity.toolbar.setTitle("Your Playlists");
     loadOverlay = view.findViewById(R.id.browsePlaylistLoadOverlay);
@@ -94,14 +107,30 @@ public class YourMusicFragment extends Fragment implements View.OnClickListener 
     playlistRA.setOnPlaylistClickListener(new PlaylistRecyclerAdapter.OnPlaylistClickListener() {
       @Override
       public void onPlaylistClick(PlaylistRecyclerAdapter.ViewHolder viewHolder) {
-        FragmentTransaction ft = mainActivity.getSupportFragmentManager().beginTransaction();
-        ListSongFragment lsf = new ListSongFragment();
-        Bundle bundle = new Bundle();
-        bundle.putChar("what", viewHolder.what);
-        bundle.putString("userId", viewHolder.userId);
-        bundle.putString("playlistId", viewHolder.playlistId);
-        lsf.setArguments(bundle);
-        ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out).replace(R.id.container, lsf, "SONG_LIST_FRAG").addToBackStack(null).commit();
+        if (arguments != null && arguments.getBoolean("isPicker")) {
+          Fragment parentFragment = getParentFragment();
+          if (getParentFragment() != null && getParentFragment() instanceof Picker) {
+            ((Picker) parentFragment).pickedPlaylist(viewHolder.userId, viewHolder.playlistId);
+          }
+        } else {
+          FragmentManager fragmentManager;
+          if (arguments != null && arguments.getBoolean("isBottomSheet")) {
+            fragmentManager = getParentFragment().getChildFragmentManager();
+          } else {
+            fragmentManager = getActivity().getSupportFragmentManager();
+          }
+          FragmentTransaction ft = fragmentManager.beginTransaction();
+          ListSongFragment lsf = new ListSongFragment();
+          Bundle bundle = new Bundle();
+          bundle.putChar("what", viewHolder.what);
+          bundle.putString("userId", viewHolder.userId);
+          bundle.putString("playlistId", viewHolder.playlistId);
+          if (arguments != null && arguments.getBoolean("hasListPicker")) {
+            bundle.putBoolean("isPlayListPicker", true);
+          }
+          lsf.setArguments(bundle);
+          ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out).replace(arguments != null && arguments.getBoolean("isBottomSheet") ? R.id.pickPlaylistFragmentContainer : R.id.container, lsf, "SONG_LIST_FRAG").addToBackStack(null).commit();
+        }
       }
     });
     rvPlaylists.setAdapter(playlistRA);

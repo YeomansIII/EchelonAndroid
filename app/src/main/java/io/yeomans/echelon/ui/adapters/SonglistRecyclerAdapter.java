@@ -142,8 +142,8 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
       voteUp.setOnClickListener(this);
       itemView.setOnClickListener(this);
       moreButton = (ImageButton) itemView.findViewById(R.id.songItemMoreButton);
+      moreButton.setOnClickListener(this);
     }
-
 
     @Override
     public void onClick(View view) {
@@ -157,7 +157,7 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
           voteUp.setSelected(true);
           upVoted = true;
         }
-      } else if (view == image) {
+      } else if (view == image || view == moreButton) {
         SongDetailBottomSheetFragment songBottom = SongDetailBottomSheetFragment.newInstance(trackId);
         songBottom.show(((AppCompatActivity) context).getSupportFragmentManager(), "SONG_DETAIL");
       } else if (mOnSongClick != null) {

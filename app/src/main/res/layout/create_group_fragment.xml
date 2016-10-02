@@ -1,149 +1,209 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/createGroupFragmentLayout"
+  <LinearLayout
+    android:id="@+id/createGroupFragmentLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="10dp"
+      android:layout_marginTop="10dp"
+      android:text="Create a Group"
+      android:textSize="25sp" />
+
+    <android.support.design.widget.TextInputLayout
+      android:id="@+id/createGroupNameEditWrapper"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
+
+      <android.support.design.widget.TextInputEditText
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@null"
+        android:drawableLeft="@drawable/ic_library_music_black_24dp"
+        android:drawablePadding="10dp"
+        android:drawableStart="@drawable/ic_library_music_black_24dp"
+        android:ems="10"
+        android:hint="Group Name"
+        android:inputType="text" />
+    </android.support.design.widget.TextInputLayout>
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentLeft="true"
+      android:layout_alignParentStart="true"
+      android:layout_alignParentTop="true"
+      android:layout_marginBottom="10dp"
+      android:drawableLeft="@drawable/ic_account_multiple_black_24dp"
+      android:drawablePadding="10dp"
+      android:drawableStart="@drawable/ic_account_multiple_black_24dp"
+      android:text="Default Playlist (Optional)"
+      android:textSize="20sp" />
+
+    <RelativeLayout
+      android:id="@+id/createGroupDPlaylistLayout"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:visibility="gone">
+
+      <ImageView
+        android:id="@+id/createGroupDPlaylistImage"
+        android:layout_width="85dp"
+        android:layout_height="85dp"
+        android:layout_marginEnd="16dp" />
+
+      <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:layout_centerInParent="true"
+        android:layout_toEndOf="@+id/createGroupDPlaylistImage">
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
-            android:text="Create a Group"
-            android:textSize="25sp"/>
+          android:id="@+id/createGroupDPlaylistNameText"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:maxLines="2"
+          android:text="Playlist Name"
+          android:textSize="18sp" />
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/createGroupNameEditWrapper"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        <TextView
+          android:id="@+id/createGroupDPlaylistDescriptionText"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_below="@+id/createGroupDPlaylistNameText"
+          android:maxLines="2"
+          android:text="Description of playlist"
+          android:textSize="16sp" />
+      </RelativeLayout>
+    </RelativeLayout>
 
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_gravity="center_horizontal"
-                android:background="@null"
-                android:drawableLeft="@drawable/ic_library_music_black_24dp"
-                android:drawablePadding="10dp"
-                android:drawableStart="@drawable/ic_library_music_black_24dp"
-                android:ems="10"
-                android:hint="Group Name"
-                android:inputType="text"/>
-        </android.support.design.widget.TextInputLayout>
+    <Button
+      android:id="@+id/createGroupDPlaylistPickButton"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="Pick Default Playlist" />
+
+    <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="20dp"
+      android:visibility="visible">
+
+      <TextView
+        android:id="@+id/createGroupPrivacyText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="10dp"
+        android:drawableLeft="@drawable/ic_account_multiple_black_24dp"
+        android:drawablePadding="10dp"
+        android:drawableStart="@drawable/ic_account_multiple_black_24dp"
+        android:text="Privacy (Coming Soon)"
+        android:textSize="20sp" />
+
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/createGroupPrivacyText"
+        android:orientation="horizontal">
 
         <RelativeLayout
-            android:layout_width="match_parent"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1">
+
+          <RadioButton
+            android:id="@+id/createGroupPrivacyPublicRadio"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:visibility="gone">
+            android:checked="false"
+            android:enabled="false"
+            android:text="Public" />
 
-            <TextView
-                android:id="@+id/createGroupPrivacyText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginBottom="10dp"
-                android:drawableLeft="@drawable/ic_account_multiple_black_24dp"
-                android:drawablePadding="10dp"
-                android:drawableStart="@drawable/ic_account_multiple_black_24dp"
-                android:text="Privacy"
-                android:textSize="20sp"/>
-
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_below="@+id/createGroupPrivacyText"
-                android:orientation="horizontal">
-
-                <RelativeLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1">
-
-                    <RadioButton
-                        android:id="@+id/createGroupPrivacyPublicRadio"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="false"
-                        android:text="Public"/>
-
-                    <RadioButton
-                        android:id="@+id/createGroupPrivacyPasswordRadio"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignLeft="@+id/createGroupPrivacyPublicRadio"
-                        android:layout_alignStart="@+id/createGroupPrivacyPublicRadio"
-                        android:layout_below="@+id/createGroupPrivacyPublicRadio"
-                        android:checked="false"
-                        android:text="Password"/>
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1">
-
-                    <RadioButton
-                        android:id="@+id/createGroupPrivacyFriendsRadio"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentStart="true"
-                        android:checked="false"
-                        android:text="Friends"/>
-
-                    <RadioButton
-                        android:id="@+id/createGroupPrivacyInviteRadio"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentStart="true"
-                        android:layout_below="@+id/createGroupPrivacyFriendsRadio"
-                        android:checked="false"
-                        android:text="Invite Only"/>
-                </RelativeLayout>
-            </LinearLayout>
-
+          <RadioButton
+            android:id="@+id/createGroupPrivacyPasswordRadio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/createGroupPrivacyPublicRadio"
+            android:layout_alignStart="@+id/createGroupPrivacyPublicRadio"
+            android:layout_below="@+id/createGroupPrivacyPublicRadio"
+            android:checked="false"
+            android:enabled="false"
+            android:text="Password" />
         </RelativeLayout>
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/createGroupPasswordEditWrapper"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:visibility="gone">
+        <RelativeLayout
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1">
 
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_gravity="center_horizontal"
-                android:background="@null"
-                android:drawableLeft="@drawable/ic_lock_outline_black_24dp"
-                android:drawablePadding="10dp"
-                android:drawableStart="@drawable/ic_lock_outline_black_24dp"
-                android:ems="10"
-                android:hint="Group Password"
-                android:inputType="text"/>
-        </android.support.design.widget.TextInputLayout>
-
-        <Button
-            android:id="@+id/createGroupCreateButton"
-            android:layout_width="match_parent"
+          <RadioButton
+            android:id="@+id/createGroupPrivacyFriendsRadio"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:text="Create Group"
-            android:theme="@style/EchelonRaisedButton"/>
-    </LinearLayout>
+            android:checked="false"
+            android:enabled="false"
+            android:text="Friends" />
+
+          <RadioButton
+            android:id="@+id/createGroupPrivacyInviteRadio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/createGroupPrivacyFriendsRadio"
+            android:checked="false"
+            android:enabled="false"
+            android:text="Invite Only" />
+        </RelativeLayout>
+      </LinearLayout>
+
+    </RelativeLayout>
+
+    <android.support.design.widget.TextInputLayout
+      android:id="@+id/createGroupPasswordEditWrapper"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="20dp"
+      android:visibility="gone">
+
+      <EditText
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@null"
+        android:drawableLeft="@drawable/ic_lock_outline_black_24dp"
+        android:drawablePadding="10dp"
+        android:drawableStart="@drawable/ic_lock_outline_black_24dp"
+        android:ems="10"
+        android:hint="Group Password"
+        android:inputType="text" />
+    </android.support.design.widget.TextInputLayout>
+
+    <Button
+      android:id="@+id/createGroupCreateButton"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:layout_alignParentLeft="true"
+      android:layout_alignParentStart="true"
+      android:text="Create Group"
+      android:theme="@style/EchelonRaisedButton" />
+  </LinearLayout>
 </RelativeLayout>

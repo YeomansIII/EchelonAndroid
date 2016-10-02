@@ -29,7 +29,7 @@
       android:layout_height="wrap_content"
       android:maxLines="1"
       android:text="Song Title"
-      android:textSize="20sp" />
+      android:textSize="18sp" />
 
     <TextView
       android:id="@+id/songArtistText"
@@ -38,30 +38,30 @@
       android:layout_below="@+id/songTitleText"
       android:maxLines="1"
       android:text="Artist"
-      android:textSize="18sp" />
+      android:textSize="16sp" />
   </RelativeLayout>
 
   <ImageButton
     android:id="@+id/songItemMoreButton"
-    android:layout_width="35dp"
+    android:layout_width="72dp"
     android:layout_height="72dp"
     android:layout_alignWithParentIfMissing="true"
     android:layout_toStartOf="@+id/songItemVoteUpButton"
     android:background="@color/transparent"
     android:contentDescription="@string/more_menu"
-    android:padding="5dp"
+    android:padding="18dp"
     android:scaleType="fitCenter"
     android:tint="@color/thumbs_up_color_list"
     app:srcCompat="@drawable/dots_vertical" />
 
   <ImageButton
     android:id="@+id/songItemVoteUpButton"
-    android:layout_width="60dp"
+    android:layout_width="72dp"
     android:layout_height="72dp"
     android:layout_alignParentEnd="true"
     android:background="@color/transparent"
     android:contentDescription="@string/vote_song_up_image"
-    android:padding="10dp"
+    android:padding="16dp"
     android:scaleType="fitCenter"
     android:tint="@color/thumbs_up_color_list"
     app:srcCompat="@drawable/thumb_up" />

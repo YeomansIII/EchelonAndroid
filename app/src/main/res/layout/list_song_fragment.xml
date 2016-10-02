@@ -6,10 +6,20 @@
   android:background="@drawable/gradient_queue"
   android:orientation="vertical">
 
+  <ImageButton
+    android:id="@+id/songListPlaylistPickerButton"
+    android:layout_width="match_parent"
+    android:layout_height="58dp"
+    android:background="@color/colorPrimary"
+    android:tint="@color/white"
+    android:visibility="gone"
+    app:srcCompat="@drawable/check" />
+
   <android.support.v7.widget.RecyclerView
     android:id="@+id/songListRecyclerView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_below="@+id/songListPlaylistPickerButton"
     android:clipToPadding="false" />
 
   <FrameLayout

@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
   public boolean loggedIn;
   public LinkedList<SpotifySong> backStack;
   public List<SpotifySong> playQueue;
-  private OnPlayerControlCallback mPlayerControlCallback;
+  private OnBackPressedListener mBackPressedListener;
   public boolean shouldPlayAfterServiceInit;
 
   private ServiceConnection playerConn = new ServiceConnection() {
@@ -239,8 +239,6 @@ public class MainActivity extends AppCompatActivity {
     setContentViewHome();
     checkGroup();
     setUpNavDrawerAndActionBar();
-
-    setOnPlayerControlCallback(((OnPlayerControlCallback) getSupportFragmentManager().findFragmentByTag("CONTROL_FRAG")));
   }
 
   public void setContentViewLogin() {
@@ -546,11 +544,15 @@ public class MainActivity extends AppCompatActivity {
 
   @Override
   public void onBackPressed() {
-    FragmentManager fragmentManager = getSupportFragmentManager();
-    Fragment groupFragment = fragmentManager.findFragmentByTag("GROUP_FRAG");
-    if (groupFragment != null && groupFragment.isVisible()) {
-      fragmentManager.beginTransaction().replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
-    } else {
+//    FragmentManager fragmentManager = getSupportFragmentManager();
+//    Fragment groupFragment = fragmentManager.findFragmentByTag("GROUP_FRAG");
+//    if (groupFragment != null && groupFragment.isVisible()) {
+//      fragmentManager.beginTransaction().replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
+//    } else {
+//      super.onBackPressed();
+//    }
+    if (mBackPressedListener != null && !mBackPressedListener.onBackPressed()) {
+      Log.d(TAG, "Super back pressed");
       super.onBackPressed();
     }
   }
@@ -583,13 +585,11 @@ public class MainActivity extends AppCompatActivity {
     return playerService.pause();
   }
 
-  public interface OnPlayerControlCallback {
-    void onPlayerPlay();
-
-    void onPlayerPause();
+  public interface OnBackPressedListener {
+    boolean onBackPressed();
   }
 
-  public void setOnPlayerControlCallback(OnPlayerControlCallback mPlayerControlCallback) {
-    this.mPlayerControlCallback = mPlayerControlCallback;
+  public void setOnBackPressedListener(OnBackPressedListener mBackPressedListener) {
+    this.mBackPressedListener = mBackPressedListener;
   }
 }

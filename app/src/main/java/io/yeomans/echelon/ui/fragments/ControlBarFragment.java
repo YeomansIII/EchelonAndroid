@@ -23,10 +23,9 @@ import io.yeomans.echelon.util.EchelonUtils;
 /**
  * Created by jason on 7/13/15.
  */
-public class ControlBarFragment extends Fragment implements View.OnClickListener, MainActivity.OnPlayerControlCallback {
+public class ControlBarFragment extends Fragment implements View.OnClickListener {
 
   public MainActivity mainActivity;
-  private OnMediaControlSelectedListener mCallback;
   private Intent playIntent = new Intent("io.yeomans.echelon.PLAY"),
     pauseIntent = new Intent("io.yeomans.echelon.PAUSE"),
     skipIntent = new Intent("io.yeomans.echelon.SKIP"),
@@ -83,11 +82,6 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
     super.onAttach(activity);
   }
 
-  public void setOnMediaControlSelectedListener(OnMediaControlSelectedListener mCallback) {
-    this.mCallback = mCallback;
-    Log.d("Control", "set callback");
-  }
-
   public void ready(boolean isLeader) {
     if (!isLeader) {
       getView().findViewById(R.id.controlPlayButton).setVisibility(View.GONE);
@@ -121,22 +115,6 @@ public class ControlBarFragment extends Fragment implements View.OnClickListener
     } else if (v.getId() == R.id.controlSkipButton) {
       getContext().sendBroadcast(skipIntent);
     }
-  }
-
-  @Override
-  public void onPlayerPlay() {
-
-  }
-
-  @Override
-  public void onPlayerPause() {
-
-  }
-
-  public interface OnMediaControlSelectedListener {
-    boolean onPlayControlSelected();
-
-    boolean onPauseControlSelected();
   }
 
   private final BroadcastReceiver receiver = new BroadcastReceiver() {

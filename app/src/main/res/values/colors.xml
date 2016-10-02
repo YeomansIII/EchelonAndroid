@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primaryColor">#94BAC7</color>
-    <color name="primaryColorDark">#412F49</color>
-    <color name="primaryAccent">#57387B</color>
-    <color name="full_red">#ff0000</color>
-    <color name="ech_pearlBlueLuster">#E3E1F6</color>
-    <color name="ech_seaFrost">#94BAC7</color>
-    <color name="ech_heroMode">#57387B</color>
-    <color name="ech_purpleRain">#4A3264</color>
-    <color name="ech_otherSide">#412F49</color>
-    <color name="ech_con_seafrost">#FF8F19</color>
-    <color name="transparent">#00000000</color>
-    <color name="white">#FFFFFF</color>
-    <color name="albumCoverTint">#88000000</color>
-    <color name="toolbarTransparent">#00FFFFFF</color>
-
+  <color name="primaryColor">#94BAC7</color>
+  <color name="primaryColorDark">#412F49</color>
+  <color name="primaryAccent">#57387B</color>
+  <color name="full_red">#ff0000</color>
+  <color name="ech_pearlBlueLuster">#E3E1F6</color>
+  <color name="ech_seaFrost">#94BAC7</color>
+  <color name="ech_heroMode">#57387B</color>
+  <color name="ech_purpleRain">#4A3264</color>
+  <color name="ech_otherSide">#412F49</color>
+  <color name="ech_con_seafrost">#FF8F19</color>
+  <color name="transparent">#00000000</color>
+  <color name="white">#FFFFFF</color>
+  <color name="grey">#666666</color>
+  <color name="albumCoverTint">#88000000</color>
+  <color name="toolbarTransparent">#00FFFFFF</color>=
 </resources>

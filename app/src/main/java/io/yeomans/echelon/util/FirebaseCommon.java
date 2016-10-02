@@ -18,8 +18,13 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
+import io.github.kaaes.spotify.webapi.core.models.FeaturedPlaylists;
+import io.github.kaaes.spotify.webapi.core.models.Playlist;
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.ui.fragments.GroupFragment;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by jason on 9/15/15.
@@ -42,6 +47,23 @@ public class FirebaseCommon {
       ref.child("votedUp").child(uid).removeValue();
       ref.child("votedDown").child(uid).removeValue();
     }
+  }
+
+  static public void setDefaultPlaylist(String userId, String playlistId) {
+    DatabaseReference ref = Dependencies.INSTANCE.getCurrentGroupReference();
+    Call<Playlist> call = Dependencies.INSTANCE.getSpotify().getPlaylist(userId, playlistId);
+    call.enqueue(new Callback<Playlist>() {
+      @Override
+      public void onResponse(Call<Playlist> call, Response<Playlist> response) {
+        Log.i("Playlists", "Get playlist results");
+        Playlist playlist = response.body();
+      }
+
+      @Override
+      public void onFailure(Call<Playlist> call, Throwable t) {
+        Log.wtf("WhatList", t.toString() + "   " + t.getMessage());
+      }
+    });
   }
 
   static public void joinGroup(final String groupName, final AppCompatActivity activity) {

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content">
+
+  <LinearLayout
+    android:id="@+id/pickPlaylistCategoryLayout"
+    android:layout_width="match_parent"
+    android:layout_height="95dp"
+    android:orientation="horizontal">
+
+    <RelativeLayout
+      android:id="@+id/pickPlaylistBrowseLayout"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_margin="0dp"
+      android:layout_weight="1"
+      android:padding="10dp">
+
+      <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/pickPlaylistBrowseText"
+        android:tint="@color/grey"
+        app:srcCompat="@drawable/album" />
+
+      <TextView
+        android:id="@+id/pickPlaylistBrowseText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:text="Browse"
+        android:textSize="16sp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+      android:id="@+id/pickPlaylistLibraryLayout"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_margin="0dp"
+      android:layout_weight="1"
+      android:drawableTop="@drawable/account"
+      android:padding="10dp">
+
+      <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/pickPlaylistLibraryText"
+        android:tint="@color/grey"
+        app:srcCompat="@drawable/library_music" />
+
+      <TextView
+        android:id="@+id/pickPlaylistLibraryText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:text="Your Library"
+        android:textSize="16sp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+      android:id="@+id/pickPlaylistSearchLayout"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_margin="0dp"
+      android:layout_weight="1"
+      android:drawableTop="@drawable/account"
+      android:padding="10dp">
+
+      <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/pickPlaylistSearchText"
+        android:tint="@color/grey"
+        app:srcCompat="@drawable/magnify" />
+
+      <TextView
+        android:id="@+id/pickPlaylistSearchText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:text="Search"
+        android:textSize="16sp" />
+    </RelativeLayout>
+  </LinearLayout>
+
+  <FrameLayout
+    android:id="@+id/pickPlaylistFragmentContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
+</RelativeLayout>

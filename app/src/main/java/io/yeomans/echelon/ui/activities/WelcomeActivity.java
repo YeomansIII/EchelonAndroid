@@ -193,31 +193,35 @@ public class WelcomeActivity extends AppCompatActivity implements ConnectionStat
                 @Override
                 public void onResponse(Call<Token> call, Response<Token> response) {
                   Token tokenBody = response.body();
-                  Log.i(TAG, (new Gson()).toJson(tokenBody));
-                  if (tokenBody.getError() == null || !tokenBody.getError().equals("")) {
-                    dependencies.getAuth().signInWithCustomToken(tokenBody.getToken())
-                      .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                  if (tokenBody != null) {
+                    Log.i(TAG, (new Gson()).toJson(tokenBody));
+                    if (tokenBody.getError() == null || !tokenBody.getError().equals("")) {
+                      dependencies.getAuth().signInWithCustomToken(tokenBody.getToken())
+                        .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                          @Override
+                          public void onSuccess(AuthResult authResult) {
+                            authResulter = authResult;
+                            checkUser();
+                          }
+                        }).addOnFailureListener(new OnFailureListener() {
                         @Override
-                        public void onSuccess(AuthResult authResult) {
-                          authResulter = authResult;
-                          checkUser();
+                        public void onFailure(@NonNull Exception e) {
+                          echelonErrorSnackie.show();
+                          Log.d(TAG, e.toString() + "   " + e.getMessage());
                         }
-                      }).addOnFailureListener(new OnFailureListener() {
-                      @Override
-                      public void onFailure(@NonNull Exception e) {
-                        echelonErrorSnackie.show();
-                        Log.d(TAG, e.toString() + "   " + e.getMessage());
-                      }
-                    });
+                      });
+                    } else {
+                      echelonErrorSnackie.setText(tokenBody.getError()).show();
+                    }
                   } else {
-                    echelonErrorSnackie.setText(tokenBody.getError()).show();
+                    echelonErrorSnackie.show();
                   }
                 }
 
                 @Override
                 public void onFailure(Call<Token> call, Throwable t) {
                   echelonErrorSnackie.show();
-                  Log.d(TAG, call.request().body().toString());
+                  Log.d(TAG, call.request().toString());
                   Log.d(TAG, t.toString() + "   " + t.getMessage());
                 }
               });
