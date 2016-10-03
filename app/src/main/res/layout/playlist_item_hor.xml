@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/playlistItemHorLayout"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content">
+
+  <ImageView
+    android:id="@+id/playlistItemHorImage"
+    android:layout_width="85dp"
+    android:layout_height="85dp"
+    android:layout_marginEnd="16dp" />
+
+  <RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true"
+    android:layout_toEndOf="@+id/playlistItemHorImage">
+
+    <TextView
+      android:id="@+id/playlistItemHorNameText"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:maxLines="2"
+      android:text="Playlist Name"
+      android:textSize="18sp" />
+
+    <TextView
+      android:id="@+id/playlistItemHorDescriptionText"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@+id/playlistItemHorNameText"
+      android:maxLines="2"
+      android:text="Description of playlist"
+      android:textSize="16sp" />
+  </RelativeLayout>
+</RelativeLayout>

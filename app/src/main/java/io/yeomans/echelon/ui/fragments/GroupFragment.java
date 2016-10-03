@@ -14,7 +14,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -25,12 +24,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -47,6 +47,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -55,6 +56,7 @@ import java.util.regex.Pattern;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.yeomans.echelon.R;
+import io.yeomans.echelon.models.Playlist;
 import io.yeomans.echelon.models.SpotifySong;
 import io.yeomans.echelon.ui.activities.MainActivity;
 import io.yeomans.echelon.ui.adapters.SonglistRecyclerAdapter;
@@ -90,29 +92,22 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
   private View view, inviteDialogView;
   private ArrayList<RelativeLayout> songListArr;
   DatabaseReference queuegroupRef;
-  List<SpotifySong> playqueue;
+  List<SpotifySong> playQueue, defaultPlaylistTracks;
   SpotifySong nowPlaying;
-  private ValueEventListener trackListChangeListener, participantListener, nowPlayingChangeListener;
+  public Playlist defaultPlaylist;
+  private ValueEventListener trackListChangeListener, participantListener, nowPlayingChangeListener, defaultPlaylistChangeListener;
   AlertDialog inviteDialog;
 
   private Boolean isFabOpen = false;
   @Bind(R.id.groupAddSongFab)
-  protected FloatingActionButton fab;
+  protected FloatingActionMenu fab;
   @Bind(R.id.groupAddSongFab1)
-  protected FloatingActionButton fab1;
+  protected ImageButton fab1;
   @Bind(R.id.groupAddSongFab2)
-  protected FloatingActionButton fab2;
+  protected ImageButton fab2;
   @Bind(R.id.groupAddSongFab3)
-  protected FloatingActionButton fab3;
+  protected ImageButton fab3;
   private Animation fab_open, fab_close, rotate_forward, rotate_backward, tip_fade_in, tip_fade_out;
-  @Bind(R.id.queueBrowseTextFrame)
-  protected FrameLayout queueBrowseTextFrame;
-  @Bind(R.id.queueSearchTextFrame)
-  protected FrameLayout queueSearchTextFrame;
-  @Bind(R.id.queueYourMusicTextFrame)
-  protected FrameLayout queueYourMusicTextFrame;
-  @Bind(R.id.queueOverlayFrame)
-  protected FrameLayout queueOverlayFrame;
   @Bind(R.id.queueNowPlayingLayout)
   protected RelativeLayout queueNowPlayingLayout;
   @Bind(R.id.nowPlayingAlbumArtImage)
@@ -121,6 +116,8 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
   protected TextView nowPlayingTitleText;
   @Bind(R.id.nowPlayingArtistText)
   protected TextView nowPlayingArtistText;
+  @Bind(R.id.queueDefaultPlaylist)
+  protected RelativeLayout queueDefaultPlaylist;
   private Drawer particDrawerResult;
   private boolean particDrawerOpen;
   private String groupName;
@@ -134,23 +131,45 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
 
     mainActivity = (MainActivity) getActivity();
 
-    playqueue = mainActivity.playQueue;
+    playQueue = mainActivity.playQueue;
     isDestroyed = false;
 
-    songListRA = new SonglistRecyclerAdapter(playqueue, true);
+    songListRA = new SonglistRecyclerAdapter(playQueue, true);
 
     queuegroupRef = dependencies.getCurrentGroupReference();
+
+    defaultPlaylistChangeListener = new ValueEventListener() {
+      @Override
+      public void onDataChange(DataSnapshot dataSnapshot) {
+        if (dataSnapshot != null) {
+          defaultPlaylist = dataSnapshot.getValue(Playlist.class);
+          defaultPlaylistTracks = new LinkedList<>(defaultPlaylist.getTracks().values());
+          Picasso.with(queueDefaultPlaylist.findViewById(R.id.playlistItemHorImage).getContext()).load(Uri.parse(defaultPlaylist.getImage())).into((ImageView) queueDefaultPlaylist.findViewById(R.id.playlistItemHorImage));
+          ((TextView) queueDefaultPlaylist.findViewById(R.id.playlistItemHorNameText)).setText(defaultPlaylist.getName());
+          ((TextView) queueDefaultPlaylist.findViewById(R.id.playlistItemHorDescriptionText)).setText(defaultPlaylist.getDescription());
+          queueDefaultPlaylist.setVisibility(View.VISIBLE);
+        }
+      }
+
+      @Override
+      public void onCancelled(DatabaseError databaseError) {
+      }
+    };
+
     trackListChangeListener = new ValueEventListener() {
       @Override
       public void onDataChange(DataSnapshot dataSnapshot) {
         Log.d("MyFirebase", "Track data changed!");
-        playqueue.clear();
+        playQueue.clear();
         SpotifySong nowPlayingSS = null;
         for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
           SpotifySong ss = dataSnapshot1.getValue(SpotifySong.class);
-          playqueue.add(ss);
+          playQueue.add(ss);
         }
-        Collections.sort(playqueue);
+        Collections.sort(playQueue);
+//        if (defaultPlaylistTracks != null) {
+//          playQueue.addAll(defaultPlaylistTracks);
+//        }
         if (songListRA != null) {
           songListRA.notifyDataSetChanged();
         }
@@ -295,15 +314,13 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     rotate_backward = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.rotate_backward);
     tip_fade_in = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.tip_fade_in);
     tip_fade_out = AnimationUtils.loadAnimation(mainActivity.getApplicationContext(), R.anim.tip_fade_out);
-    fab.setOnClickListener(this);
+    //fab.setOnClickListener(this);
     fab1.setOnClickListener(this);
     fab2.setOnClickListener(this);
     fab3.setOnClickListener(this);
-    view.findViewById(R.id.queueOverlayFrame).setOnClickListener(this);
 
     if (!dependencies.getPreferences().getString(PreferenceNames.PREF_USER_AUTH_TYPE, "").equals("spotify")) {
       fab2.setVisibility(View.GONE);
-      queueYourMusicTextFrame.setVisibility(View.GONE);
     }
 
     particDrawerResult = new DrawerBuilder()
@@ -315,13 +332,13 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
       .withOnDrawerListener(new Drawer.OnDrawerListener() {
         @Override
         public void onDrawerOpened(View drawerView) {
-          fab.setImageResource(R.drawable.ic_account_plus_white_36dp);
+          fab.getMenuIconView().setImageResource(R.drawable.ic_account_plus_white_36dp);
           particDrawerOpen = true;
         }
 
         @Override
         public void onDrawerClosed(View drawerView) {
-          fab.setImageResource(R.drawable.ic_add_white_36dp);
+          fab.getMenuIconView().setImageResource(R.drawable.ic_add_white_36dp);
           particDrawerOpen = false;
         }
 
@@ -343,6 +360,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     queuegroupRef.child("tracks").addValueEventListener(trackListChangeListener);
     queuegroupRef.child("participants").addValueEventListener(participantListener);
     queuegroupRef.child("nowPlaying").addValueEventListener(nowPlayingChangeListener);
+    queuegroupRef.child("defaultPlaylist").addValueEventListener(defaultPlaylistChangeListener);
 
     return view;
   }
@@ -384,6 +402,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     queuegroupRef.child("tracks").removeEventListener(trackListChangeListener);
     queuegroupRef.child("participants").removeEventListener(participantListener);
     queuegroupRef.child("nowPlaying").removeEventListener(nowPlayingChangeListener);
+    queuegroupRef.child("defaultPlaylist").removeEventListener(defaultPlaylistChangeListener);
     //getView().findViewById(R.id.groupAddSongButton).setVisibility(View.GONE);
   }
 
@@ -420,28 +439,18 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
       fab1.startAnimation(fab_close);
       fab2.startAnimation(fab_close);
       fab3.startAnimation(fab_close);
-      queueBrowseTextFrame.startAnimation(fab_close);
-      queueSearchTextFrame.startAnimation(fab_close);
-      queueYourMusicTextFrame.startAnimation(fab_close);
-      queueOverlayFrame.startAnimation(tip_fade_out);
       fab1.setClickable(false);
       fab2.setClickable(false);
       fab3.setClickable(false);
-      queueOverlayFrame.setClickable(false);
       isFabOpen = false;
     } else {
       fab.startAnimation(rotate_forward);
       fab1.startAnimation(fab_open);
       fab2.startAnimation(fab_open);
       fab3.startAnimation(fab_open);
-      queueBrowseTextFrame.startAnimation(fab_open);
-      queueSearchTextFrame.startAnimation(fab_open);
-      queueYourMusicTextFrame.startAnimation(fab_open);
-      queueOverlayFrame.startAnimation(tip_fade_in);
       fab1.setClickable(true);
       fab2.setClickable(true);
       fab3.setClickable(true);
-      queueOverlayFrame.setClickable(true);
       isFabOpen = true;
     }
   }
@@ -456,7 +465,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
           Log.i("Queue", "Can't add a friend quite yet!");
           createInviteDialog();
         } else { // this occurs when the participant drawer is closed and the button is showing an "add" icon, meaning add music
-          animateFAB();
+          //animateFAB();
         }
         break;
       case R.id.groupAddSongFab1: {
@@ -489,9 +498,6 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         }
         break;
       }
-      case R.id.queueOverlayFrame:
-        animateFAB();
-        break;
 
     }
   }

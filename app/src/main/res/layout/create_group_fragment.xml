@@ -49,42 +49,10 @@
       android:text="Default Playlist (Optional)"
       android:textSize="20sp" />
 
-    <RelativeLayout
+    <include
       android:id="@+id/createGroupDPlaylistLayout"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:visibility="gone">
-
-      <ImageView
-        android:id="@+id/createGroupDPlaylistImage"
-        android:layout_width="85dp"
-        android:layout_height="85dp"
-        android:layout_marginEnd="16dp" />
-
-      <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_toEndOf="@+id/createGroupDPlaylistImage">
-
-        <TextView
-          android:id="@+id/createGroupDPlaylistNameText"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:maxLines="2"
-          android:text="Playlist Name"
-          android:textSize="18sp" />
-
-        <TextView
-          android:id="@+id/createGroupDPlaylistDescriptionText"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:layout_below="@+id/createGroupDPlaylistNameText"
-          android:maxLines="2"
-          android:text="Description of playlist"
-          android:textSize="16sp" />
-      </RelativeLayout>
-    </RelativeLayout>
+      layout="@layout/playlist_item_hor"
+      android:visibility="gone" />
 
     <Button
       android:id="@+id/createGroupDPlaylistPickButton"

@@ -99,6 +99,7 @@ dependencies {
   compile 'com.squareup.retrofit2:converter-gson:2.1.0'
   compile 'com.spotify.webapi.android:spotify-api-core:0.4.1@aar'
   compile 'com.spotify.webapi.android:spotify-api-retrofit2:0.4.1@aar'
+  compile 'com.github.Clans:FloatingActionButton:v1.6.4'
 }
 
 apply plugin: 'com.google.gms.google-services'

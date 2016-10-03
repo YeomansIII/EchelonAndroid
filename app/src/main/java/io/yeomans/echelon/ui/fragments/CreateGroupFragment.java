@@ -29,9 +29,7 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,11 +77,11 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
 
   @Bind(R.id.createGroupDPlaylistLayout)
   public RelativeLayout createGroupDPlaylistLayout;
-  @Bind(R.id.createGroupDPlaylistImage)
+  @Bind(R.id.playlistItemHorImage)
   public ImageView createGroupDPlaylistImage;
-  @Bind(R.id.createGroupDPlaylistNameText)
+  @Bind(R.id.playlistItemHorNameText)
   public TextView createGroupDPlaylistNameText;
-  @Bind(R.id.createGroupDPlaylistDescriptionText)
+  @Bind(R.id.playlistItemHorDescriptionText)
   public TextView createGroupDPlaylistDescriptionText;
 
   String selectedPrivacy;
@@ -194,16 +192,16 @@ public class CreateGroupFragment extends Fragment implements View.OnClickListene
                 playlistMap.put("id", defaultPlaylist.id);
                 playlistMap.put("name", defaultPlaylist.name);
                 playlistMap.put("description", defaultPlaylist.description);
-                playlistMap.put("image", defaultPlaylist.images.get(0));
+                playlistMap.put("image", defaultPlaylist.images.get(0).url);
                 playlistMap.put("type", defaultPlaylist.type);
                 playlistMap.put("uri", defaultPlaylist.uri);
-//                Map<String, Object> trackMap = new HashMap<>();
-//                for (PlaylistTrack track : defaultPlaylist.tracks.items) {
-//                  String pushKey = ref.push().getKey();
-//                  trackMap.put(pushKey, ModelUtils.createTrackMap(track.track, pushKey));
-//                }
-//                playlistMap.put("tracks", trackMap);
-                //map.put("defaultPlaylist", playlistMap);
+                Map<String, Object> trackMap = new HashMap<>();
+                for (PlaylistTrack track : defaultPlaylist.tracks.items) {
+                  String pushKey = ref.push().getKey();
+                  trackMap.put(pushKey, ModelUtils.createTrackMap(track.track, pushKey));
+                }
+                playlistMap.put("tracks", trackMap);
+                map.put("defaultPlaylist", playlistMap);
               }
               // map.put("privacy", selectedPrivacy);
 //                        if (selectedPrivacy.equals("password")) {

@@ -32,6 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import io.yeomans.echelon.R;
+import io.yeomans.echelon.models.Playlist;
 import io.yeomans.echelon.models.SpotifySong;
 import io.yeomans.echelon.ui.activities.MainActivity;
 import io.yeomans.echelon.util.Dependencies;
@@ -45,7 +46,7 @@ public class PlayerService extends Service implements Player.NotificationCallbac
 
   public boolean playerSetup = false, firebaseSetup = false;
   SharedPreferences pref, groupPref;
-  private ValueEventListener trackListChangeListener, nowPlayingChangeListener;
+  private ValueEventListener trackListChangeListener, nowPlayingChangeListener, defaultPlaylistChangeListener;
   private PlayerBinder playerBinder;
 
   public Intent playingIntent = new Intent("io.yeomans.echelon.PLAYING"),
@@ -66,8 +67,9 @@ public class PlayerService extends Service implements Player.NotificationCallbac
   public boolean playQueueChanged = false;
   public boolean loggedIn;
   public LinkedList<SpotifySong> backStack;
-  public List<SpotifySong> playQueue;
+  public List<SpotifySong> playQueue, defaultPlaylistTracks;
   public SpotifySong nowPlaying;
+  public Playlist defaultPlaylist;
 
   Dependencies dependencies;
 
@@ -99,6 +101,21 @@ public class PlayerService extends Service implements Player.NotificationCallbac
 
     registerReceiver(receiver, filter);
 
+    defaultPlaylistChangeListener = new ValueEventListener() {
+      @Override
+      public void onDataChange(DataSnapshot dataSnapshot) {
+        if (dataSnapshot != null) {
+          defaultPlaylist = dataSnapshot.getValue(Playlist.class);
+          defaultPlaylistTracks = new LinkedList<>(defaultPlaylist.getTracks().values());
+        }
+      }
+
+      @Override
+      public void onCancelled(DatabaseError databaseError) {
+        Toast.makeText(getApplicationContext(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+      }
+    };
+
     trackListChangeListener = new ValueEventListener() {
       @Override
       public void onDataChange(DataSnapshot dataSnapshot) {
@@ -110,6 +127,9 @@ public class PlayerService extends Service implements Player.NotificationCallbac
           playQueue.add(ss);
         }
         Collections.sort(playQueue);
+        if (defaultPlaylistTracks != null) {
+          playQueue.addAll(defaultPlaylistTracks);
+        }
         playQueueChanged = true;
         if (shouldPlayAfterServiceInit) {
           shouldPlayAfterServiceInit = false;
@@ -182,6 +202,7 @@ public class PlayerService extends Service implements Player.NotificationCallbac
           Log.d("Player", "Player Ready");
           dependencies.getCurrentGroupReference().child("tracks").addValueEventListener(trackListChangeListener);
           dependencies.getCurrentGroupReference().child("nowPlaying").addValueEventListener(nowPlayingChangeListener);
+          dependencies.getCurrentGroupReference().child("defaultPlaylist").addValueEventListener(defaultPlaylistChangeListener);
         }
 
         @Override
@@ -240,6 +261,7 @@ public class PlayerService extends Service implements Player.NotificationCallbac
   public void kill() {
     dependencies.getCurrentGroupReference().child("tracks").removeEventListener(trackListChangeListener);
     dependencies.getCurrentGroupReference().child("nowPlaying").removeEventListener(nowPlayingChangeListener);
+    dependencies.getCurrentGroupReference().child("defaultPlaylist").removeEventListener(defaultPlaylistChangeListener);
     if (mPlayer != null) {
       stop();
       Spotify.destroyPlayer(mPlayer);

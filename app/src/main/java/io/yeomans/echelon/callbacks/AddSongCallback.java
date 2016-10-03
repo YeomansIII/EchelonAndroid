@@ -38,7 +38,7 @@ public class AddSongCallback implements Callback<Track> {
   @Override
   public void onResponse(Call<Track> call, Response<Track> response) {
     Track track = response.body();
-    DatabaseReference push = Dependencies.INSTANCE.getDatabase().getReference("queuegroups/" + Dependencies.INSTANCE.getGroupPreferences().getString(PreferenceNames.PREF_GROUP_NAME, "") + "/tracks").push();
+    DatabaseReference push = Dependencies.INSTANCE.getCurrentGroupReference().child("tracks").push();
     push.setValue(ModelUtils.createTrackMap(track, push.getKey()));
     FragmentManager fragmentManager = activity.getSupportFragmentManager();
     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

@@ -542,21 +542,6 @@ public class MainActivity extends AppCompatActivity {
     super.onDestroy();
   }
 
-  @Override
-  public void onBackPressed() {
-//    FragmentManager fragmentManager = getSupportFragmentManager();
-//    Fragment groupFragment = fragmentManager.findFragmentByTag("GROUP_FRAG");
-//    if (groupFragment != null && groupFragment.isVisible()) {
-//      fragmentManager.beginTransaction().replace(R.id.container, new HomeFragment(), "HOME_FRAG").commit();
-//    } else {
-//      super.onBackPressed();
-//    }
-    if (mBackPressedListener != null && !mBackPressedListener.onBackPressed()) {
-      Log.d(TAG, "Super back pressed");
-      super.onBackPressed();
-    }
-  }
-
   /**
    * Check the device to make sure it has the Google Play Services APK. If
    * it doesn't, display a dialog that allows users to download the APK from
