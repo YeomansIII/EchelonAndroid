@@ -4,7 +4,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
@@ -24,13 +23,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.github.clans.fab.FloatingActionMenu;
+import com.github.florent37.picassopalette.PicassoPalette;
 import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -141,7 +140,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     defaultPlaylistChangeListener = new ValueEventListener() {
       @Override
       public void onDataChange(DataSnapshot dataSnapshot) {
-        if (dataSnapshot != null) {
+        if (dataSnapshot.getValue() != null) {
           defaultPlaylist = dataSnapshot.getValue(Playlist.class);
           defaultPlaylistTracks = new LinkedList<>(defaultPlaylist.getTracks().values());
           Picasso.with(queueDefaultPlaylist.findViewById(R.id.playlistItemHorImage).getContext()).load(Uri.parse(defaultPlaylist.getImage())).into((ImageView) queueDefaultPlaylist.findViewById(R.id.playlistItemHorImage));
@@ -191,7 +190,15 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
           nowPlaying = ss;
           nowPlayingTitleText.setText(nowPlaying.getTitle());
           nowPlayingArtistText.setText(nowPlaying.getArtist());
-          Picasso.with(mainActivity).load(nowPlaying.getAlbumArtLarge().url).placeholder(R.drawable.ic_music_circle_black_48dp).into(nowPlayingAlbumArtImage);
+          Picasso.with(mainActivity).load(nowPlaying.getAlbumArtLarge().url).placeholder(R.drawable.ic_music_circle_black_48dp).into(nowPlayingAlbumArtImage,
+            PicassoPalette.with(nowPlaying.getAlbumArtLarge().url, nowPlayingAlbumArtImage)
+              .use(PicassoPalette.Profile.VIBRANT)
+              .intoBackground(queueNowPlayingLayout, PicassoPalette.Swatch.RGB)
+              .intoTextColor(nowPlayingTitleText, PicassoPalette.Swatch.BODY_TEXT_COLOR)
+              .intoTextColor(nowPlayingArtistText, PicassoPalette.Swatch.BODY_TEXT_COLOR));
+          queueNowPlayingLayout.setVisibility(View.VISIBLE);
+        } else {
+          queueNowPlayingLayout.setVisibility(View.GONE);
         }
       }
 
@@ -432,28 +439,28 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     mainActivity.setContentViewHome();
   }
 
-  public void animateFAB() {
-
-    if (isFabOpen) {
-      fab.startAnimation(rotate_backward);
-      fab1.startAnimation(fab_close);
-      fab2.startAnimation(fab_close);
-      fab3.startAnimation(fab_close);
-      fab1.setClickable(false);
-      fab2.setClickable(false);
-      fab3.setClickable(false);
-      isFabOpen = false;
-    } else {
-      fab.startAnimation(rotate_forward);
-      fab1.startAnimation(fab_open);
-      fab2.startAnimation(fab_open);
-      fab3.startAnimation(fab_open);
-      fab1.setClickable(true);
-      fab2.setClickable(true);
-      fab3.setClickable(true);
-      isFabOpen = true;
-    }
-  }
+//  public void animateFAB() {
+//
+//    if (isFabOpen) {
+//      fab.startAnimation(rotate_backward);
+//      fab1.startAnimation(fab_close);
+//      fab2.startAnimation(fab_close);
+//      fab3.startAnimation(fab_close);
+//      fab1.setClickable(false);
+//      fab2.setClickable(false);
+//      fab3.setClickable(false);
+//      isFabOpen = false;
+//    } else {
+//      fab.startAnimation(rotate_forward);
+//      fab1.startAnimation(fab_open);
+//      fab2.startAnimation(fab_open);
+//      fab3.startAnimation(fab_open);
+//      fab1.setClickable(true);
+//      fab2.setClickable(true);
+//      fab3.setClickable(true);
+//      isFabOpen = true;
+//    }
+//  }
 
   @Override
   public void onClick(View v) {
@@ -473,7 +480,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         if (groupFragment != null && groupFragment.isVisible()) {
-          animateFAB();
+          //animateFAB();
           fragmentTransaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out).replace(R.id.container, new SongSearchFragment(), "SONG_SEARCH_FRAG").addToBackStack(null).commit();
         }
         break;
@@ -483,7 +490,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         if (groupFragment != null && groupFragment.isVisible()) {
-          animateFAB();
+          //animateFAB();
           fragmentTransaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out).replace(R.id.container, new YourMusicFragment(), "YOUR_MUSIC_FRAG").addToBackStack(null).commit();
         }
         break;
@@ -493,7 +500,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         if (groupFragment != null && groupFragment.isVisible()) {
-          animateFAB();
+          //animateFAB();
           fragmentTransaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out).replace(R.id.container, new BrowseSongsFragment(), "BROWSE_SONG_FRAG").addToBackStack(null).commit();
         }
         break;

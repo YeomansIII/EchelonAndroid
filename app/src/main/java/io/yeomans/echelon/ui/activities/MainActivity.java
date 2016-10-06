@@ -211,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     spotify = io.github.kaaes.spotify.webapi.retrofit.v2.Spotify.createAuthenticatedService(spotifyAuthToken);
-    Picasso.with(getApplicationContext()).setIndicatorsEnabled(BuildConfig.DEBUG);
+    Picasso.with(getApplicationContext());//.setIndicatorsEnabled(BuildConfig.DEBUG);
     context = getApplicationContext();
     mainActivity = this;
     mainActivityClass = MainActivity.this;
