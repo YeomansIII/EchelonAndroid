@@ -34,10 +34,10 @@
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_alignParentLeft="true"
-            android:scaleType="centerCrop"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:contentDescription="@string/album_cover_image" />
+            android:contentDescription="@string/album_cover_image"
+            android:scaleType="centerCrop" />
 
           <RelativeLayout
             android:layout_width="match_parent"
@@ -53,7 +53,6 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_marginTop="5dp"
-              android:layout_toLeftOf="@+id/nowPlayingVoteSongDownButton"
               android:maxLines="2"
               android:text="Song Title"
               android:textSize="20dp" />
@@ -65,7 +64,6 @@
               android:layout_below="@+id/nowPlayingTitleText"
               android:layout_marginBottom="10dp"
               android:layout_marginTop="5dp"
-              android:layout_toLeftOf="@+id/nowPlayingVoteSongDownButton"
               android:text="Artist"
               android:textSize="15dp" />
 
