@@ -15,6 +15,8 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import io.github.kaaes.spotify.webapi.core.models.ArtistSimple;
 import io.github.kaaes.spotify.webapi.core.models.Track;
 import io.yeomans.echelon.R;
@@ -81,26 +83,31 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
       holder.isSpotifySong = false;
       curTrack = mTracks.get(position);
     }
-    String imgUrl;
-    try {
-      imgUrl = curTrack.album.images.get(2).url;
-    } catch (IndexOutOfBoundsException e) {
+    if (curTrack != null) {
+      holder.itemView.setVisibility(View.VISIBLE);
+      String imgUrl;
       try {
-        imgUrl = curTrack.album.images.get(1).url;
-      } catch (IndexOutOfBoundsException e2) {
-        imgUrl = curTrack.album.images.get(0).url;
+        imgUrl = curTrack.album.images.get(2).url;
+      } catch (IndexOutOfBoundsException e) {
+        try {
+          imgUrl = curTrack.album.images.get(1).url;
+        } catch (IndexOutOfBoundsException e2) {
+          imgUrl = curTrack.album.images.get(0).url;
+        }
       }
-    }
 
-    Picasso.with(context).load(imgUrl).placeholder(R.drawable.ic_music_circle_black_36dp).into(holder.image);
-    holder.title.setText(curTrack.name);
-    String artistText = "";
-    List<ArtistSimple> artists = curTrack.artists;
-    for (ArtistSimple a : artists) {
-      artistText += a.name + ", ";
+      Picasso.with(context).load(imgUrl).placeholder(R.drawable.ic_music_circle_black_36dp).into(holder.image);
+      holder.title.setText(curTrack.name);
+      String artistText = "";
+      List<ArtistSimple> artists = curTrack.artists;
+      for (ArtistSimple a : artists) {
+        artistText += a.name + ", ";
+      }
+      holder.artist.setText(artistText.replaceAll(", $", ""));
+      holder.trackId = curTrack.id;
+    } else {
+      holder.itemView.setVisibility(View.GONE);
     }
-    holder.artist.setText(artistText.replaceAll(", $", ""));
-    holder.trackId = curTrack.id;
 
     if (vote) {
       holder.voteUp.setVisibility(View.VISIBLE);
@@ -118,13 +125,21 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
   public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     // Your holder should contain a member variable
     // for any view that will be set as you render a row
-    public TextView title, artist;
+    @Bind(R.id.songTitleText)
+    public TextView title;
+    @Bind(R.id.songArtistText)
+    public TextView artist;
+    @Bind(R.id.songAlbumArtImage)
     public ImageView image;
     public String key;
     public String trackId;
     public boolean upVoted, isSpotifySong;
-    public ImageButton voteUp, moreButton;
+    @Bind(R.id.songItemVoteUpButton)
+    public ImageButton voteUp;
+    @Bind(R.id.songItemMoreButton)
+    public ImageButton moreButton;
     public OnSongClickListener mOnSongClick;
+    public View itemView;
     Context context;
 
     // We also create a constructor that accepts the entire item row
@@ -133,15 +148,12 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
       // Stores the itemView in a public final member variable that can be used
       // to access the context from any ViewHolder instance.
       super(itemView);
+      ButterKnife.bind(this, itemView);
       this.context = context;
-      title = (TextView) itemView.findViewById(R.id.songTitleText);
-      artist = (TextView) itemView.findViewById(R.id.songArtistText);
-      image = (ImageView) itemView.findViewById(R.id.songAlbumArtImage);
+      this.itemView = itemView;
       image.setOnClickListener(this);
-      voteUp = (ImageButton) itemView.findViewById(R.id.songItemVoteUpButton);
       voteUp.setOnClickListener(this);
       itemView.setOnClickListener(this);
-      moreButton = (ImageButton) itemView.findViewById(R.id.songItemMoreButton);
       moreButton.setOnClickListener(this);
     }
 

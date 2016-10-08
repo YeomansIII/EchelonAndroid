@@ -7,8 +7,9 @@
   <LinearLayout
     android:id="@+id/pickPlaylistCategoryLayout"
     android:layout_width="match_parent"
-    android:layout_height="95dp"
-    android:orientation="horizontal">
+    android:layout_height="105dp"
+    android:orientation="horizontal"
+    android:paddingBottom="10dp">
 
     <RelativeLayout
       android:id="@+id/pickPlaylistBrowseLayout"

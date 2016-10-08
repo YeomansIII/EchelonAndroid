@@ -37,9 +37,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.squareup.picasso.Picasso;
+
+import org.w3c.dom.Text;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -117,6 +120,14 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
   protected TextView nowPlayingArtistText;
   @Bind(R.id.queueDefaultPlaylist)
   protected RelativeLayout queueDefaultPlaylist;
+  @Bind(R.id.playlistItemHorImage)
+  protected ImageView playlistItemHorImage;
+  @Bind(R.id.playlistItemHorNameText)
+  protected TextView playlistItemHorNameText;
+  @Bind(R.id.playlistItemHorDescriptionText)
+  protected TextView playlistItemHorDescriptionText;
+  @Bind(R.id.queueDefaultPlaylistText)
+  protected TextView queueDefaultPlaylistText;
   private Drawer particDrawerResult;
   private boolean particDrawerOpen;
   private String groupName;
@@ -143,9 +154,16 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
         if (dataSnapshot.getValue() != null) {
           defaultPlaylist = dataSnapshot.getValue(Playlist.class);
           defaultPlaylistTracks = new LinkedList<>(defaultPlaylist.getTracks().values());
-          Picasso.with(queueDefaultPlaylist.findViewById(R.id.playlistItemHorImage).getContext()).load(Uri.parse(defaultPlaylist.getImage())).into((ImageView) queueDefaultPlaylist.findViewById(R.id.playlistItemHorImage));
-          ((TextView) queueDefaultPlaylist.findViewById(R.id.playlistItemHorNameText)).setText(defaultPlaylist.getName());
-          ((TextView) queueDefaultPlaylist.findViewById(R.id.playlistItemHorDescriptionText)).setText(defaultPlaylist.getDescription());
+          Picasso.with(playlistItemHorImage.getContext()).load(Uri.parse(defaultPlaylist.getImage()))
+            .into(playlistItemHorImage,
+              PicassoPalette.with(defaultPlaylist.getImage(), playlistItemHorImage)
+                .use(PicassoPalette.Profile.VIBRANT)
+                .intoBackground(queueDefaultPlaylist, PicassoPalette.Swatch.RGB)
+                .intoTextColor(playlistItemHorNameText, PicassoPalette.Swatch.BODY_TEXT_COLOR)
+                .intoTextColor(playlistItemHorDescriptionText, PicassoPalette.Swatch.BODY_TEXT_COLOR)
+                .intoTextColor(queueDefaultPlaylistText, PicassoPalette.Swatch.TITLE_TEXT_COLOR));
+          playlistItemHorNameText.setText(defaultPlaylist.getName());
+          playlistItemHorDescriptionText.setText(android.text.Html.fromHtml(defaultPlaylist.getDescription()));
           queueDefaultPlaylist.setVisibility(View.VISIBLE);
         }
       }
@@ -192,6 +210,10 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
           nowPlayingArtistText.setText(nowPlaying.getArtist());
           Picasso.with(mainActivity).load(nowPlaying.getAlbumArtLarge().url).placeholder(R.drawable.ic_music_circle_black_48dp).into(nowPlayingAlbumArtImage,
             PicassoPalette.with(nowPlaying.getAlbumArtLarge().url, nowPlayingAlbumArtImage)
+              .use(PicassoPalette.Profile.MUTED)
+              .intoBackground(queueNowPlayingLayout, PicassoPalette.Swatch.RGB)
+              .intoTextColor(nowPlayingTitleText, PicassoPalette.Swatch.BODY_TEXT_COLOR)
+              .intoTextColor(nowPlayingArtistText, PicassoPalette.Swatch.BODY_TEXT_COLOR)
               .use(PicassoPalette.Profile.VIBRANT)
               .intoBackground(queueNowPlayingLayout, PicassoPalette.Swatch.RGB)
               .intoTextColor(nowPlayingTitleText, PicassoPalette.Swatch.BODY_TEXT_COLOR)
@@ -251,6 +273,17 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
             }
           });
         }
+        PrimaryDrawerItem inviteItem = new PrimaryDrawerItem()
+          .withName("Invite")
+          .withIcon(R.drawable.ic_account_plus_grey600_24dp)
+          .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+            @Override
+            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+              createInviteDialog();
+              return false;
+            }
+          });
+        particDrawerResult.addStickyFooterItem(inviteItem);
       }
 
       @Override
@@ -277,8 +310,9 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
     isDestroyed = false;
 
     mRecyclerView = (RecyclerView) view.findViewById(R.id.queuedSongsRecyclerView);
-//        mRecyclerView.setNestedScrollingEnabled(false);
+    mRecyclerView.setNestedScrollingEnabled(false);
     mLayoutManager = new NestedRVLinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+    mLayoutManager.setAutoMeasureEnabled(true);
 
     mCurrentLayoutManagerType = LayoutManagerType.LINEAR_LAYOUT_MANAGER;
 
@@ -339,13 +373,11 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
       .withOnDrawerListener(new Drawer.OnDrawerListener() {
         @Override
         public void onDrawerOpened(View drawerView) {
-          fab.getMenuIconView().setImageResource(R.drawable.ic_account_plus_white_36dp);
           particDrawerOpen = true;
         }
 
         @Override
         public void onDrawerClosed(View drawerView) {
-          fab.getMenuIconView().setImageResource(R.drawable.ic_add_white_36dp);
           particDrawerOpen = false;
         }
 
@@ -466,15 +498,6 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
   public void onClick(View v) {
     int id = v.getId();
     switch (id) {
-      case R.id.groupAddSongFab: // or add user (invite)
-        Log.i("Queue", "FAB Touch");
-        if (particDrawerOpen) { // this occurs when the participant drawer is open and the button is showing an "add user" icon
-          Log.i("Queue", "Can't add a friend quite yet!");
-          createInviteDialog();
-        } else { // this occurs when the participant drawer is closed and the button is showing an "add" icon, meaning add music
-          //animateFAB();
-        }
-        break;
       case R.id.groupAddSongFab1: {
         FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
         GroupFragment groupFragment = (GroupFragment) fragmentManager.findFragmentByTag("GROUP_FRAG");

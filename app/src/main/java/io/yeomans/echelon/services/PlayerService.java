@@ -338,6 +338,8 @@ public class PlayerService extends Service implements Player.NotificationCallbac
           for (int i = 1; i < playQueue.size(); i++) {
             mPlayer.queue(null, playQueue.get(i).getUri());
           }
+        } else {
+          setNowPlaying(null);
         }
       }
     } else if (event == PlayerEvent.kSpPlaybackNotifyPlay) {

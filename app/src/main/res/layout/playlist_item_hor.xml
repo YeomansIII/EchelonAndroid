@@ -6,8 +6,8 @@
 
   <ImageView
     android:id="@+id/playlistItemHorImage"
-    android:layout_width="85dp"
-    android:layout_height="85dp"
+    android:layout_width="110dp"
+    android:layout_height="110dp"
     android:layout_marginEnd="16dp" />
 
   <RelativeLayout

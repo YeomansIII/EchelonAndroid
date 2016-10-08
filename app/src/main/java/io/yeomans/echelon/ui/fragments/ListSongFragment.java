@@ -71,8 +71,35 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
   List<Track> tracks;
   Bundle arguments;
   boolean isPlayListPicker;
+  int retries = 0;
 
   Dependencies dependencies;
+
+  Callback<Playlist> getPlaylistCallback = new Callback<Playlist>() {
+    @Override
+    public void onResponse(Call<Playlist> call, Response<Playlist> response) {
+      Playlist playlist = response.body();
+      if ((response.code() >= 200 && response.code() <= 300 || response.code() == 304) && playlist != null) {
+        mainActivity.toolbar.setTitle(playlist.name);
+        for (PlaylistTrack t : playlist.tracks.items) {
+          tracks.add(t.track);
+        }
+        songListRA.notifyDataSetChanged();
+        loadOverlay.setVisibility(View.GONE);
+        retries = 0;
+      } else {
+        if (retries < 6) {
+          retries++;
+          call.enqueue(getPlaylistCallback);
+        }
+      }
+    }
+
+    @Override
+    public void onFailure(Call<Playlist> call, Throwable t) {
+      Log.wtf("WhatList", t.toString() + "   " + t.getMessage());
+    }
+  };
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -175,23 +202,7 @@ public class ListSongFragment extends Fragment implements View.OnClickListener {
     } else if (what == PLAYLIST) {
       Log.d("WhatList", "Playlist");
       Call<Playlist> call = dependencies.getSpotify().getPlaylist(userId, playlistId);
-      call.enqueue(new Callback<Playlist>() {
-        @Override
-        public void onResponse(Call<Playlist> call, Response<Playlist> response) {
-          Playlist playlist = response.body();
-          mainActivity.toolbar.setTitle(playlist.name);
-          for (PlaylistTrack t : playlist.tracks.items) {
-            tracks.add(t.track);
-          }
-          songListRA.notifyDataSetChanged();
-          loadOverlay.setVisibility(View.GONE);
-        }
-
-        @Override
-        public void onFailure(Call<Playlist> call, Throwable t) {
-          Log.wtf("WhatList", t.toString() + "   " + t.getMessage());
-        }
-      });
+      call.enqueue(getPlaylistCallback);
     }
   }
 
