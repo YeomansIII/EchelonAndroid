@@ -30,6 +30,7 @@ import org.json.JSONObject;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import io.yeomans.echelon.R;
 import io.yeomans.echelon.models.Playlist;
@@ -128,6 +129,8 @@ public class PlayerService extends Service implements Player.NotificationCallbac
         }
         Collections.sort(playQueue);
         if (defaultPlaylistTracks != null) {
+          long seed = System.nanoTime();
+          Collections.shuffle(defaultPlaylistTracks, new Random(seed));
           playQueue.addAll(defaultPlaylistTracks);
         }
         playQueueChanged = true;
