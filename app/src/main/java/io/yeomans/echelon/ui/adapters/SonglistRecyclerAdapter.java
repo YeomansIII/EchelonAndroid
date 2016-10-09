@@ -92,11 +92,15 @@ public class SonglistRecyclerAdapter extends RecyclerView.Adapter<SonglistRecycl
         try {
           imgUrl = curTrack.album.images.get(1).url;
         } catch (IndexOutOfBoundsException e2) {
-          imgUrl = curTrack.album.images.get(0).url;
+          try {
+            imgUrl = curTrack.album.images.get(0).url;
+          } catch (IndexOutOfBoundsException e3) {
+            imgUrl = null;
+          }
         }
       }
 
-      Picasso.with(context).load(imgUrl).placeholder(R.drawable.ic_music_circle_black_36dp).into(holder.image);
+      Picasso.with(context).load(imgUrl != null ? imgUrl : null).placeholder(R.drawable.ic_music_circle_black_36dp).into(holder.image);
       holder.title.setText(curTrack.name);
       String artistText = "";
       List<ArtistSimple> artists = curTrack.artists;
