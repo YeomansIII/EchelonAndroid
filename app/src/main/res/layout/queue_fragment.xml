@@ -28,10 +28,10 @@
           android:background="#99FFFFFF"
           app:layout_collapseMode="parallax">
 
-          <ImageView
+          <io.yeomans.echelon.ui.views.SquareImageView
             android:id="@+id/nowPlayingAlbumArtImage"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
