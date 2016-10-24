@@ -61,6 +61,10 @@
           android:scheme="echelonapp" />
 
       </intent-filter>
+
+      <meta-data
+        android:name="android.app.shortcuts"
+        android:resource="@xml/shortcuts" />
     </activity>
     <activity
       android:name="com.spotify.sdk.android.authentication.LoginActivity"

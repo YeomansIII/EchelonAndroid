@@ -21,80 +21,61 @@ import io.yeomans.echelon.util.PreferenceNames;
  */
 public class HomeFragment extends Fragment implements View.OnClickListener {
 
-    private View view;
-    private MainActivity mainActivity;
-    private SharedPreferences mainPref, groupPref;
+  private View view;
+  private MainActivity mainActivity;
+  private SharedPreferences mainPref, groupPref;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-        mainActivity = (MainActivity) getActivity();
-        mainPref = mainActivity.getSharedPreferences(PreferenceNames.MAIN_PREFS_NAME, 0);
-        groupPref = mainActivity.getSharedPreferences(PreferenceNames.GROUP_PREFS_NAME, 0);
+    mainActivity = (MainActivity) getActivity();
+    mainPref = mainActivity.getSharedPreferences(PreferenceNames.MAIN_PREFS_NAME, 0);
+    groupPref = mainActivity.getSharedPreferences(PreferenceNames.GROUP_PREFS_NAME, 0);
+  }
+
+  @Override
+  public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                           Bundle savedInstanceState) {
+    View view = inflater.inflate(R.layout.home_fragment,
+      container, false);
+    View createButton = view.findViewById(R.id.createGroupButton);
+    if (mainPref.getString(PreferenceNames.PREF_USER_AUTH_TYPE, "").equals("spotify") && mainPref.getBoolean(PreferenceNames.PREF_SPOTIFY_AUTHENTICATED, false) && mainPref.getString(PreferenceNames.PREF_SPOTIFY_PRODUCT, "").equals("premium")) {
+      createButton.setOnClickListener(this);
+    } else {
+      createButton.setVisibility(View.GONE);
     }
+    view.findViewById(R.id.joinGroupButton).setOnClickListener(this);
+    view.findViewById(R.id.logoutButton).setOnClickListener(this);
+    //view.findViewById(R.id.spotifyLoginButton).setOnClickListener(this);
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.home_fragment,
-                container, false);
-        View createButton = view.findViewById(R.id.createGroupButton);
-        if (mainPref.getString(PreferenceNames.PREF_USER_AUTH_TYPE, "").equals("spotify") && mainPref.getBoolean(PreferenceNames.PREF_SPOTIFY_AUTHENTICATED, false) && mainPref.getString(PreferenceNames.PREF_SPOTIFY_PRODUCT, "").equals("premium")) {
-            createButton.setOnClickListener(this);
-        } else {
-            createButton.setVisibility(View.GONE);
-        }
-        view.findViewById(R.id.joinGroupButton).setOnClickListener(this);
-        view.findViewById(R.id.logoutButton).setOnClickListener(this);
-        //view.findViewById(R.id.spotifyLoginButton).setOnClickListener(this);
+    mainActivity.toolbar.setBackgroundColor(Color.TRANSPARENT);
+    mainActivity.getSupportActionBar().setTitle("");
 
-        mainActivity.toolbar.setBackgroundColor(Color.TRANSPARENT);
-        mainActivity.getSupportActionBar().setTitle("");
+    this.view = view;
+    return view;
+  }
 
-        this.view = view;
-        return view;
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+  @Override
+  public void onAttach(Activity activity) {
+    super.onAttach(activity);
 //        Drawable colorDrawable = new ColorDrawable(Color.TRANSPARENT);
 //        ActionBar actionBar = ((AppCompatActivity) activity).getSupportActionBar();
 //        actionBar.setBackgroundDrawable(colorDrawable);
 //        actionBar.setDisplayShowTitleEnabled(false);
-    }
+  }
 
-    @Override
-    public void onClick(View v) {
-        if (v == view.findViewById(R.id.createGroupButton)) {
-            boolean leader = true;
-            Log.d("Button", "Create Button");
-            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-            if (groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null) == null) {
-                if (mainPref.getBoolean(PreferenceNames.PREF_SPOTIFY_AUTHENTICATED, false) && mainPref.getString(PreferenceNames.PREF_SPOTIFY_PRODUCT, "").equalsIgnoreCase("premium")) {
-//                    DatabaseReference refQueueGroups = mainActivity.myFirebaseRef.child("queuegroups");
-//                    Map<String, Object> map = new HashMap<>();
-//                    map.put("name", "testname");
-//                    refQueueGroups.push().setValue(map);
-                    fragmentManager.beginTransaction().replace(R.id.container, new CreateGroupFragment(), "CREATE_GROUP_FRAG").addToBackStack(null).commit();
-                } else {
-                    Toast.makeText(getActivity().getApplicationContext(), "A Spotify Premium account is required", Toast.LENGTH_LONG).show();
-                }
-            } else {
-                Toast.makeText(getActivity().getApplicationContext(), "You are already in a group", Toast.LENGTH_SHORT).show();
-            }
-        } else if (v == view.findViewById(R.id.joinGroupButton)) {
-            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-            if (groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null) == null) {
-                Log.d("Button", "Join Group Button");
-                fragmentManager.beginTransaction().replace(R.id.container, new JoinGroupFragment(), "JOIN_GROUP_FRAG").addToBackStack(null).commit();
-            } else {
-                Toast.makeText(getActivity().getApplicationContext(), "You are already in a group", Toast.LENGTH_SHORT).show();
-            }
-        } else if (v == view.findViewById(R.id.logoutButton)) {
-            Log.d("Button", "Logout Button");
-            mainActivity.logout();
-        }
+  @Override
+  public void onClick(View v) {
+    if (v == view.findViewById(R.id.createGroupButton)) {
+      boolean leader = true;
+      Log.d("Button", "Create Button");
+      mainActivity.createCreateGroupFrag();
+    } else if (v == view.findViewById(R.id.joinGroupButton)) {
+      mainActivity.createJoinGroupFrag();
+    } else if (v == view.findViewById(R.id.logoutButton)) {
+      Log.d("Button", "Logout Button");
+      mainActivity.logout();
     }
+  }
 }

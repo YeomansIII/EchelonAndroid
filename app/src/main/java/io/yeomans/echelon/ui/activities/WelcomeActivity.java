@@ -72,6 +72,9 @@ public class WelcomeActivity extends AppCompatActivity implements ConnectionStat
   public static final String REDIRECT_URI = "echelonapp://callback";
   public static final int REQUEST_CODE = 9001;
 
+  private static final String ACTION_CREATE_GROUP = "io.yeomans.echelon.CREATE_GROUP";
+  private static final String ACTION_JOIN_GROUP = "io.yeomans.echelon.JOIN_GROUP";
+
   public AuthenticationResponse authResponse;
   String spotifyAuthToken;
   Dependencies dependencies;
@@ -101,6 +104,11 @@ public class WelcomeActivity extends AppCompatActivity implements ConnectionStat
     checkInvitation();
     echelonErrorSnackie = Snackbar.make(findViewById(R.id.loginRootRelativeLayout), "Error logging in to Echelon", Snackbar.LENGTH_SHORT);
     spotifyErrorSnackie = Snackbar.make(findViewById(R.id.loginRootRelativeLayout), "Error logging in to Spotify", Snackbar.LENGTH_SHORT);
+    if (ACTION_CREATE_GROUP.equals(getIntent().getAction())) {
+      getIntent().putExtra("create_group", true);
+    } else if (ACTION_JOIN_GROUP.equals(getIntent().getAction())) {
+      getIntent().putExtra("join_group_page", true);
+    }
     if (dependencies.getPreferences().getBoolean(PreferenceNames.PREF_SPOTIFY_AUTHENTICATED, false)) {
       authenticateSpotify();
     }

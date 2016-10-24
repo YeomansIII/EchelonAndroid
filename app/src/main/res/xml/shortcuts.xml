@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+  <shortcut
+    android:enabled="true"
+    android:icon="@drawable/shortcut_create_group"
+    android:shortcutDisabledMessage="@string/create_group_disabled"
+    android:shortcutId="createGroup"
+    android:shortcutLongLabel="@string/create_group_long"
+    android:shortcutShortLabel="@string/create_group">
+    <intent
+      android:action="io.yeomans.echelon.CREATE_GROUP"
+      android:targetClass="io.yeomans.echelon.ui.activities.WelcomeActivity"
+      android:targetPackage="io.yeomans.echelon" />
+  </shortcut>
+  <shortcut
+    android:enabled="true"
+    android:icon="@drawable/shortcut_join_group"
+    android:shortcutDisabledMessage="@string/join_group_disabled"
+    android:shortcutId="joinGroup"
+    android:shortcutLongLabel="@string/join_group_long"
+    android:shortcutShortLabel="@string/join_group">
+    <intent
+      android:action="io.yeomans.echelon.JOIN_GROUP"
+      android:targetClass="io.yeomans.echelon.ui.activities.WelcomeActivity"
+      android:targetPackage="io.yeomans.echelon" />
+  </shortcut>
+  <!-- Specify more shortcuts here. -->
+</shortcuts>

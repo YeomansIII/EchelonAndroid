@@ -44,4 +44,12 @@
   <string name="invitation_custom_image">image</string>
   <string name="invitation_cta">Join Group</string>
 
+  <string name="create_group">Create Group</string>
+  <string name="create_group_long">Create Group</string>
+  <string name="create_group_disabled">Create Group</string>
+
+  <string name="join_group">Join Group</string>
+  <string name="join_group_long">Join Group</string>
+  <string name="join_group_disabled">Join Group</string>
+
 </resources>

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -37,6 +38,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.mikepenz.community_material_typeface_library.CommunityMaterial;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
+import com.mikepenz.iconics.context.IconicsContextWrapper;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -65,10 +70,12 @@ import io.yeomans.echelon.services.PlayerService;
 import io.yeomans.echelon.ui.fragments.AboutFragment;
 import io.yeomans.echelon.ui.fragments.AccountFragment;
 import io.yeomans.echelon.ui.fragments.ControlBarFragment;
+import io.yeomans.echelon.ui.fragments.CreateGroupFragment;
 import io.yeomans.echelon.ui.fragments.CurrentGroupDialogFragment;
 import io.yeomans.echelon.ui.fragments.CurrentGroupLeaderDialogFragment;
 import io.yeomans.echelon.ui.fragments.GroupFragment;
 import io.yeomans.echelon.ui.fragments.HomeFragment;
+import io.yeomans.echelon.ui.fragments.JoinGroupFragment;
 import io.yeomans.echelon.ui.fragments.LoginFragment;
 import io.yeomans.echelon.ui.fragments.SettingsFragment;
 import io.yeomans.echelon.util.Dependencies;
@@ -241,6 +248,11 @@ public class MainActivity extends AppCompatActivity {
     setUpNavDrawerAndActionBar();
   }
 
+  @Override
+  protected void attachBaseContext(Context newBase) {
+    super.attachBaseContext(IconicsContextWrapper.wrap(newBase));
+  }
+
   public void setContentViewLogin() {
     Fragment newFragment = new LoginFragment();
     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -278,10 +290,10 @@ public class MainActivity extends AppCompatActivity {
       })
       .withSelectionListEnabledForSingleProfile(false)
       .build();
-    PrimaryDrawerItem item1 = new PrimaryDrawerItem().withName("Home").withIcon(R.drawable.ic_home_grey600_36dp);
-    PrimaryDrawerItem item2 = new PrimaryDrawerItem().withName("Group").withIcon(R.drawable.ic_queue_music_grey_36dp);
-    PrimaryDrawerItem item3 = new PrimaryDrawerItem().withName("Account").withIcon(R.drawable.ic_account_grey600_36dp);
-    PrimaryDrawerItem item4 = new PrimaryDrawerItem().withName("Settings").withIcon(R.drawable.ic_settings_grey600_36dp);
+    PrimaryDrawerItem item1 = new PrimaryDrawerItem().withName("Home").withIcon(new IconicsDrawable(this).icon(CommunityMaterial.Icon.cmd_home).color(Color.GRAY));
+    PrimaryDrawerItem item2 = new PrimaryDrawerItem().withName("Group").withIcon(new IconicsDrawable(this).icon(GoogleMaterial.Icon.gmd_queue_music).color(Color.GRAY));
+    PrimaryDrawerItem item3 = new PrimaryDrawerItem().withName("Account").withIcon(new IconicsDrawable(this).icon(CommunityMaterial.Icon.cmd_account).color(Color.GRAY));
+    PrimaryDrawerItem item4 = new PrimaryDrawerItem().withName("Settings").withIcon(new IconicsDrawable(this).icon(CommunityMaterial.Icon.cmd_settings).color(Color.GRAY));
     SecondaryDrawerItem item5 = new SecondaryDrawerItem().withName("Submit Feature/Bug");
     SecondaryDrawerItem item6 = new SecondaryDrawerItem().withName("About");
     final Drawer result = new DrawerBuilder()
@@ -460,6 +472,10 @@ public class MainActivity extends AppCompatActivity {
 
                 }
               });
+            } else if (mainActivityIntent.getBooleanExtra("create_group", false)) {
+              createCreateGroupFrag();
+            } else if (mainActivityIntent.getBooleanExtra("join_group_page", false)) {
+              createJoinGroupFrag();
             }
           }
 
@@ -560,6 +576,29 @@ public class MainActivity extends AppCompatActivity {
       return false;
     }
     return true;
+  }
+
+  public void createCreateGroupFrag() {
+    FragmentManager fragmentManager = getSupportFragmentManager();
+    if (groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null) == null) {
+      if (pref.getBoolean(PreferenceNames.PREF_SPOTIFY_AUTHENTICATED, false) && pref.getString(PreferenceNames.PREF_SPOTIFY_PRODUCT, "").equalsIgnoreCase("premium")) {
+        fragmentManager.beginTransaction().replace(R.id.container, new CreateGroupFragment(), "CREATE_GROUP_FRAG").addToBackStack(null).commit();
+      } else {
+        Toast.makeText(getApplicationContext(), "A Spotify Premium account is required", Toast.LENGTH_LONG).show();
+      }
+    } else {
+      Toast.makeText(getApplicationContext(), "You are already in a group", Toast.LENGTH_SHORT).show();
+    }
+  }
+
+  public void createJoinGroupFrag() {
+    FragmentManager fragmentManager = getSupportFragmentManager();
+    if (groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null) == null) {
+      Log.d("Button", "Join Group Button");
+      fragmentManager.beginTransaction().replace(R.id.container, new JoinGroupFragment(), "JOIN_GROUP_FRAG").addToBackStack(null).commit();
+    } else {
+      Toast.makeText(getApplicationContext(), "You are already in a group", Toast.LENGTH_SHORT).show();
+    }
   }
 
   public boolean onPlayControlSelected() {
