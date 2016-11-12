@@ -3,7 +3,7 @@
 
   <string name="hello_world">Hello world!</string>
   <string name="action_search">Search</string>
-  <string name="action_leave_group">Leave Group</string>
+  <string name="action_group_leave">Leave Group</string>
   <string name="action_settings">Settings</string>
   <string name="drawer_open">open</string>
   <string name="drawer_close">close</string>
@@ -51,5 +51,7 @@
   <string name="join_group">Join Group</string>
   <string name="join_group_long">Join Group</string>
   <string name="join_group_disabled">Join Group</string>
+  <string name="action_group_settings">Group Settings</string>
+  <string name="action_group_participants">Participants</string>
 
 </resources>

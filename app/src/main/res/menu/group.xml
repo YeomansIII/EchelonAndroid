@@ -1,23 +1,28 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="io.yeomans.echelon.ui.fragments.GroupFragment">
-    <item
-        android:id="@+id/action_leave_group"
-        android:title="@string/action_leave_group"
-        android:icon="@android:drawable/ic_menu_close_clear_cancel"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/action_group_participants"
-        android:title="Participants"
-        android:icon="@drawable/ic_account_multiple_white_36dp"
-        app:showAsAction="always" />
-    <!--<item-->
-        <!--android:id="@+id/action_search"-->
-        <!--android:title="@string/action_search"-->
-        <!--android:icon="@android:drawable/ic_menu_search"-->
-        <!--android:onClick="onSearchMenuClick"-->
-        <!--app:showAsAction="always" />-->
-    <!--<item android:id="@+id/action_settings" android:title="@string/action_settings"-->
-    <!--android:orderInCategory="100" app:showAsAction="never" />-->
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  tools:context="io.yeomans.echelon.ui.fragments.GroupFragment">
+  <item
+    android:id="@+id/action_settings_group"
+    android:icon="@drawable/settings"
+    android:title="@string/action_group_settings"
+    app:showAsAction="never" />
+  <item
+    android:id="@+id/action_leave_group"
+    android:icon="@android:drawable/ic_menu_close_clear_cancel"
+    android:title="@string/action_group_leave"
+    app:showAsAction="never" />
+  <item
+    android:id="@+id/action_group_participants"
+    android:icon="@drawable/ic_account_multiple_white_36dp"
+    android:title="@string/action_group_participants"
+    app:showAsAction="always" />
+  <!--<item-->
+  <!--android:id="@+id/action_search"-->
+  <!--android:title="@string/action_search"-->
+  <!--android:icon="@android:drawable/ic_menu_search"-->
+  <!--android:onClick="onSearchMenuClick"-->
+  <!--app:showAsAction="always" />-->
+  <!--<item android:id="@+id/action_settings" android:title="@string/action_settings"-->
+  <!--android:orderInCategory="100" app:showAsAction="never" />-->
 </menu>

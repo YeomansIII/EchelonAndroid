@@ -4,10 +4,19 @@ package io.yeomans.echelon.models;
  * Created by jason on 10/3/16.
  */
 
+import android.os.Parcel;
+import android.util.Log;
+
+import com.google.firebase.database.DatabaseReference;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+
+import io.github.kaaes.spotify.webapi.core.models.PlaylistTrack;
+import io.yeomans.echelon.util.Dependencies;
 
 public class Playlist {
 
@@ -38,6 +47,28 @@ public class Playlist {
   @SerializedName("tracks")
   @Expose
   private Map<String, SpotifySong> tracks;
+
+  public Playlist() {
+
+  }
+
+  public Playlist(io.github.kaaes.spotify.webapi.core.models.Playlist playlist) {
+    description = playlist.description;
+    id = playlist.id;
+    image = playlist.images.get(0).url;
+    followers = playlist.followers.total;
+    name = playlist.name;
+    uri = playlist.uri;
+    type = playlist.type;
+    externalUrl = playlist.external_urls.get("spotify");
+    tracks = new HashMap<>();
+    DatabaseReference ref = Dependencies.INSTANCE.getDatabase().getReference();
+    for (PlaylistTrack track : playlist.tracks.items) {
+      String pushKey = ref.push().getKey();
+      tracks.put(pushKey, new SpotifySong(pushKey, track.track));
+    }
+  }
+
 
   /**
    * @return The description
@@ -165,4 +196,14 @@ public class Playlist {
     this.tracks = tracks;
   }
 
+  public Map<String, Object> getTracksMap() {
+    Map<String, Object> tempMap = new HashMap<>();
+    Iterator it = tracks.entrySet().iterator();
+    while (it.hasNext()) {
+      Map.Entry pair = (Map.Entry) it.next();
+      tempMap.put((String) pair.getKey(), ((SpotifySong) pair.getValue()).getMap());
+      it.remove(); // avoids a ConcurrentModificationException
+    }
+    return tempMap;
+  }
 }

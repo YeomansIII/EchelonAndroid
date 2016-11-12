@@ -67,6 +67,7 @@ repositories {
   }
   maven { url 'https://maven.fabric.io/public' }
   maven { url 'https://jitpack.io' }
+  maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 
 dependencies {
@@ -103,6 +104,8 @@ dependencies {
   compile "com.mikepenz:iconics-core:2.8.1@aar"
   compile 'com.mikepenz:community-material-typeface:1.5.54.2@aar'
   compile 'com.mikepenz:google-material-typeface:2.2.0.3.original@aar'
+  compile 'in.srain.cube:ultra-ptr:1.0.11'
+  compile 'blue.aodev:material-values:1.0.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -114,6 +114,8 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
   protected RelativeLayout queueNowPlayingLayout;
   @Bind(R.id.nowPlayingAlbumArtImage)
   protected ImageView nowPlayingAlbumArtImage;
+  //  @Bind(R.id.nowPlayingAlbumArtImage2)
+//  protected ImageView nowPlayingAlbumArtImage2;
   @Bind(R.id.nowPlayingTitleText)
   protected TextView nowPlayingTitleText;
   @Bind(R.id.nowPlayingArtistText)
@@ -208,6 +210,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
           nowPlaying = ss;
           nowPlayingTitleText.setText(nowPlaying.getTitle());
           nowPlayingArtistText.setText(nowPlaying.getArtist());
+//          Picasso.with(mainActivity).load(nowPlaying.getAlbumArtLarge().url).placeholder(R.drawable.ic_music_circle_black_48dp).into(nowPlayingAlbumArtImage2);
           Picasso.with(mainActivity).load(nowPlaying.getAlbumArtLarge().url).placeholder(R.drawable.ic_music_circle_black_48dp).into(nowPlayingAlbumArtImage,
             PicassoPalette.with(nowPlaying.getAlbumArtLarge().url, nowPlayingAlbumArtImage)
               .use(PicassoPalette.Profile.MUTED)
@@ -407,6 +410,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
   @Override
   public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
     inflater.inflate(R.menu.group, menu);
+
     super.onCreateOptionsMenu(menu, inflater);
   }
 
@@ -423,6 +427,11 @@ public class GroupFragment extends Fragment implements View.OnClickListener {
       }
       case R.id.action_leave_group: {
         leaveGroup(item);
+        break;
+      }
+      case R.id.action_settings_group: {
+        mainActivity.fragmentTransaction(new GroupSettingsFragment(), "GROUP_SETTINGS_FRAG");
+        break;
       }
     }
     return super.onOptionsItemSelected(item);

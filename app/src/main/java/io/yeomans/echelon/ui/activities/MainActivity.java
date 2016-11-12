@@ -578,11 +578,15 @@ public class MainActivity extends AppCompatActivity {
     return true;
   }
 
+  public void fragmentTransaction(Fragment fragment, String name) {
+    getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment, name).addToBackStack(null).commit();
+  }
+
   public void createCreateGroupFrag() {
     FragmentManager fragmentManager = getSupportFragmentManager();
     if (groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null) == null) {
       if (pref.getBoolean(PreferenceNames.PREF_SPOTIFY_AUTHENTICATED, false) && pref.getString(PreferenceNames.PREF_SPOTIFY_PRODUCT, "").equalsIgnoreCase("premium")) {
-        fragmentManager.beginTransaction().replace(R.id.container, new CreateGroupFragment(), "CREATE_GROUP_FRAG").addToBackStack(null).commit();
+        fragmentTransaction(new CreateGroupFragment(), "CREATE_GROUP_FRAG");
       } else {
         Toast.makeText(getApplicationContext(), "A Spotify Premium account is required", Toast.LENGTH_LONG).show();
       }
@@ -595,7 +599,7 @@ public class MainActivity extends AppCompatActivity {
     FragmentManager fragmentManager = getSupportFragmentManager();
     if (groupPref.getString(PreferenceNames.PREF_GROUP_NAME, null) == null) {
       Log.d("Button", "Join Group Button");
-      fragmentManager.beginTransaction().replace(R.id.container, new JoinGroupFragment(), "JOIN_GROUP_FRAG").addToBackStack(null).commit();
+      fragmentTransaction(new JoinGroupFragment(), "JOIN_GROUP_FRAG");
     } else {
       Toast.makeText(getApplicationContext(), "You are already in a group", Toast.LENGTH_SHORT).show();
     }

@@ -40,6 +40,28 @@ public class SpotifySong extends Track implements Comparable<SpotifySong> {
     artists = new ArrayList<>();
   }
 
+  public SpotifySong(String key, Track track) {
+    this.key = key;
+    artists = track.artists;
+    available_markets = track.available_markets;
+    is_playable = track.is_playable;
+    linked_from = track.linked_from;
+    disc_number = track.disc_number;
+    duration_ms = track.duration_ms;
+    explicit = track.explicit;
+    external_urls = track.external_urls;
+    href = track.href;
+    id = track.id;
+    name = track.name;
+    preview_url = track.preview_url;
+    track_number = track.track_number;
+    type = track.type;
+    uri = track.uri;
+    album = track.album;
+    external_ids = track.external_ids;
+    popularity = track.popularity;
+  }
+
   protected SpotifySong(Parcel in) {
     super(in);
   }
@@ -167,7 +189,7 @@ public class SpotifySong extends Track implements Comparable<SpotifySong> {
   }
 
   public int getRating() {
-    return popularity;
+    return popularity != null ? popularity : 0;
   }
 
   public void setRating(int rating) {

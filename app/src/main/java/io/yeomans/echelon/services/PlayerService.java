@@ -106,6 +106,7 @@ public class PlayerService extends Service implements Player.NotificationCallbac
       @Override
       public void onDataChange(DataSnapshot dataSnapshot) {
         if (dataSnapshot.getValue() != null) {
+          Log.d(TAG, "" + dataSnapshot.getValue());
           defaultPlaylist = dataSnapshot.getValue(Playlist.class);
           defaultPlaylistTracks = new LinkedList<>(defaultPlaylist.getTracks().values());
         }
