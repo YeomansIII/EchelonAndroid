@@ -3,12 +3,12 @@ apply plugin: 'android-apt'
 
 android {
   compileSdkVersion 25
-  buildToolsVersion "24.0.3"
+  buildToolsVersion "25.0.0"
 
   defaultConfig {
     applicationId "io.yeomans.echelon"
     minSdkVersion 17
-    targetSdkVersion 24
+    targetSdkVersion 25
     versionCode 27
     versionName "0.7.1"
     archivesBaseName = "Echelon-$versionName-$versionCode"
@@ -67,7 +67,6 @@ repositories {
   }
   maven { url 'https://maven.fabric.io/public' }
   maven { url 'https://jitpack.io' }
-  maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 
 dependencies {

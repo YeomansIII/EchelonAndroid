@@ -7,51 +7,51 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-    <LinearLayout
-        android:id="@+id/loginLayout"
+  <LinearLayout
+      android:id="@+id/loginLayout"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+    android:orientation="vertical"
+      android:visibility="visible"
+    android:layout_centerVertical="true"
+    android:layout_alignParentStart="true">
+
+      <TextView
+          android:id="@+id/loginText"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:focusable="true"
+          android:focusableInTouchMode="true"
+          android:padding="10dp"
+          android:text="Login to Echelon"
+          android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+
+      <TextView
+          android:id="@+id/loginErrorText"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textColor="@color/full_red"/>
+
+    <Button
+        android:id="@+id/spotifyLoginButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:orientation="vertical"
-        android:visibility="visible">
+        android:layout_gravity="center_horizontal"
+        android:text="Login With Spotify"
+        android:theme="@style/EchelonRaisedButton"/>
 
-        <TextView
-            android:id="@+id/loginText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:padding="10dp"
-            android:text="Login to Echelon"
-            android:textAppearance="?android:attr/textAppearanceLarge"/>
-
-
-        <TextView
-            android:id="@+id/loginErrorText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/full_red"/>
-
-        <Button
-            android:id="@+id/spotifyLoginButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="Login With Spotify"
-            android:theme="@style/EchelonRaisedButton"/>
-
-        <Button
-            android:id="@+id/anonymousLoginButton"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_gravity="center_horizontal"
-            android:gravity="center_vertical|center|center_horizontal"
-            android:padding="22dp"
-            android:text="Skip Login (Limited)"/>
-    </LinearLayout>
+    <Button
+          android:id="@+id/anonymousLoginButton"
+          style="@style/Widget.AppCompat.Button.Borderless"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_centerHorizontal="true"
+          android:layout_gravity="center_horizontal"
+          android:gravity="center_vertical|center|center_horizontal"
+          android:padding="22dp"
+          android:text="Skip Login (Limited)"/>
+  </LinearLayout>
 
 </RelativeLayout>
